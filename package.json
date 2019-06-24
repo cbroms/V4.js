@@ -1,0 +1,29 @@
+{
+  "name": "textcanvas",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "webpack --watch",
+    "start": "webpack-dev-server --open",
+    "build": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CBR0MS/textCanvas.git"
+  },
+  "author": "Christian Broms",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/CBR0MS/textCanvas/issues"
+  },
+  "homepage": "https://github.com/CBR0MS/textCanvas#readme",
+  "devDependencies": {
+    "@babel/core": "^7.4.5",
+    "babel-loader": "^8.0.6",
+    "webpack": "^4.35.0",
+    "webpack-cli": "^3.3.5",
+    "webpack-dev-server": "^3.7.2"
+  }
+}
