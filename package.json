@@ -21,9 +21,13 @@
   "homepage": "https://github.com/CBR0MS/textCanvas#readme",
   "devDependencies": {
     "@babel/core": "^7.4.5",
+    "@babel/plugin-proposal-throw-expressions": "^7.2.0",
     "babel-loader": "^8.0.6",
     "webpack": "^4.35.0",
     "webpack-cli": "^3.3.5",
     "webpack-dev-server": "^3.7.2"
+  },
+  "dependencies": {
+    "opentype.js": "^1.1.0"
   }
 }
