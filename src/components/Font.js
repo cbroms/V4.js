@@ -4,17 +4,30 @@ class Font {
     constructor(url = "", name = "", variants = ["Regular"]) {
         this.url = url;
         this.name = name;
-        this.style = style;
-        this.font = null;
+        this.fonts = {};
     }
 
-    async loadGFont(name = this.name, variants = this.variants) {
+    async loadGFonts(name = this.name, variants = this.variants) {
         const urls = this.makeGFontUrls(name, variants);
         this.fonts = {};
-        for (let i = 0; i < variants.length; i++) {
-            this.fonts[variants[i]] = new Font(urls[i], name, variants[i]);
-            this.fonts[variants[i]].load();
+        let classThis = this;
+
+        for (const i in variants) {
+            const font = await this.loadTask(urls[i]);
+            this.fonts[variants[i]] = font;
         }
+    }
+
+    loadTask(url) {
+        return new Promise(resolve => {
+            opentype.load(url, function(err, font) {
+                if (err) {
+                    Promise.reject("Font could not be loaded: " + err);
+                } else {
+                    resolve(font);
+                }
+            });
+        });
     }
 
     async load() {
@@ -27,9 +40,13 @@ class Font {
         });
     }
 
+    getFontVariant(variant) {
+        return this.fonts[variant];
+    }
+
     makeGFontUrls(name, variants) {
         // make a url like this:
-        // https://raw.githubusercontent.com/google/fonts/master/ofl/crimsontext/CrimsonText-Italic.ttf
+        // https://raw.githubusercontent.com/google/fonts/master/ofl/crimsontext/CrimsonText-Regular.ttf
         const baseUrl =
             "https://raw.githubusercontent.com/google/fonts/master/ofl/";
         const nameNoSpace = name.replace(" ", "");
@@ -42,6 +59,16 @@ class Font {
             val =>
                 baseUrl + nameCleaned + "/" + nameNoSpace + "-" + val + ".ttf"
         );
+    }
+
+    httpGetAsync(theUrl, callback) {
+        const xmlHttp = new XMLHttpRequest();
+        xmlHttp.onreadystatechange = function() {
+            if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+                callback(xmlHttp.responseText);
+        };
+        xmlHttp.open("GET", theUrl, true); // true for asynchronous
+        xmlHttp.send(null);
     }
 }
 
