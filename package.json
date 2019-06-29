@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CBR0MS/textCanvas.git"
+    "url": "git+https://github.com/CBR0MS/V4.js.git"
   },
   "author": "Christian Broms",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/CBR0MS/textCanvas/issues"
+    "url": "https://github.com/CBR0MS/V4.js/issues"
   },
-  "homepage": "https://github.com/CBR0MS/textCanvas#readme",
+  "homepage": "https://github.com/CBR0MS/V4.js#readme",
   "devDependencies": {
     "@babel/core": "^7.4.5",
     "@babel/plugin-proposal-throw-expressions": "^7.2.0",

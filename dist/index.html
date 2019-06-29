@@ -28,7 +28,7 @@
 
                 function backgroundRenderer(state) {
                     if (state.hasCanvas && state.hasCanvas) {
-                        x += state.deltaTime;
+                        x += 5 * state.deltaTime;
                         let path = font.getPath("Hello, World!", x, 150, 72);
                         path.fill = "white";
                         path.draw(animator.context);
