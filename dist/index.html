@@ -13,26 +13,46 @@
                 var animator = new V4.Animator(canvas, false);
                 animator.canvas.height = 500;
                 animator.canvas.width = 800;
-                animator.backgroundColor("#000");
+                animator.backgroundColor("#fff");
 
                 var fontObj = new V4.Font();
-                var res = await fontObj.loadGFonts("Crimson Text", [
-                    "Regular",
-                    "Italic"
-                ]);
+                await fontObj.loadFont(
+                    "assets/CrimsonText-Regular.ttf",
+                    "Crimson Text",
+                    "Regular"
+                );
 
-                var font = fontObj.getFontVariant("Italic");
+                // var res = await fontObj.loadGFonts("Crimson Text", [
+                //     "Regular",
+                //     "Italic"
+                // ]);
+
+                var font = fontObj.getFontVariant("Regular");
 
                 animator.framesPerSecond(60);
                 var x = 0;
+                var right = true;
+                var speed = 20
 
                 function backgroundRenderer(state) {
-                    if (state.hasCanvas && state.hasCanvas) {
-                        x += 5 * state.deltaTime;
-                        let path = font.getPath("Hello, World!", x, 150, 72);
-                        path.fill = "white";
-                        path.draw(animator.context);
+                    
+                    right ? x += speed * state.deltaTime : x -= speed * state.deltaTime;
+                    
+                    if (x + 100 > state.canvas.width) {
+                        right = false
+                    } else if (x - 100 <= 0) {    
+                        right = true;
                     }
+
+                    state.context.fillStyle = "#000";
+                    state.context.fillRect(x, 20, 100, 200);
+                    //state.context.fillColor();
+
+                     //   let path = font.getPath("Hello, World!", x, 150, 72);
+                     // path.fill = "white";
+                     //  path.draw(animator.context);
+
+
                 }
 
                 animator.addToAnimation(backgroundRenderer);

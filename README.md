@@ -52,7 +52,7 @@ animator.addToAnimation(rectangleRenderer);
 Now, each time the canvas is updated (30 times per second by default), our renderer will be called and the code inside will draw a rectangle to the canvas. Let's start the animation:
 
 ```javascript
-animatior.startAnimationLoop();
+animator.startAnimationLoop();
 ```
 
 There's no movement because the renderer we provided does not change the position of the rectange over time. To move it across the screen, we can keep track of its `x` position and increment `x` by the distance we want it to move, found by multiplying the speed by the deltaTime (the time passed since the last frame):
@@ -63,7 +63,7 @@ let speed = 5;
 
 function rectangleRenderer(state) {
     x += speed * state.deltaTime;
-    state.context.rect(20, x, 100, 200);
+    state.context.rect(x, 20, 100, 200);
     state.context.stroke();
 }
 ```

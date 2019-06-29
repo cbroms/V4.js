@@ -13,21 +13,31 @@ class Font {
      * @param {array} variants - a list of font variants (strings), case and space sensitive (Italic, Regular, Bold Italic, etc.)
      */
     async loadGFonts(name = this.name, variants = this.variants) {
-        const urls = this.makeGFontUrls(name, variants);
+        const urls = this._makeGFontUrls(name, variants);
         this.fonts = {};
-        let classThis = this;
 
         for (const i in variants) {
-            const font = await this.load(urls[i]);
+            const font = await this._load(urls[i]);
             this.fonts[variants[i]] = font;
         }
+    }
+
+    /**
+     * Load a font from a url or path
+     * @param {string} name - the name of the font
+     * @param {string} variant - the variant of the font (Italic, Regular, Bold Italic, etc.)
+     */
+    async loadFont(loc, name = this.name, variant = "Regular") {
+        this.name = name;
+        const font = await this._load(loc);
+        this.fonts[variant] = font;
     }
 
     /**
      * Wrapper for opentype.js' load function to provide async/await functionality
      * @param {string} url - the path/url to load the font
      */
-    load(url) {
+    _load(url) {
         return new Promise(resolve => {
             opentype.load(url, function(err, font) {
                 if (err) {
@@ -54,7 +64,7 @@ class Font {
      * @param {array} variants - a list of font variants (strings), case and space sensitive (Italic, Regular, Bold Italic, etc.)
      * @returns {array} - a list of urls containing .ttf files for each of the font's variants
      */
-    makeGFontUrls(name, variants) {
+    _makeGFontUrls(name, variants) {
         // make a url like this:
         // https://raw.githubusercontent.com/google/fonts/master/ofl/crimsontext/CrimsonText-Regular.ttf
         const baseUrl =

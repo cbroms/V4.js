@@ -1,5 +1,5 @@
 import Font from "./Font";
-import { backgroundRenderer } from "./Renderers";
+import { backgroundRenderer, clearPrevRenderer } from "./Renderers";
 
 /**
  * @exports textCanvas
@@ -17,7 +17,7 @@ class Animator {
         this.framesPerSecond(30);
 
         // add renderer to animation buffer
-        this._animationBuffer = [backgroundRenderer];
+        this._animationBuffer = [clearPrevRenderer, backgroundRenderer];
     }
 
     /**
@@ -132,18 +132,14 @@ class Animator {
                     fps: fps
                 };
 
-                // clear the old canvas
-                self.context.clearRect(
-                    0,
-                    0,
-                    self.canvas.width,
-                    self.canvas.height
-                );
+                self.context.save();
 
                 // call each render function and pass rendererPayload
                 for (const renderer of self._animationBuffer) {
                     renderer(rendererPayload);
                 }
+
+                self.context.restore();
             }
 
             const callback = () => {
