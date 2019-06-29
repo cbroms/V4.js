@@ -4,7 +4,7 @@ module.exports = {
     entry: "./src/index.js",
     output: {
         filename: "main.js",
-        library: "textCanvas",
+        library: "V4",
         libraryTarget: "var",
         globalObject: "this",
         path: path.resolve(__dirname, "dist")
