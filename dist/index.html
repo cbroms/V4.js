@@ -18,10 +18,10 @@
                 var fontObj = new textCanvas.Font();
                 var res = await fontObj.loadGFonts("Crimson Text", ["Regular", "Italic"])
               
-                var font = fontObj.getFontVariant("Italic");
-                font.draw(textCanvasObj.context, 'Hello, World!', 0, 150, 72);
+               // var font = fontObj.getFontVariant("Italic");
+                //font.draw(textCanvasObj.context, 'Hello, World!', 0, 150, 72);
                 
-                
+                textCanvasObj.startAnimationLoop();
                 
             }
 
