@@ -1,11 +1,11 @@
-import Font from "./Font";
+import { Font } from "./Font";
 import { backgroundRenderer, clearPrevRenderer } from "./Renderers";
 
 /**
  * @exports textCanvas
  * @class
  */
-class Animator {
+export class Animator {
     constructor(canvas = null, webgl = false) {
         // set default values
         this.canvas = canvas;
@@ -27,7 +27,7 @@ class Animator {
      */
     hasCanvas(quietly = false) {
         if (!this.canvas) {
-            return quietly ? false : throw "Trying to access null canvas";
+            throw "Trying to access null canvas";
         }
         return true;
     }
@@ -39,9 +39,8 @@ class Animator {
      */
     hasContext(quietly = false) {
         if (!this.context) {
-            return quietly
-                ? false
-                : throw "Trying to access null canvas context";
+            return quietly;
+            throw "Trying to access null canvas context";
         }
         return true;
     }
@@ -129,6 +128,8 @@ class Animator {
                     hasCanvas: self.hasCanvas,
                     backgroundColor: self._backgroundColor,
                     deltaTime: elapsed / 100,
+                    frameCount: self._frameCount,
+                    startTime: self._startTime,
                     fps: fps
                 };
 
@@ -136,7 +137,11 @@ class Animator {
 
                 // call each render function and pass rendererPayload
                 for (const renderer of self._animationBuffer) {
-                    renderer(rendererPayload);
+                    try {
+                        renderer(rendererPayload);
+                    } catch (e) {
+                        throw "Error in renderer function: " + e;
+                    }
                 }
 
                 self.context.restore();
@@ -150,5 +155,3 @@ class Animator {
         }
     }
 }
-
-export default Animator;

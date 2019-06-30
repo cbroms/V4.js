@@ -3,7 +3,7 @@ const path = require("path");
 module.exports = {
     entry: "./src/index.js",
     output: {
-        filename: "main.js",
+        filename: "V4.js",
         library: "V4",
         libraryTarget: "var",
         globalObject: "this",
@@ -14,7 +14,7 @@ module.exports = {
             { test: /\.js$/, exclude: /node_modules/, loader: "babel-loader" }
         ]
     },
-    mode: "development",
+
     devtool: "inline-source-map",
     devServer: {
         contentBase: "./dist"

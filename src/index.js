@@ -1,7 +1,8 @@
-const Animator = require("./components/Animator").default;
-const Font = require("./components/Font").default;
-const Renderers = require("./components/Renderers");
+export { Animator } from "./components/Animator";
+export { Font } from "./components/Font";
+export { backgroundRenderer, clearPrevRenderer } from "./components/Renderers";
 
-module.exports.Animator = Animator;
-module.exports.Font = Font;
-module.exports.Renderers = Renderers;
+// module.exports.Animator = Animator;
+// module.exports.Font = Font;
+// module.exports.backgroundRenderer = backgroundRenderer;
+// module.exports.clearPrevRenderer = clearPrevRenderer;

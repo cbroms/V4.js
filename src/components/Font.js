@@ -1,6 +1,6 @@
-const opentype = require("opentype.js");
+import { load } from "opentype.js";
 
-class Font {
+export class Font {
     constructor(url = "", name = "", variants = ["Regular"]) {
         this.url = url;
         this.name = name;
@@ -39,7 +39,7 @@ class Font {
      */
     _load(url) {
         return new Promise(resolve => {
-            opentype.load(url, function(err, font) {
+            load(url, function(err, font) {
                 if (err) {
                     Promise.reject("Font could not be loaded: " + err);
                 } else {
@@ -81,5 +81,3 @@ class Font {
         );
     }
 }
-
-export default Font;

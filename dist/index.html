@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Asset Management</title>
+        <meta charset="UTF-8" />
+        <title>V4.js</title>
     </head>
     <body>
-        <script src="./main.js"></script>
+        <script src="./V4.min.js"></script>
         <canvas id="testCanvas"></canvas>
 
         <script>
@@ -32,15 +33,16 @@
                 animator.framesPerSecond(60);
                 var x = 0;
                 var right = true;
-                var speed = 20
+                var speed = 20;
 
                 function backgroundRenderer(state) {
-                    
-                    right ? x += speed * state.deltaTime : x -= speed * state.deltaTime;
-                    
+                    right
+                        ? (x += speed * state.deltaTime)
+                        : (x -= speed * state.deltaTime);
+
                     if (x + 100 > state.canvas.width) {
-                        right = false
-                    } else if (x - 100 <= 0) {    
+                        right = false;
+                    } else if (x - 100 <= 0) {
                         right = true;
                     }
 
@@ -48,11 +50,9 @@
                     state.context.fillRect(x, 20, 100, 200);
                     //state.context.fillColor();
 
-                     //   let path = font.getPath("Hello, World!", x, 150, 72);
-                     // path.fill = "white";
-                     //  path.draw(animator.context);
-
-
+                    //   let path = font.getPath("Hello, World!", x, 150, 72);
+                    // path.fill = "white";
+                    //  path.draw(animator.context);
                 }
 
                 animator.addToAnimation(backgroundRenderer);
