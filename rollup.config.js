@@ -3,6 +3,7 @@ import babel from "rollup-plugin-babel";
 import commonjs from "rollup-plugin-commonjs";
 import license from "rollup-plugin-license";
 import butternut from "rollup-plugin-butternut";
+import serve from "rollup-plugin-serve";
 
 export default [
   {
@@ -14,12 +15,12 @@ export default [
       name: "V4"
     },
     plugins: [
+      serve({ contentBase: "dist", port: 8080, open: true }),
       resolve(),
       commonjs(),
       babel({
         exclude: "node_modules/**"
       }),
-
       license({
         banner:
           "V4.js v<%= pkg.version %>\n" +

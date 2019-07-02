@@ -10,6 +10,20 @@
   (global = global || self, factory(global.V4 = {}));
 }(this, function (exports) { 'use strict';
 
+  function _typeof(obj) {
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof = function (obj) {
+        return typeof obj;
+      };
+    } else {
+      _typeof = function (obj) {
+        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+      };
+    }
+
+    return _typeof(obj);
+  }
+
   function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
     try {
       var info = gen[key](arg);
@@ -44,6 +58,28 @@
         _next(undefined);
       });
     };
+  }
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  function _defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  function _createClass(Constructor, protoProps, staticProps) {
+    if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) _defineProperties(Constructor, staticProps);
+    return Constructor;
   }
 
   /*! https://mths.be/codepointat v0.2.0 by @mathias */
@@ -14209,10 +14245,300 @@
       });
   }
 
-  class Font$1 {
-    constructor() {
-      let url = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
-      let name = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "";
+  Function.prototype.$asyncbind = function $asyncbind(self, catcher) {
+
+    if (!Function.prototype.$asyncbind) {
+      Object.defineProperty(Function.prototype, "$asyncbind", {
+        value: $asyncbind,
+        enumerable: false,
+        configurable: true,
+        writable: true
+      });
+    }
+
+    if (!$asyncbind.trampoline) {
+      $asyncbind.trampoline = function trampoline(t, x, s, e, u) {
+        return function b(q) {
+          while (q) {
+            if (q.then) {
+              q = q.then(b, e);
+              return u ? undefined : q;
+            }
+
+            try {
+              if (q.pop) {
+                if (q.length) return q.pop() ? x.call(t) : q;
+                q = s;
+              } else q = q.call(t);
+            } catch (r) {
+              return e(r);
+            }
+          }
+        };
+      };
+    }
+
+    if (!$asyncbind.LazyThenable) {
+      $asyncbind.LazyThenable = function () {
+        function isThenable(obj) {
+          return obj && obj instanceof Object && typeof obj.then === "function";
+        }
+
+        function resolution(p, r, how) {
+          try {
+            var x = how ? how(r) : r;
+            if (p === x) return p.reject(new TypeError("Promise resolution loop"));
+
+            if (isThenable(x)) {
+              x.then(function (y) {
+                resolution(p, y);
+              }, function (e) {
+                p.reject(e);
+              });
+            } else {
+              p.resolve(x);
+            }
+          } catch (ex) {
+            p.reject(ex);
+          }
+        }
+
+        function _unchained(v) {}
+
+        function thenChain(res, rej) {
+          this.resolve = res;
+          this.reject = rej;
+        }
+
+        function Chained() {}
+        Chained.prototype = {
+          resolve: _unchained,
+          reject: _unchained,
+          then: thenChain
+        };
+
+        function then(res, rej) {
+          var chain = new Chained();
+
+          try {
+            this._resolver(function (value) {
+              return isThenable(value) ? value.then(res, rej) : resolution(chain, value, res);
+            }, function (ex) {
+              resolution(chain, ex, rej);
+            });
+          } catch (ex) {
+            resolution(chain, ex, rej);
+          }
+
+          return chain;
+        }
+
+        function Thenable(resolver) {
+          this._resolver = resolver;
+          this.then = then;
+        }
+
+        Thenable.resolve = function (v) {
+          return Thenable.isThenable(v) ? v : {
+            then: function then(resolve) {
+              return resolve(v);
+            }
+          };
+        };
+
+        Thenable.isThenable = isThenable;
+        return Thenable;
+      }();
+
+      $asyncbind.EagerThenable = $asyncbind.Thenable = ($asyncbind.EagerThenableFactory = function (tick) {
+        tick = tick || (typeof process === "undefined" ? "undefined" : _typeof(process)) === "object" && process.nextTick || typeof setImmediate === "function" && setImmediate || function (f) {
+          setTimeout(f, 0);
+        };
+
+        var soon = function () {
+          var fq = [],
+              fqStart = 0,
+              bufferSize = 1024;
+
+          function callQueue() {
+            while (fq.length - fqStart) {
+              try {
+                fq[fqStart]();
+              } catch (ex) {}
+
+              fq[fqStart++] = undefined;
+
+              if (fqStart === bufferSize) {
+                fq.splice(0, bufferSize);
+                fqStart = 0;
+              }
+            }
+          }
+
+          return function (fn) {
+            fq.push(fn);
+            if (fq.length - fqStart === 1) tick(callQueue);
+          };
+        }();
+
+        function Zousan(func) {
+          if (func) {
+            var me = this;
+            func(function (arg) {
+              me.resolve(arg);
+            }, function (arg) {
+              me.reject(arg);
+            });
+          }
+        }
+
+        Zousan.prototype = {
+          resolve: function resolve(value) {
+            if (this.state !== undefined) return;
+            if (value === this) return this.reject(new TypeError("Attempt to resolve promise with self"));
+            var me = this;
+
+            if (value && (typeof value === "function" || _typeof(value) === "object")) {
+              try {
+                var first = 0;
+                var then = value.then;
+
+                if (typeof then === "function") {
+                  then.call(value, function (ra) {
+                    if (!first++) {
+                      me.resolve(ra);
+                    }
+                  }, function (rr) {
+                    if (!first++) {
+                      me.reject(rr);
+                    }
+                  });
+                  return;
+                }
+              } catch (e) {
+                if (!first) this.reject(e);
+                return;
+              }
+            }
+
+            this.state = STATE_FULFILLED;
+            this.v = value;
+            if (me.c) soon(function () {
+              for (var n = 0, l = me.c.length; n < l; n++) {
+                STATE_FULFILLED(me.c[n], value);
+              }
+            });
+          },
+          reject: function reject(reason) {
+            if (this.state !== undefined) return;
+            this.state = STATE_REJECTED;
+            this.v = reason;
+            var clients = this.c;
+            if (clients) soon(function () {
+              for (var n = 0, l = clients.length; n < l; n++) {
+                STATE_REJECTED(clients[n], reason);
+              }
+            });
+          },
+          then: function then(onF, onR) {
+            var p = new Zousan();
+            var client = {
+              y: onF,
+              n: onR,
+              p: p
+            };
+
+            if (this.state === undefined) {
+              if (this.c) this.c.push(client);else this.c = [client];
+            } else {
+              var s = this.state,
+                  a = this.v;
+              soon(function () {
+                s(client, a);
+              });
+            }
+
+            return p;
+          }
+        };
+
+        function STATE_FULFILLED(c, arg) {
+          if (typeof c.y === "function") {
+            try {
+              var yret = c.y.call(undefined, arg);
+              c.p.resolve(yret);
+            } catch (err) {
+              c.p.reject(err);
+            }
+          } else c.p.resolve(arg);
+        }
+
+        function STATE_REJECTED(c, reason) {
+          if (typeof c.n === "function") {
+            try {
+              var yret = c.n.call(undefined, reason);
+              c.p.resolve(yret);
+            } catch (err) {
+              c.p.reject(err);
+            }
+          } else c.p.reject(reason);
+        }
+
+        Zousan.resolve = function (val) {
+          if (val && val instanceof Zousan) return val;
+          var z = new Zousan();
+          z.resolve(val);
+          return z;
+        };
+
+        Zousan.reject = function (err) {
+          if (err && err instanceof Zousan) return err;
+          var z = new Zousan();
+          z.reject(err);
+          return z;
+        };
+
+        Zousan.version = "2.3.3-nodent";
+        return Zousan;
+      })();
+    }
+
+    function boundThen() {
+      return resolver.apply(self, arguments);
+    }
+
+    var resolver = this;
+
+    switch (catcher) {
+      case true:
+        return new $asyncbind.Thenable(boundThen);
+
+      case 0:
+        return new $asyncbind.LazyThenable(boundThen);
+
+      case undefined:
+        boundThen.then = boundThen;
+        return boundThen;
+
+      default:
+        return function () {
+          try {
+            return resolver.apply(self, arguments);
+          } catch (ex) {
+            return catcher(ex);
+          }
+        };
+    }
+  };
+  var Font$1 =
+  /*#__PURE__*/
+  function () {
+    function Font() {
+      var url = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
+      var name = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "";
+
+      _classCallCheck(this, Font);
+
       this.url = url;
       this.name = name;
       this.fonts = {};
@@ -14224,95 +14550,113 @@
      */
 
 
-    loadGFonts() {
-      var _this = this,
-          _arguments = arguments;
+    _createClass(Font, [{
+      key: "loadGFonts",
+      value: function () {
+        var _loadGFonts = _asyncToGenerator(function* () {
+          var name = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.name;
+          var variants = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.variants;
 
-      return _asyncToGenerator(function* () {
-        let name = _arguments.length > 0 && _arguments[0] !== undefined ? _arguments[0] : _this.name;
-        let variants = _arguments.length > 1 && _arguments[1] !== undefined ? _arguments[1] : _this.variants;
+          var urls = this._makeGFontUrls(name, variants);
 
-        const urls = _this._makeGFontUrls(name, variants);
+          this.fonts = {};
 
-        _this.fonts = {};
-
-        for (const i in variants) {
-          const font = yield _this._load(urls[i]);
-          _this.fonts[variants[i]] = font;
-        }
-      })();
-    }
-    /**
-     * Load a font from a url or path
-     * @param {string} name - the name of the font
-     * @param {string} variant - the variant of the font (Italic, Regular, Bold Italic, etc.)
-     */
-
-
-    loadFont(loc) {
-      var _this2 = this,
-          _arguments2 = arguments;
-
-      return _asyncToGenerator(function* () {
-        let name = _arguments2.length > 1 && _arguments2[1] !== undefined ? _arguments2[1] : _this2.name;
-        let variant = _arguments2.length > 2 && _arguments2[2] !== undefined ? _arguments2[2] : "Regular";
-        _this2.name = name;
-        const font = yield _this2._load(loc);
-        _this2.fonts[variant] = font;
-      })();
-    }
-    /**
-     * Wrapper for opentype.js' load function to provide async/await functionality
-     * @param {string} url - the path/url to load the font
-     */
-
-
-    _load(url) {
-      return new Promise(resolve => {
-        load(url, function (err, font) {
-          if (err) {
-            Promise.reject("Font could not be loaded: " + err);
-          } else {
-            resolve(font);
+          for (var i in variants) {
+            var font = yield this._load(urls[i]);
+            this.fonts[variants[i]] = font;
           }
         });
-      });
-    }
-    /**
-     * Get a specific font variant
-     * @param {string} variant - the variant to get, case and space sensitive (Italic, Bold Italic, etc.)
-     * @returns {opentype.font} - the opentype.js font object
-     */
 
+        function loadGFonts() {
+          return _loadGFonts.apply(this, arguments);
+        }
 
-    getFontVariant(variant) {
-      return this.fonts[variant];
-    }
-    /**
-     * Create the urls to retrieve a font and its variants from Google Fonts
-     * @param {string} name - the name of the font, case and space sensitive
-     * @param {array} variants - a list of font variants (strings), case and space sensitive (Italic, Regular, Bold Italic, etc.)
-     * @returns {array} - a list of urls containing .ttf files for each of the font's variants
-     */
+        return loadGFonts;
+      }()
+      /**
+       * Load a font from a url or path
+       * @param {string} name - the name of the font
+       * @param {string} variant - the variant of the font (Italic, Regular, Bold Italic, etc.)
+       */
 
+    }, {
+      key: "loadFont",
+      value: function () {
+        var _loadFont = _asyncToGenerator(function* (loc) {
+          var name = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.name;
+          var variant = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "Regular";
+          this.name = name;
+          var font = yield this._load(loc);
+          this.fonts[variant] = font;
+        });
 
-    _makeGFontUrls(name, variants) {
-      // make a url like this:
-      // https://raw.githubusercontent.com/google/fonts/master/ofl/crimsontext/CrimsonText-Regular.ttf
-      const baseUrl = "https://raw.githubusercontent.com/google/fonts/master/ofl/";
-      const nameNoSpace = name.replace(" ", "");
-      const nameCleaned = nameNoSpace.toLowerCase();
-      const varsCleaned = variants.map(val => val.replace(" ", "").replace("-", ""));
-      return varsCleaned.map(val => baseUrl + nameCleaned + "/" + nameNoSpace + "-" + val + ".ttf");
-    }
+        function loadFont(_x) {
+          return _loadFont.apply(this, arguments);
+        }
 
-  }
+        return loadFont;
+      }()
+      /**
+       * Wrapper for opentype.js' load function to provide async/await functionality
+       * @param {string} url - the path/url to load the font
+       */
+
+    }, {
+      key: "_load",
+      value: function _load(url) {
+        return new Promise(function (resolve) {
+          load(url, function (err, font) {
+            if (err) {
+              Promise.reject("Font could not be loaded: " + err);
+            } else {
+              resolve(font);
+            }
+          });
+        });
+      }
+      /**
+       * Get a specific font variant
+       * @param {string} variant - the variant to get, case and space sensitive (Italic, Bold Italic, etc.)
+       * @returns {opentype.font} - the opentype.js font object
+       */
+
+    }, {
+      key: "getFontVariant",
+      value: function getFontVariant(variant) {
+        return this.fonts[variant];
+      }
+      /**
+       * Create the urls to retrieve a font and its variants from Google Fonts
+       * @param {string} name - the name of the font, case and space sensitive
+       * @param {array} variants - a list of font variants (strings), case and space sensitive (Italic, Regular, Bold Italic, etc.)
+       * @returns {array} - a list of urls containing .ttf files for each of the font's variants
+       */
+
+    }, {
+      key: "_makeGFontUrls",
+      value: function _makeGFontUrls(name, variants) {
+        // make a url like this:
+        // https://raw.githubusercontent.com/google/fonts/master/ofl/crimsontext/CrimsonText-Regular.ttf
+        var baseUrl = "https://raw.githubusercontent.com/google/fonts/master/ofl/";
+        var nameNoSpace = name.replace(" ", "");
+        var nameCleaned = nameNoSpace.toLowerCase();
+        var varsCleaned = variants.map(function (val) {
+          return val.replace(" ", "").replace("-", "");
+        });
+        return varsCleaned.map(function (val) {
+          return baseUrl + nameCleaned + "/" + nameNoSpace + "-" + val + ".ttf";
+        });
+      }
+    }]);
+
+    return Font;
+  }();
 
   /**
    * The default background renderer function
    * @param {object} state - the current state of the animation
    */
-  const backgroundRenderer = state => {
+  var backgroundRenderer = function backgroundRenderer(state) {
     state.context.fillStyle = state.backgroundColor;
     state.context.fillRect(0, 0, state.canvas.width, state.canvas.height);
   };
@@ -14321,7 +14665,7 @@
    * @param {object} state - the current state of the animation
    */
 
-  const clearPrevRenderer = state => {
+  var clearPrevRenderer = function clearPrevRenderer(state) {
     state.context.clearRect(0, 0, state.canvas.width, state.canvas.height);
   };
 
@@ -14330,10 +14674,15 @@
    * @class
    */
 
-  class Animator {
-    constructor() {
-      let canvas = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-      let webgl = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+  var Animator =
+  /*#__PURE__*/
+  function () {
+    function Animator() {
+      var canvas = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+      var webgl = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+      _classCallCheck(this, Animator);
+
       // set default values
       this.canvas = canvas;
       this.context = canvas ? canvas.getContext("2d") : null;
@@ -14351,146 +14700,178 @@
      */
 
 
-    hasCanvas() {
+    _createClass(Animator, [{
+      key: "hasCanvas",
+      value: function hasCanvas() {
 
-      if (!this.canvas) {
-        throw "Trying to access null canvas";
-      }
-
-      return true;
-    }
-    /**
-     * Check the status of the canvas' context
-     * @param {bool} quietly - don't throw error if context DNE?
-     * @returns {bool} - if the context exists
-     */
-
-
-    hasContext() {
-      let quietly = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-
-      if (!this.context) {
-        return quietly;
-        throw "Trying to access null canvas context";
-      }
-
-      return true;
-    }
-    /**
-     * Get/set the background color of the canvas
-     * @param {string} color - the color to fill, in hex
-     * @returns {string} - the background color, in hex
-     */
-
-
-    backgroundColor(color) {
-      if (color) this._backgroundColor = color;
-      return this._backgroundColor;
-    }
-    /**
-     * Get/set the target frames per second of canvas animations
-     * @param {number} num - target FPS
-     * @param {number} - target FPS
-     */
-
-
-    framesPerSecond(num) {
-      if (num) {
-        this._fps = num;
-        this._fpsInterval = 1000 / num;
-      }
-
-      return this._fps;
-    }
-    /**
-     * Add a renderer function to the animation
-     * @param {Function} renderer - the render function to be executed
-     */
-
-
-    addToAnimation(renderer) {
-      this._animationBuffer.push(renderer);
-    }
-    /**
-     * Start the canvas animation
-     */
-
-
-    startAnimationLoop() {
-      this._loop = true;
-      this._then = window.performance.now();
-      this._startTime = this._then;
-
-      this._animationLoop(this);
-    }
-    /**
-     * Stop/pause the canvas animation
-     */
-
-
-    stopAnimationLoop() {
-      this._loop = false;
-    }
-    /**
-     * The animation loop running at the target frames per second
-     * @param {TextCanvas} self - TextCanvas class reference
-     */
-
-
-    _animationLoop(self) {
-      if (self._loop && self.hasCanvas() && self.hasContext()) {
-        // calculate the deltaTime
-        const now = window.performance.now();
-        let elapsed = now - self._then; // window has likely been inactive; reset frame and time counters
-
-        if (elapsed > 300) {
-          self._startTime = now;
-          self._frameCount = 0;
-          self._then = now;
-          elapsed = 0;
+        if (!this.canvas) {
+          throw "Trying to access null canvas";
         }
 
-        if (elapsed > self._fpsInterval) {
-          self._then = now - elapsed % self._fpsInterval;
-          self._frameCount += 1;
-          const sinceStart = now - self._startTime;
-          const fps = Math.round(1000 / (sinceStart / self._frameCount)); //console.log(fps);
-          // create the rendererPayload object to be sent to each render function
+        return true;
+      }
+      /**
+       * Check the status of the canvas' context
+       * @param {bool} quietly - don't throw error if context DNE?
+       * @returns {bool} - if the context exists
+       */
 
-          const rendererPayload = {
-            canvas: self.canvas,
-            context: self.context,
-            hasContext: self.hasContext,
-            hasCanvas: self.hasCanvas,
-            backgroundColor: self._backgroundColor,
-            deltaTime: elapsed / 100,
-            frameCount: self._frameCount,
-            startTime: self._startTime,
-            fps: fps
-          };
-          self.context.save(); // call each render function and pass rendererPayload
+    }, {
+      key: "hasContext",
+      value: function hasContext() {
+        var quietly = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
 
-          for (const renderer of self._animationBuffer) {
-            try {
-              renderer(rendererPayload);
-            } catch (e) {
-              throw "Error in renderer function: " + e;
-            }
+        if (!this.context) {
+          return quietly;
+          throw "Trying to access null canvas context";
+        }
+
+        return true;
+      }
+      /**
+       * Get/set the background color of the canvas
+       * @param {string} color - the color to fill, in hex
+       * @returns {string} - the background color, in hex
+       */
+
+    }, {
+      key: "backgroundColor",
+      value: function backgroundColor(color) {
+        if (color) this._backgroundColor = color;
+        return this._backgroundColor;
+      }
+      /**
+       * Get/set the target frames per second of canvas animations
+       * @param {number} num - target FPS
+       * @param {number} - target FPS
+       */
+
+    }, {
+      key: "framesPerSecond",
+      value: function framesPerSecond(num) {
+        if (num) {
+          this._fps = num;
+          this._fpsInterval = 1000 / num;
+        }
+
+        return this._fps;
+      }
+      /**
+       * Add a renderer function to the animation
+       * @param {Function} renderer - the render function to be executed
+       */
+
+    }, {
+      key: "addToAnimation",
+      value: function addToAnimation(renderer) {
+        this._animationBuffer.push(renderer);
+      }
+      /**
+       * Start the canvas animation
+       */
+
+    }, {
+      key: "startAnimationLoop",
+      value: function startAnimationLoop() {
+        this._loop = true;
+        this._then = window.performance.now();
+        this._startTime = this._then;
+
+        this._animationLoop(this);
+      }
+      /**
+       * Stop/pause the canvas animation
+       */
+
+    }, {
+      key: "stopAnimationLoop",
+      value: function stopAnimationLoop() {
+        this._loop = false;
+      }
+      /**
+       * The animation loop running at the target frames per second
+       * @param {TextCanvas} self - TextCanvas class reference
+       */
+
+    }, {
+      key: "_animationLoop",
+      value: function _animationLoop(self) {
+        if (self._loop && self.hasCanvas() && self.hasContext()) {
+          // calculate the deltaTime
+          var now = window.performance.now();
+          var elapsed = now - self._then; // window has likely been inactive; reset frame and time counters
+
+          if (elapsed > 300) {
+            self._startTime = now;
+            self._frameCount = 0;
+            self._then = now;
+            elapsed = 0;
           }
 
-          self.context.restore();
+          if (elapsed > self._fpsInterval) {
+            self._then = now - elapsed % self._fpsInterval;
+            self._frameCount += 1;
+            var sinceStart = now - self._startTime;
+            var fps = Math.round(1000 / (sinceStart / self._frameCount)); //console.log(fps);
+            // create the rendererPayload object to be sent to each render function
+
+            var rendererPayload = {
+              canvas: self.canvas,
+              context: self.context,
+              hasContext: self.hasContext,
+              hasCanvas: self.hasCanvas,
+              backgroundColor: self._backgroundColor,
+              deltaTime: elapsed / 100,
+              frameCount: self._frameCount,
+              startTime: self._startTime,
+              fps: fps
+            };
+            self.context.save(); // call each render function and pass rendererPayload
+
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
+
+            try {
+              for (var _iterator = self._animationBuffer[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                var renderer = _step.value;
+
+                try {
+                  renderer(rendererPayload);
+                } catch (e) {
+                  throw "Error in renderer function: " + e;
+                }
+              }
+            } catch (err) {
+              _didIteratorError = true;
+              _iteratorError = err;
+            } finally {
+              try {
+                if (!_iteratorNormalCompletion && _iterator["return"] != null) {
+                  _iterator["return"]();
+                }
+              } finally {
+                if (_didIteratorError) {
+                  throw _iteratorError;
+                }
+              }
+            }
+
+            self.context.restore();
+          }
+
+          var callback = function callback() {
+            self._animationLoop(self);
+          }; // request next frame
+
+
+          requestAnimationFrame(callback);
         }
-
-        const callback = () => {
-          self._animationLoop(self);
-        }; // request next frame
-
-
-        requestAnimationFrame(callback);
       }
-    }
+    }]);
 
-  }
+    return Animator;
+  }();
 
   exports.Animator = Animator;
   exports.Font = Font$1;

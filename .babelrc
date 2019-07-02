@@ -3,11 +3,10 @@
     [
       "@babel/preset-env",
       {
-        "targets": {
-          "esmodules": true
-        }
+        "exclude": ["@babel/plugin-transform-regenerator"]
       }
     ]
-  ]
+  ],
+  "plugins": ["module:fast-async"]
 
 }
