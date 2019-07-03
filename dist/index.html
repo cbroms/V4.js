@@ -5,7 +5,7 @@
         <title>V4.js</title>
     </head>
     <body>
-        <script src="./V4.min.js"></script>
+        <script src="./V4.js"></script>
         <canvas id="testCanvas"></canvas>
 
         <script>
@@ -14,7 +14,7 @@
                 var animator = new V4.Animator(canvas, false);
                 animator.canvas.height = 500;
                 animator.canvas.width = 800;
-                animator.backgroundColor("#fff");
+                animator.backgroundColor("#000");
 
                 var fontObj = new V4.Font();
                 await fontObj.loadFont(
@@ -30,32 +30,37 @@
 
                 var font = fontObj.getFontVariant("Regular");
 
-                animator.framesPerSecond(60);
-                var x = 0;
-                var right = true;
-                var speed = 20;
+                var textBox = new V4.TextBox(font, 0, 200, 200, 400);
+                textBox.text("Hello, World!", 72);
+                textBox.outlinePath(true);
+                animator.addToAnimation(textBox.renderer);
 
-                function backgroundRenderer(state) {
-                    right
-                        ? (x += speed * state.deltaTime)
-                        : (x -= speed * state.deltaTime);
+                animator.framesPerSecond(30);
+                // var x = 0;
+                // var right = true;
+                // var speed = 20;
 
-                    if (x + 100 > state.canvas.width) {
-                        right = false;
-                    } else if (x - 100 <= 0) {
-                        right = true;
-                    }
+                // function backgroundRenderer(state) {
+                //     right
+                //         ? (x += speed * state.deltaTime)
+                //         : (x -= speed * state.deltaTime);
 
-                    state.context.fillStyle = "#000";
-                    state.context.fillRect(x, 20, 100, 200);
-                    //state.context.fillColor();
+                //     if (x + 100 > state.canvas.width) {
+                //         right = false;
+                //     } else if (x - 100 <= 0) {
+                //         right = true;
+                //     }
 
-                    //   let path = font.getPath("Hello, World!", x, 150, 72);
-                    // path.fill = "white";
-                    //  path.draw(animator.context);
-                }
+                //     state.context.fillStyle = "#000";
+                //     state.context.fillRect(x, 20, 100, 200);
+                //     //state.context.fillColor();
 
-                animator.addToAnimation(backgroundRenderer);
+                //     //   let path = font.getPath("Hello, World!", x, 150, 72);
+                //     // path.fill = "white";
+                //     //  path.draw(animator.context);
+                // }
+
+                // animator.addToAnimation(backgroundRenderer);
 
                 animator.startAnimationLoop();
             };

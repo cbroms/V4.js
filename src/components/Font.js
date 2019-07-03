@@ -1,8 +1,17 @@
 import { load } from "opentype.js";
 
+/**
+ * @exports V4.Font
+ * @class
+ */
 export class Font {
-    constructor(url = "", name = "", variants = ["Regular"]) {
-        this.url = url;
+    /**
+     * Create a new Font object
+     * @param {string} name - the font's name
+     * @param {array} variants - the font's variants (Italic, Regular, etc.)
+     * @returns {Font} - the new Font object
+     */
+    constructor(name = "", variants = ["Regular"]) {
         this.name = name;
         this.fonts = {};
     }
@@ -24,10 +33,11 @@ export class Font {
 
     /**
      * Load a font from a url or path
+     * @param {string} loc - the url/path containing the font .ttf/.otf file
      * @param {string} name - the name of the font
      * @param {string} variant - the variant of the font (Italic, Regular, Bold Italic, etc.)
      */
-    async loadFont(loc, name = this.name, variant = "Regular") {
+    async loadFont(loc = "", name = this.name, variant = "Regular") {
         this.name = name;
         const font = await this._load(loc);
         this.fonts[variant] = font;

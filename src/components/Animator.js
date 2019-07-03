@@ -2,7 +2,7 @@ import { Font } from "./Font";
 import { backgroundRenderer, clearPrevRenderer } from "./Renderers";
 
 /**
- * @exports textCanvas
+ * @exports V4.Animator
  * @class
  */
 export class Animator {
@@ -10,7 +10,7 @@ export class Animator {
         // set default values
         this.canvas = canvas;
         this.context = canvas ? canvas.getContext("2d") : null;
-        this.webgl = webgl;
+        this._webgl = webgl;
         this._loop = false;
         this._frameCount = 0;
 
@@ -27,7 +27,8 @@ export class Animator {
      */
     hasCanvas(quietly = false) {
         if (!this.canvas) {
-            throw "Trying to access null canvas";
+            if (quietly) return false;
+            else throw "Trying to access null canvas";
         }
         return true;
     }
@@ -39,8 +40,8 @@ export class Animator {
      */
     hasContext(quietly = false) {
         if (!this.context) {
-            return quietly;
-            throw "Trying to access null canvas context";
+            if (quietly) return false;
+            else throw "Trying to access null canvas context";
         }
         return true;
     }

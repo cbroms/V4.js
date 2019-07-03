@@ -15,7 +15,7 @@ export default [
       name: "V4"
     },
     plugins: [
-      serve({ contentBase: "dist", port: 8080, open: true }),
+      serve({ contentBase: "dist", port: 8080 }),
       resolve(),
       commonjs(),
       babel({
@@ -31,25 +31,25 @@ export default [
     watch: {
       include: "src/**"
     }
-  },
-  {
-    input: "src/index.js",
-    output: {
-      exports: "named",
-      file: "dist/V4.min.js",
-      format: "umd",
-      name: "V4"
-    },
-    plugins: [
-      butternut(),
-      resolve(),
-      commonjs(),
-      babel({
-        exclude: "node_modules/**"
-      })
-    ],
-    watch: {
-      include: "src/**"
-    }
   }
+  // {
+  //   input: "src/index.js",
+  //   output: {
+  //     exports: "named",
+  //     file: "dist/V4.min.js",
+  //     format: "umd",
+  //     name: "V4"
+  //   },
+  //   plugins: [
+  //     butternut(),
+  //     resolve(),
+  //     commonjs(),
+  //     babel({
+  //       exclude: "node_modules/**"
+  //     })
+  //   ],
+  //   watch: {
+  //     include: "src/**"
+  //   }
+  // }
 ];
