@@ -2,7 +2,7 @@
   "name": "V4",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "V4.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "./node_modules/.bin/rollup -c -w",
@@ -12,8 +12,8 @@
     "type": "git",
     "url": "git+https://github.com/CBR0MS/V4.js.git"
   },
-  "author": "Christian Broms",
-  "license": "Apache-2.0",
+  "author": "Christian Broms <cb@rainfla.me>",
+  "license": "LGPL-3.0-only",
   "bugs": {
     "url": "https://github.com/CBR0MS/V4.js/issues"
   },
