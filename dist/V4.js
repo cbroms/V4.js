@@ -14926,6 +14926,8 @@
         w: w,
         h: h
       };
+      this._verticalAlign = "BOTTOM";
+      this._horizontalAlign = "RIGHT";
       this.renderer = this.renderer.bind(this);
     }
     /**
@@ -14941,7 +14943,50 @@
       value: function text(newText, fontSize) {
         if (newText) this._text = newText;
         if (fontSize) this._fontSize = fontSize;
+        var absPath = this.font.getPath(this._text, 0, 0, this._fontSize);
+        var bb = absPath.getBoundingBox();
+        this._textHeight = bb.y2 - bb.y1;
+        this._textOffsetBottom = bb.y2;
+        this._textWidth = this.font.getAdvanceWidth(newText, fontSize);
         return this._text;
+      }
+      /**
+       * Get/set the vertical alignment of the text in the text box
+       * @param {string} alignment - alignment command, must be BOTTOM, CENTER, or TOP
+       * @returns {string} - the alignment
+       */
+
+    }, {
+      key: "verticalAlign",
+      value: function verticalAlign() {
+        var alignment = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "BOTTOM";
+        if (alignment) this._verticalAlign = alignment;
+        return this._verticalAlign;
+      }
+      /**
+       * Get/set the horizontal alignment of the text in the text box
+       * @param {string} alignment - alignment command, must be LEFT, CENTER, or RIGHT
+       * @returns {string} - the alignment
+       */
+
+    }, {
+      key: "horizontalAlign",
+      value: function horizontalAlign() {
+        var alignment = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "LEFT";
+        if (alignment) this._horizontalAlign = alignment;
+        return this._horizontalAlign;
+      }
+      /**
+       * Explicitly specify where to draw text within the text box
+       * @param {number} x - x coordinate to place text (bottom left corner)
+       * @param {number} y - x coordinate to place text (bottom left corner)
+       */
+
+    }, {
+      key: "exactTextPosition",
+      value: function exactTextPosition(x, y) {
+        this._drawX = x;
+        this._drawY = y;
       }
       /**
        * Set if the text box should be outlined
@@ -14964,32 +15009,64 @@
       key: "renderer",
       value: function renderer(state) {
         var ctx = state.context; //create clipping mask
-        // state.context.beginPath();
-        // state.context.lineWidth = "2";
-        // state.context.strokeStyle = "red";
-        // state.context.moveTo(this.bounds.x1, this.bounds.y1);
-        // state.context.lineTo(this.bounds.x2, this.bounds.y2);
-        // state.context.moveTo(this.bounds.x2, this.bounds.y2);
-        // state.context.lineTo(this.bounds.x3, this.bounds.y3);
-        // state.context.moveTo(this.bounds.x3, this.bounds.y3);
-        // state.context.lineTo(this.bounds.x4, this.bounds.y4);
-        // state.context.moveTo(this.bounds.x4, this.bounds.y4);
-        // state.context.lineTo(this.bounds.x1, this.bounds.y1);
-        // state.context.closePath();
-        // state.context.stroke();
-        // state.context.clip();
-        // Clip a rectangular area
 
-        ctx.strokeStyle = "red";
-        ctx.rect(this.bounds.x1, this.bounds.y2, this.bounds.w, this.bounds.h);
-        ctx.stroke();
-        ctx.clip(); // render font
+        ctx.beginPath();
+        ctx.moveTo(this.bounds.x1, this.bounds.y1);
+        ctx.lineTo(this.bounds.x2, this.bounds.y2);
+        ctx.lineTo(this.bounds.x4, this.bounds.y4);
+        ctx.moveTo(this.bounds.x3, this.bounds.y3);
+        ctx.lineTo(this.bounds.x4, this.bounds.y4);
+        ctx.lineTo(this.bounds.x2, this.bounds.y2);
+        ctx.closePath();
+        ctx.clip();
 
-        var path = this.font.getPath(this._text, this.bounds.x1, this.bounds.y1, this._fontSize);
-        var path2 = new Path2D(path.toPathData(2)); //path2.moveTo(0, 0);
+        if (this._debug) {
+          ctx.lineWidth = "1";
+          ctx.strokeStyle = "red";
+          ctx.beginPath();
+          ctx.moveTo(this.bounds.x1, this.bounds.y1);
+          ctx.lineTo(this.bounds.x2, this.bounds.y2);
+          ctx.moveTo(this.bounds.x2, this.bounds.y2);
+          ctx.lineTo(this.bounds.x3, this.bounds.y3);
+          ctx.moveTo(this.bounds.x3, this.bounds.y3);
+          ctx.lineTo(this.bounds.x4, this.bounds.y4);
+          ctx.moveTo(this.bounds.x4, this.bounds.y4);
+          ctx.lineTo(this.bounds.x1, this.bounds.y1);
+          ctx.closePath();
+          ctx.stroke();
+        }
 
+        var x, y; // user gave a position, use it
+
+        if (this._drawX && this._drawY) {
+          x = this._drawX;
+          y = this._drawY;
+        } else {
+          // user has not specified a position, calculate based on alignment
+          // calc y
+          if (this._verticalAlign === "BOTTOM") {
+            y = this.bounds.y1 - this._textOffsetBottom;
+          } else if (this._verticalAlign === "CENTER") {
+            y = this.bounds.y1 - this.bounds.h / 2 + this._textHeight / 2 - this._textOffsetBottom;
+          } else if (this._verticalAlign === "TOP") {
+            y = this.bounds.y2 + (this._textHeight - this._textOffsetBottom);
+          } // calc x
+
+
+          if (this._horizontalAlign === "LEFT") {
+            x = this.bounds.x1;
+          } else if (this._horizontalAlign === "CENTER") {
+            x = this.bounds.x1 + this.bounds.w / 2 - this._textWidth / 2;
+          } else if (this._horizontalAlign === "RIGHT") {
+            x = this.bounds.x1 + (this.bounds.w - this._textWidth);
+          }
+        } // render font
+
+
+        var absPath = this.font.getPath(this._text, x, y, this._fontSize);
+        var drawPath = new Path2D(absPath.toPathData(2));
         ctx.fillStyle = "white";
-        ctx.fill(path2); // ctx.drawImage(path.toSVG(2), 0, 0);
+        ctx.fill(drawPath); // ctx.drawImage(path.toSVG(2), 0, 0);
         // path.fill = "white";
         // path.draw(state.context);
       }
