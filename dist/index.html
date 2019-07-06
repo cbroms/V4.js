@@ -30,12 +30,19 @@
 
                 var font = fontObj.getFontVariant("Regular");
 
-                var textBox = new V4.TextBox(font, 10, 300, 200, 600);
+                var textBox = new V4.TextBox(font, 10, 300, 200, 150);
                 textBox.text("Hello, World!", 72);
                 textBox.outlinePath(true);
                 textBox.verticalAlign("CENTER");
                 textBox.horizontalAlign("CENTER")
                 animator.addToAnimation(textBox.renderer);
+
+                var textBox2 = new V4.TextBox(font, 0, 250, 200, 600);
+                textBox2.text("Here's a text!", 72);
+                textBox2.outlinePath(true);
+                textBox2.verticalAlign("TOP");
+                textBox2.horizontalAlign("RIGHT")
+                animator.addToAnimation(textBox2.renderer);
 
                 animator.framesPerSecond(30);
                 // var x = 0;

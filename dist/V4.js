@@ -14898,7 +14898,7 @@
      * @param {number} y - the y coordinate of the text box's bottom left corner
      * @param {number} h - the height, in pixels, of the text box
      * @param {number} w - the width, in pixels, of the text box
-     * @returns {TextBox} - the new TextBox object
+     * @returns {V4.TextBox} - the new TextBox object
      */
     function TextBox(font, x, y, h, w) {
       _classCallCheck(this, TextBox);
@@ -14928,6 +14928,7 @@
       };
       this._verticalAlign = "BOTTOM";
       this._horizontalAlign = "RIGHT";
+      this._animating = false;
       this.renderer = this.renderer.bind(this);
     }
     /**
@@ -14948,6 +14949,7 @@
         this._textHeight = bb.y2 - bb.y1;
         this._textOffsetBottom = bb.y2;
         this._textWidth = this.font.getAdvanceWidth(newText, fontSize);
+        this._drawPos = this._calculateTextRenderXY();
         return this._text;
       }
       /**
@@ -14959,8 +14961,13 @@
     }, {
       key: "verticalAlign",
       value: function verticalAlign() {
-        var alignment = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "BOTTOM";
-        if (alignment) this._verticalAlign = alignment;
+        var alignment = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "CENTER";
+
+        if (alignment) {
+          this._verticalAlign = alignment;
+          this._drawPos = this._calculateTextRenderXY();
+        }
+
         return this._verticalAlign;
       }
       /**
@@ -14973,7 +14980,12 @@
       key: "horizontalAlign",
       value: function horizontalAlign() {
         var alignment = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "LEFT";
-        if (alignment) this._horizontalAlign = alignment;
+
+        if (alignment) {
+          this._horizontalAlign = alignment;
+          this._drawPos = this._calculateTextRenderXY();
+        }
+
         return this._horizontalAlign;
       }
       /**
@@ -14987,6 +14999,7 @@
       value: function exactTextPosition(x, y) {
         this._drawX = x;
         this._drawY = y;
+        this._drawPos = this._calculateTextRenderXY();
       }
       /**
        * Set if the text box should be outlined
@@ -15001,6 +15014,60 @@
         return this._debug;
       }
       /**
+       * Set if the the text should be underlined
+       * @param {bool} underline - underline the text in the text box?
+       * @returns {bool} - if the underlines are active
+       */
+
+    }, {
+      key: "underline",
+      value: function underline(_underline) {
+        if (_underline !== null) this._underline = _underline;
+        return this._underline;
+      }
+      /**
+       * Calculate the x and y coordinates to start drawing the text
+       * @returns {object} - the x and y coords, via result.x and result.y
+       */
+
+    }, {
+      key: "_calculateTextRenderXY",
+      value: function _calculateTextRenderXY() {
+        var x, y; // user gave a position, use it
+
+        if (this._drawX && this._drawY) {
+          x = this._drawX;
+          y = this._drawY;
+        } else {
+          // user has not specified a position, calculate based on alignment
+          // calc y
+          if (this._verticalAlign === "BOTTOM") {
+            y = this.bounds.y1 - this._textOffsetBottom;
+          } else if (this._verticalAlign === "CENTER") {
+            y = this.bounds.y1 - this.bounds.h / 2 + this._textHeight / 2 - this._textOffsetBottom;
+          } else if (this._verticalAlign === "TOP") {
+            y = this.bounds.y2 + (this._textHeight - this._textOffsetBottom);
+          } // calc x
+
+
+          if (this._horizontalAlign === "LEFT") {
+            x = this.bounds.x1;
+          } else if (this._horizontalAlign === "CENTER") {
+            x = this.bounds.x1 + this.bounds.w / 2 - this._textWidth / 2;
+          } else if (this._horizontalAlign === "RIGHT") {
+            x = this.bounds.x1 + (this.bounds.w - this._textWidth);
+          }
+        }
+
+        return {
+          x: x,
+          y: y
+        };
+      }
+    }, {
+      key: "_calculateUnderlineRenderXY",
+      value: function _calculateUnderlineRenderXY() {}
+      /**
        * The renderer function for this text box
        * @param {object} state - the state object
        */
@@ -15008,7 +15075,8 @@
     }, {
       key: "renderer",
       value: function renderer(state) {
-        var ctx = state.context; //create clipping mask
+        var ctx = state.context;
+        ctx.save(); //create clipping mask
 
         ctx.beginPath();
         ctx.moveTo(this.bounds.x1, this.bounds.y1);
@@ -15036,39 +15104,13 @@
           ctx.stroke();
         }
 
-        var x, y; // user gave a position, use it
+        var drawPos = this._animating ? this._calculateTextRenderXY() : this._drawPos; // render font
 
-        if (this._drawX && this._drawY) {
-          x = this._drawX;
-          y = this._drawY;
-        } else {
-          // user has not specified a position, calculate based on alignment
-          // calc y
-          if (this._verticalAlign === "BOTTOM") {
-            y = this.bounds.y1 - this._textOffsetBottom;
-          } else if (this._verticalAlign === "CENTER") {
-            y = this.bounds.y1 - this.bounds.h / 2 + this._textHeight / 2 - this._textOffsetBottom;
-          } else if (this._verticalAlign === "TOP") {
-            y = this.bounds.y2 + (this._textHeight - this._textOffsetBottom);
-          } // calc x
-
-
-          if (this._horizontalAlign === "LEFT") {
-            x = this.bounds.x1;
-          } else if (this._horizontalAlign === "CENTER") {
-            x = this.bounds.x1 + this.bounds.w / 2 - this._textWidth / 2;
-          } else if (this._horizontalAlign === "RIGHT") {
-            x = this.bounds.x1 + (this.bounds.w - this._textWidth);
-          }
-        } // render font
-
-
-        var absPath = this.font.getPath(this._text, x, y, this._fontSize);
+        var absPath = this.font.getPath(this._text, drawPos.x, drawPos.y, this._fontSize);
         var drawPath = new Path2D(absPath.toPathData(2));
         ctx.fillStyle = "white";
-        ctx.fill(drawPath); // ctx.drawImage(path.toSVG(2), 0, 0);
-        // path.fill = "white";
-        // path.draw(state.context);
+        ctx.fill(drawPath);
+        ctx.restore();
       }
     }]);
 

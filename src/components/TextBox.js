@@ -10,7 +10,7 @@ export class TextBox {
      * @param {number} y - the y coordinate of the text box's bottom left corner
      * @param {number} h - the height, in pixels, of the text box
      * @param {number} w - the width, in pixels, of the text box
-     * @returns {TextBox} - the new TextBox object
+     * @returns {V4.TextBox} - the new TextBox object
      */
     constructor(font, x, y, h, w) {
         this.font = font;
@@ -38,6 +38,7 @@ export class TextBox {
 
         this._verticalAlign = "BOTTOM";
         this._horizontalAlign = "RIGHT";
+        this._animating = false;
 
         this.renderer = this.renderer.bind(this);
     }
@@ -53,12 +54,13 @@ export class TextBox {
         if (fontSize) this._fontSize = fontSize;
 
         const absPath = this.font.getPath(this._text, 0, 0, this._fontSize);
-
         const bb = absPath.getBoundingBox();
+
         this._textHeight = bb.y2 - bb.y1;
         this._textOffsetBottom = bb.y2;
-
         this._textWidth = this.font.getAdvanceWidth(newText, fontSize);
+        this._drawPos = this._calculateTextRenderXY();
+
         return this._text;
     }
 
@@ -67,8 +69,11 @@ export class TextBox {
      * @param {string} alignment - alignment command, must be BOTTOM, CENTER, or TOP
      * @returns {string} - the alignment
      */
-    verticalAlign(alignment = "BOTTOM") {
-        if (alignment) this._verticalAlign = alignment;
+    verticalAlign(alignment = "CENTER") {
+        if (alignment) {
+            this._verticalAlign = alignment;
+            this._drawPos = this._calculateTextRenderXY();
+        }
         return this._verticalAlign;
     }
 
@@ -78,7 +83,10 @@ export class TextBox {
      * @returns {string} - the alignment
      */
     horizontalAlign(alignment = "LEFT") {
-        if (alignment) this._horizontalAlign = alignment;
+        if (alignment) {
+            this._horizontalAlign = alignment;
+            this._drawPos = this._calculateTextRenderXY();
+        }
         return this._horizontalAlign;
     }
 
@@ -90,6 +98,7 @@ export class TextBox {
     exactTextPosition(x, y) {
         this._drawX = x;
         this._drawY = y;
+        this._drawPos = this._calculateTextRenderXY();
     }
 
     /**
@@ -103,11 +112,65 @@ export class TextBox {
     }
 
     /**
+     * Set if the the text should be underlined
+     * @param {bool} underline - underline the text in the text box?
+     * @returns {bool} - if the underlines are active
+     */
+    underline(underline) {
+        if (underline !== null) this._underline = underline;
+        return this._underline;
+    }
+
+    /**
+     * Calculate the x and y coordinates to start drawing the text
+     * @returns {object} - the x and y coords, via result.x and result.y
+     */
+    _calculateTextRenderXY() {
+        let x, y;
+
+        // user gave a position, use it
+        if (this._drawX && this._drawY) {
+            x = this._drawX;
+            y = this._drawY;
+        } else {
+            // user has not specified a position, calculate based on alignment
+            // calc y
+            if (this._verticalAlign === "BOTTOM") {
+                y = this.bounds.y1 - this._textOffsetBottom;
+            } else if (this._verticalAlign === "CENTER") {
+                y =
+                    this.bounds.y1 -
+                    this.bounds.h / 2 +
+                    this._textHeight / 2 -
+                    this._textOffsetBottom;
+            } else if (this._verticalAlign === "TOP") {
+                y =
+                    this.bounds.y2 +
+                    (this._textHeight - this._textOffsetBottom);
+            }
+            // calc x
+            if (this._horizontalAlign === "LEFT") {
+                x = this.bounds.x1;
+            } else if (this._horizontalAlign === "CENTER") {
+                x = this.bounds.x1 + this.bounds.w / 2 - this._textWidth / 2;
+            } else if (this._horizontalAlign === "RIGHT") {
+                x = this.bounds.x1 + (this.bounds.w - this._textWidth);
+            }
+        }
+
+        return { x: x, y: y };
+    }
+
+    _calculateUnderlineRenderXY() {}
+
+    /**
      * The renderer function for this text box
      * @param {object} state - the state object
      */
     renderer(state) {
         const ctx = state.context;
+
+        ctx.save();
 
         //create clipping mask
         ctx.beginPath();
@@ -136,50 +199,23 @@ export class TextBox {
             ctx.stroke();
         }
 
-        let x, y;
-
-        // user gave a position, use it
-        if (this._drawX && this._drawY) {
-            x = this._drawX;
-            y = this._drawY;
-        } else {
-            // user has not specified a position, calculate based on alignment
-
-            // calc y
-            if (this._verticalAlign === "BOTTOM") {
-                y = this.bounds.y1 - this._textOffsetBottom;
-            } else if (this._verticalAlign === "CENTER") {
-                y =
-                    this.bounds.y1 -
-                    this.bounds.h / 2 +
-                    this._textHeight / 2 -
-                    this._textOffsetBottom;
-            } else if (this._verticalAlign === "TOP") {
-                y =
-                    this.bounds.y2 +
-                    (this._textHeight - this._textOffsetBottom);
-            }
-
-            // calc x
-            if (this._horizontalAlign === "LEFT") {
-                x = this.bounds.x1;
-            } else if (this._horizontalAlign === "CENTER") {
-                x = this.bounds.x1 + this.bounds.w / 2 - this._textWidth / 2;
-            } else if (this._horizontalAlign === "RIGHT") {
-                x = this.bounds.x1 + (this.bounds.w - this._textWidth);
-            }
-        }
+        const drawPos = this._animating
+            ? this._calculateTextRenderXY()
+            : this._drawPos;
 
         // render font
-
-        const absPath = this.font.getPath(this._text, x, y, this._fontSize);
+        const absPath = this.font.getPath(
+            this._text,
+            drawPos.x,
+            drawPos.y,
+            this._fontSize
+        );
 
         const drawPath = new Path2D(absPath.toPathData(2));
 
         ctx.fillStyle = "white";
         ctx.fill(drawPath);
-        // ctx.drawImage(path.toSVG(2), 0, 0);
-        // path.fill = "white";
-        // path.draw(state.context);
+
+        ctx.restore();
     }
 }
