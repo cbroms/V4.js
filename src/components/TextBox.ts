@@ -1,8 +1,51 @@
+import { Font } from "opentype.js";
+import { RendererPayload } from "./RendererPayload";
+
+type VerticalAlignOpts = "BOTTOM" | "TOP" | "CENTER";
+type HorizontalAlignOpts = "RIGHT" | "LEFT" | "CENTER";
+
+type TextStats = {
+    textWidth: number;
+    textHeight: number;
+    textOffsetBottom: number;
+};
+
+type Bounds = {
+    x1: number;
+    x2: number;
+    x3: number;
+    x4: number;
+    y1: number;
+    y2: number;
+    y3: number;
+    y4: number;
+    w: number;
+    h: number;
+};
+
+type DrawPos = {
+    x: number;
+    y: number;
+};
 /**
  * @exports V4.TextBox
  * @class
  */
 export class TextBox {
+    private _text: string;
+    private _fontSize: number;
+    private _animating: boolean;
+    private _debug: boolean;
+    private _drawExact: boolean;
+    private _underline: boolean;
+    private _drawPos: DrawPos;
+    private _textStats: TextStats;
+    private _verticalAlign: VerticalAlignOpts;
+    private _horizontalAlign: HorizontalAlignOpts;
+
+    public font: Font;
+    public bounds: Bounds;
+
     /**
      * Create a new TextBox object
      * @param {Font} font - the font object
@@ -12,10 +55,11 @@ export class TextBox {
      * @param {number} w - the width, in pixels, of the text box
      * @returns {V4.TextBox} - the new TextBox object
      */
-    constructor(font, x, y, h, w) {
+    constructor(font: Font, x: number, y: number, h: number, w: number) {
         this.font = font;
         this._text = "";
         this._fontSize = 24;
+
         // Corner points are assigned clockwise from bottom left:
         /*
          *   (x2, y2) *--------------* (x3, y3)
@@ -36,10 +80,15 @@ export class TextBox {
             h: h
         };
 
+        // set defaut properties
         this._verticalAlign = "BOTTOM";
         this._horizontalAlign = "RIGHT";
         this._animating = false;
-
+        this._debug = false;
+        this._drawExact = false;
+        this._underline = false;
+        this._drawPos = { x: 0, y: 0 };
+        this._textStats = { textWidth: 0, textHeight: 0, textOffsetBottom: 0 };
         this.renderer = this.renderer.bind(this);
     }
 
@@ -49,16 +98,19 @@ export class TextBox {
      * @param {number} fontSize - the font size
      * @returns {string} - the text
      */
-    text(newText, fontSize) {
+    text(newText: string, fontSize: number): string {
         if (newText) this._text = newText;
         if (fontSize) this._fontSize = fontSize;
 
         const absPath = this.font.getPath(this._text, 0, 0, this._fontSize);
         const bb = absPath.getBoundingBox();
 
-        this._textHeight = bb.y2 - bb.y1;
-        this._textOffsetBottom = bb.y2;
-        this._textWidth = this.font.getAdvanceWidth(newText, fontSize);
+        this._textStats.textHeight = bb.y2 - bb.y1;
+        this._textStats.textOffsetBottom = bb.y2;
+        this._textStats.textWidth = this.font.getAdvanceWidth(
+            newText,
+            fontSize
+        );
         this._drawPos = this._calculateTextRenderXY();
 
         return this._text;
@@ -69,7 +121,7 @@ export class TextBox {
      * @param {string} alignment - alignment command, must be BOTTOM, CENTER, or TOP
      * @returns {string} - the alignment
      */
-    verticalAlign(alignment = "CENTER") {
+    verticalAlign(alignment: VerticalAlignOpts): VerticalAlignOpts {
         if (alignment) {
             this._verticalAlign = alignment;
             this._drawPos = this._calculateTextRenderXY();
@@ -82,7 +134,7 @@ export class TextBox {
      * @param {string} alignment - alignment command, must be LEFT, CENTER, or RIGHT
      * @returns {string} - the alignment
      */
-    horizontalAlign(alignment = "LEFT") {
+    horizontalAlign(alignment: HorizontalAlignOpts): HorizontalAlignOpts {
         if (alignment) {
             this._horizontalAlign = alignment;
             this._drawPos = this._calculateTextRenderXY();
@@ -95,10 +147,9 @@ export class TextBox {
      * @param {number} x - x coordinate to place text (bottom left corner)
      * @param {number} y - x coordinate to place text (bottom left corner)
      */
-    exactTextPosition(x, y) {
-        this._drawX = x;
-        this._drawY = y;
-        this._drawPos = this._calculateTextRenderXY();
+    exactTextPosition(x: number, y: number): void {
+        this._drawPos = { x: x, y: y };
+        this._drawExact = true;
     }
 
     /**
@@ -106,7 +157,7 @@ export class TextBox {
      * @param {bool} outline - outline the text box?
      * @returns {bool} - if the text box outline is activated
      */
-    outlinePath(outline) {
+    outlinePath(outline: boolean): boolean {
         if (outline !== null) this._debug = outline;
         return this._debug;
     }
@@ -116,7 +167,7 @@ export class TextBox {
      * @param {bool} underline - underline the text in the text box?
      * @returns {bool} - if the underlines are active
      */
-    underline(underline) {
+    underline(underline: boolean): boolean {
         if (underline !== null) this._underline = underline;
         return this._underline;
     }
@@ -125,36 +176,42 @@ export class TextBox {
      * Calculate the x and y coordinates to start drawing the text
      * @returns {object} - the x and y coords, via result.x and result.y
      */
-    _calculateTextRenderXY() {
-        let x, y;
+    _calculateTextRenderXY(): DrawPos {
+        let x: number;
+        let y: number;
 
         // user gave a position, use it
-        if (this._drawX && this._drawY) {
-            x = this._drawX;
-            y = this._drawY;
+        if (this._drawExact) {
+            return this._drawPos;
         } else {
             // user has not specified a position, calculate based on alignment
             // calc y
             if (this._verticalAlign === "BOTTOM") {
-                y = this.bounds.y1 - this._textOffsetBottom;
+                y = this.bounds.y1 - this._textStats.textOffsetBottom;
             } else if (this._verticalAlign === "CENTER") {
                 y =
                     this.bounds.y1 -
                     this.bounds.h / 2 +
-                    this._textHeight / 2 -
-                    this._textOffsetBottom;
+                    this._textStats.textHeight / 2 -
+                    this._textStats.textOffsetBottom;
             } else if (this._verticalAlign === "TOP") {
                 y =
                     this.bounds.y2 +
-                    (this._textHeight - this._textOffsetBottom);
+                    (this._textStats.textHeight -
+                        this._textStats.textOffsetBottom);
             }
             // calc x
             if (this._horizontalAlign === "LEFT") {
                 x = this.bounds.x1;
             } else if (this._horizontalAlign === "CENTER") {
-                x = this.bounds.x1 + this.bounds.w / 2 - this._textWidth / 2;
+                x =
+                    this.bounds.x1 +
+                    this.bounds.w / 2 -
+                    this._textStats.textWidth / 2;
             } else if (this._horizontalAlign === "RIGHT") {
-                x = this.bounds.x1 + (this.bounds.w - this._textWidth);
+                x =
+                    this.bounds.x1 +
+                    (this.bounds.w - this._textStats.textWidth);
             }
         }
 
@@ -167,7 +224,7 @@ export class TextBox {
      * The renderer function for this text box
      * @param {object} state - the state object
      */
-    renderer(state) {
+    renderer(state: RendererPayload) {
         const ctx = state.context;
 
         ctx.save();
@@ -184,7 +241,7 @@ export class TextBox {
         ctx.clip();
 
         if (this._debug) {
-            ctx.lineWidth = "1";
+            ctx.lineWidth = 1;
             ctx.strokeStyle = "red";
             ctx.beginPath();
             ctx.moveTo(this.bounds.x1, this.bounds.y1);

@@ -5,6 +5,7 @@
         <title>V4.js</title>
     </head>
     <body>
+        <script src="https://cdn.jsdelivr.net/npm/opentype.js@latest/dist/opentype.min.js"></script>
         <script src="./V4.js"></script>
         <canvas id="testCanvas"></canvas>
 
@@ -16,7 +17,7 @@
                 animator.canvas.width = 800;
                 animator.backgroundColor("#000");
 
-                var fontObj = new V4.Font();
+                var fontObj = new V4.FontWrapper();
                 await fontObj.loadFont(
                     "assets/CrimsonText-Regular.ttf",
                     "Crimson Text",
@@ -34,14 +35,14 @@
                 textBox.text("Hello, World!", 72);
                 textBox.outlinePath(true);
                 textBox.verticalAlign("CENTER");
-                textBox.horizontalAlign("CENTER")
+                textBox.horizontalAlign("CENTER");
                 animator.addToAnimation(textBox.renderer);
 
                 var textBox2 = new V4.TextBox(font, 0, 250, 200, 600);
                 textBox2.text("Here's a text!", 72);
                 textBox2.outlinePath(true);
                 textBox2.verticalAlign("TOP");
-                textBox2.horizontalAlign("RIGHT")
+                textBox2.horizontalAlign("RIGHT");
                 animator.addToAnimation(textBox2.renderer);
 
                 animator.framesPerSecond(30);

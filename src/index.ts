@@ -1,4 +1,4 @@
 export { Animator } from "./components/Animator";
-export { Font } from "./components/Font";
+export { FontWrapper } from "./components/FontWrapper";
 export { TextBox } from "./components/TextBox";
 export { backgroundRenderer, clearPrevRenderer } from "./components/Renderers";

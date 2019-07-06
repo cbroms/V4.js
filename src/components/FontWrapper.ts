@@ -1,10 +1,14 @@
-import { load } from "opentype.js";
+import { load, Font } from "opentype.js";
 
 /**
- * @exports V4.Font
+ * @exports V4.FontWrapper
  * @class
  */
-export class Font {
+export class FontWrapper {
+    private _fonts: { [s: string]: Font };
+    private _variants: string[];
+
+    public name: string;
     /**
      * Create a new Font object
      * @param {string} name - the font's name
@@ -13,7 +17,8 @@ export class Font {
      */
     constructor(name = "", variants = ["Regular"]) {
         this.name = name;
-        this.fonts = {};
+        this._fonts = {};
+        this._variants = variants;
     }
 
     /**
@@ -21,13 +26,13 @@ export class Font {
      * @param {string} name - the name of the font, case and space sensitive
      * @param {array} variants - a list of font variants (strings), case and space sensitive (Italic, Regular, Bold Italic, etc.)
      */
-    async loadGFonts(name = this.name, variants = this.variants) {
+    async loadGFonts(name = this.name, variants = this._variants) {
         const urls = this._makeGFontUrls(name, variants);
-        this.fonts = {};
+        this._fonts = {};
 
         for (const i in variants) {
             const font = await this._load(urls[i]);
-            this.fonts[variants[i]] = font;
+            this._fonts[variants[i]] = font;
         }
     }
 
@@ -40,14 +45,14 @@ export class Font {
     async loadFont(loc = "", name = this.name, variant = "Regular") {
         this.name = name;
         const font = await this._load(loc);
-        this.fonts[variant] = font;
+        this._fonts[variant] = font;
     }
 
     /**
      * Wrapper for opentype.js' load function to provide async/await functionality
      * @param {string} url - the path/url to load the font
      */
-    _load(url) {
+    _load(url: string): Promise<Font> {
         return new Promise(resolve => {
             load(url, function(err, font) {
                 if (err) {
@@ -64,8 +69,8 @@ export class Font {
      * @param {string} variant - the variant to get, case and space sensitive (Italic, Bold Italic, etc.)
      * @returns {opentype.font} - the opentype.js font object
      */
-    getFontVariant(variant) {
-        return this.fonts[variant];
+    getFontVariant(variant: string): Font {
+        return this._fonts[variant];
     }
 
     /**
@@ -74,7 +79,7 @@ export class Font {
      * @param {array} variants - a list of font variants (strings), case and space sensitive (Italic, Regular, Bold Italic, etc.)
      * @returns {array} - a list of urls containing .ttf files for each of the font's variants
      */
-    _makeGFontUrls(name, variants) {
+    _makeGFontUrls(name: string, variants: string[]): string[] {
         // make a url like this:
         // https://raw.githubusercontent.com/google/fonts/master/ofl/crimsontext/CrimsonText-Regular.ttf
         const baseUrl =

@@ -1,18 +1,34 @@
-import { Font } from "./Font";
 import { backgroundRenderer, clearPrevRenderer } from "./Renderers";
+import { RendererPayload } from "./RendererPayload";
 
 /**
  * @exports V4.Animator
  * @class
  */
 export class Animator {
-    constructor(canvas = null, webgl = false) {
+    private _loop: boolean;
+    private _frameCount: number;
+    private _animationBuffer: { (rendererPayload: object): void }[];
+    private _backgroundColor: string;
+    private _fps: number;
+    private _fpsInterval: number;
+    private _startTime: number;
+    private _then: number;
+
+    public canvas: HTMLCanvasElement | null;
+    public context: CanvasRenderingContext2D | null;
+
+    constructor(canvas: HTMLCanvasElement | null) {
         // set default values
         this.canvas = canvas;
         this.context = canvas ? canvas.getContext("2d") : null;
-        this._webgl = webgl;
         this._loop = false;
         this._frameCount = 0;
+        this._backgroundColor = "#000";
+        this._fps = 30;
+        this._fpsInterval = 30 / 1000;
+        this._startTime = Date.now();
+        this._then = Date.now();
 
         this.framesPerSecond(30);
 
@@ -25,7 +41,7 @@ export class Animator {
      * @param {bool} quietly - don't throw error if canvas DNE?
      * @returns {bool} - if the canvas exists
      */
-    hasCanvas(quietly = false) {
+    hasCanvas(quietly = false): boolean | Error {
         if (!this.canvas) {
             if (quietly) return false;
             else throw "Trying to access null canvas";
@@ -38,7 +54,7 @@ export class Animator {
      * @param {bool} quietly - don't throw error if context DNE?
      * @returns {bool} - if the context exists
      */
-    hasContext(quietly = false) {
+    hasContext(quietly = false): boolean | Error {
         if (!this.context) {
             if (quietly) return false;
             else throw "Trying to access null canvas context";
@@ -51,7 +67,7 @@ export class Animator {
      * @param {string} color - the color to fill, in hex
      * @returns {string} - the background color, in hex
      */
-    backgroundColor(color) {
+    backgroundColor(color: string): string {
         if (color) this._backgroundColor = color;
         return this._backgroundColor;
     }
@@ -61,7 +77,7 @@ export class Animator {
      * @param {number} num - target FPS
      * @param {number} - target FPS
      */
-    framesPerSecond(num) {
+    framesPerSecond(num: number): number {
         if (num) {
             this._fps = num;
             this._fpsInterval = 1000 / num;
@@ -73,7 +89,7 @@ export class Animator {
      * Add a renderer function to the animation
      * @param {Function} renderer - the render function to be executed
      */
-    addToAnimation(renderer) {
+    addToAnimation(renderer: { (rendererPayload: object): void }): void {
         this._animationBuffer.push(renderer);
     }
 
@@ -98,7 +114,7 @@ export class Animator {
      * The animation loop running at the target frames per second
      * @param {TextCanvas} self - TextCanvas class reference
      */
-    _animationLoop(self) {
+    _animationLoop(self: this) {
         if (self._loop && self.hasCanvas() && self.hasContext()) {
             // calculate the deltaTime
             const now = window.performance.now();
@@ -122,24 +138,24 @@ export class Animator {
                 //console.log(fps);
 
                 // create the rendererPayload object to be sent to each render function
-                const rendererPayload = {
-                    canvas: self.canvas,
-                    context: self.context,
-                    hasContext: self.hasContext,
-                    hasCanvas: self.hasCanvas,
-                    backgroundColor: self._backgroundColor,
-                    deltaTime: elapsed / 100,
-                    frameCount: self._frameCount,
-                    startTime: self._startTime,
-                    fps: fps
-                };
+                const payload = new RendererPayload();
+
+                payload.canvas = self.canvas;
+                payload.context = self.context;
+                payload.hasContext = self.hasContext;
+                payload.hasCanvas = self.hasCanvas;
+                payload.backgroundColor = self._backgroundColor;
+                payload.deltaTime = elapsed / 100;
+                payload.frameCount = self._frameCount;
+                payload.startTime = self._startTime;
+                payload.fps = fps;
 
                 self.context.save();
 
                 // call each render function and pass rendererPayload
                 for (const renderer of self._animationBuffer) {
                     try {
-                        renderer(rendererPayload);
+                        renderer(payload);
                     } catch (e) {
                         throw "Error in renderer function: " + e;
                     }
