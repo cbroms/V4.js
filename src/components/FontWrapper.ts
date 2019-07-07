@@ -11,9 +11,9 @@ export class FontWrapper {
     public name: string;
     /**
      * Create a new Font object
-     * @param {string} name - the font's name
-     * @param {array} variants - the font's variants (Italic, Regular, etc.)
-     * @returns {Font} - the new Font object
+     * @param name - the font's name
+     * @param variants - the font's variants (Italic, Regular, etc.)
+     * @returns - the new Font object
      */
     constructor(name = "", variants = ["Regular"]) {
         this.name = name;
@@ -23,8 +23,8 @@ export class FontWrapper {
 
     /**
      * Load a font and its styles from Google Fonts
-     * @param {string} name - the name of the font, case and space sensitive
-     * @param {array} variants - a list of font variants (strings), case and space sensitive (Italic, Regular, Bold Italic, etc.)
+     * @param name - the name of the font, case and space sensitive
+     * @param variants - a list of font variants (strings), case and space sensitive (Italic, Regular, Bold Italic, etc.)
      */
     async loadGFonts(name = this.name, variants = this._variants) {
         const urls = this._makeGFontUrls(name, variants);
@@ -38,9 +38,9 @@ export class FontWrapper {
 
     /**
      * Load a font from a url or path
-     * @param {string} loc - the url/path containing the font .ttf/.otf file
-     * @param {string} name - the name of the font
-     * @param {string} variant - the variant of the font (Italic, Regular, Bold Italic, etc.)
+     * @param loc - the url/path containing the font .ttf/.otf file
+     * @param name - the name of the font
+     * @param variant - the variant of the font (Italic, Regular, Bold Italic, etc.)
      */
     async loadFont(loc = "", name = this.name, variant = "Regular") {
         this.name = name;
@@ -50,7 +50,7 @@ export class FontWrapper {
 
     /**
      * Wrapper for opentype.js' load function to provide async/await functionality
-     * @param {string} url - the path/url to load the font
+     * @param url - the path/url to load the font
      */
     _load(url: string): Promise<Font> {
         return new Promise(resolve => {
@@ -66,8 +66,8 @@ export class FontWrapper {
 
     /**
      * Get a specific font variant
-     * @param {string} variant - the variant to get, case and space sensitive (Italic, Bold Italic, etc.)
-     * @returns {opentype.font} - the opentype.js font object
+     * @param variant - the variant to get, case and space sensitive (Italic, Bold Italic, etc.)
+     * @returns - the opentype.js font object
      */
     getFontVariant(variant: string): Font {
         return this._fonts[variant];
@@ -75,9 +75,9 @@ export class FontWrapper {
 
     /**
      * Create the urls to retrieve a font and its variants from Google Fonts
-     * @param {string} name - the name of the font, case and space sensitive
-     * @param {array} variants - a list of font variants (strings), case and space sensitive (Italic, Regular, Bold Italic, etc.)
-     * @returns {array} - a list of urls containing .ttf files for each of the font's variants
+     * @param name - the name of the font, case and space sensitive
+     * @param variants - a list of font variants (strings), case and space sensitive (Italic, Regular, Bold Italic, etc.)
+     * @returns - a list of urls containing .ttf files for each of the font's variants
      */
     _makeGFontUrls(name: string, variants: string[]): string[] {
         // make a url like this:

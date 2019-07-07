@@ -38,8 +38,8 @@ export class Animator {
 
     /**
      * Check the status of the canvas
-     * @param {bool} quietly - don't throw error if canvas DNE?
-     * @returns {bool} - if the canvas exists
+     * @param quietly - don't throw error if canvas DNE?
+     * @returns - if the canvas exists
      */
     hasCanvas(quietly = false): boolean | Error {
         if (!this.canvas) {
@@ -51,8 +51,8 @@ export class Animator {
 
     /**
      * Check the status of the canvas' context
-     * @param {bool} quietly - don't throw error if context DNE?
-     * @returns {bool} - if the context exists
+     * @param quietly - don't throw error if context DNE?
+     * @returns - if the context exists
      */
     hasContext(quietly = false): boolean | Error {
         if (!this.context) {
@@ -64,8 +64,8 @@ export class Animator {
 
     /**
      * Get/set the background color of the canvas
-     * @param {string} color - the color to fill, in hex
-     * @returns {string} - the background color, in hex
+     * @param color - the color to fill, in hex
+     * @returns - the background color, in hex
      */
     backgroundColor(color: string): string {
         if (color) this._backgroundColor = color;
@@ -74,8 +74,8 @@ export class Animator {
 
     /**
      * Get/set the target frames per second of canvas animations
-     * @param {number} num - target FPS
-     * @param {number} - target FPS
+     * @param num - target FPS
+     * @param - target FPS
      */
     framesPerSecond(num: number): number {
         if (num) {
@@ -87,7 +87,7 @@ export class Animator {
 
     /**
      * Add a renderer function to the animation
-     * @param {Function} renderer - the render function to be executed
+     * @param renderer - the render function to be executed
      */
     addToAnimation(renderer: { (rendererPayload: object): void }): void {
         this._animationBuffer.push(renderer);
@@ -112,7 +112,7 @@ export class Animator {
 
     /**
      * The animation loop running at the target frames per second
-     * @param {TextCanvas} self - TextCanvas class reference
+     * @param self - TextCanvas class reference
      */
     _animationLoop(self: this) {
         if (self._loop && self.hasCanvas() && self.hasContext()) {

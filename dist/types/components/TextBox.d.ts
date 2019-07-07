@@ -18,6 +18,12 @@ declare type DrawPos = {
     x: number;
     y: number;
 };
+declare type Chunk = {
+    text: string;
+    pos: DrawPos;
+    num: number;
+    width: number;
+};
 /**
  * @exports V4.TextBox
  * @class
@@ -25,11 +31,10 @@ declare type DrawPos = {
 export declare class TextBox {
     private _text;
     private _fontSize;
-    private _animating;
     private _debug;
     private _drawExact;
     private _underline;
-    private _drawPos;
+    private _chunks;
     private _textStats;
     private _verticalAlign;
     private _horizontalAlign;
@@ -37,60 +42,65 @@ export declare class TextBox {
     bounds: Bounds;
     /**
      * Create a new TextBox object
-     * @param {Font} font - the font object
-     * @param {number} x - the x coordinate of the text box's bottom left corner
-     * @param {number} y - the y coordinate of the text box's bottom left corner
-     * @param {number} h - the height, in pixels, of the text box
-     * @param {number} w - the width, in pixels, of the text box
-     * @returns {V4.TextBox} - the new TextBox object
+     * @param font - the font object
+     * @param x - the x coordinate of the text box's bottom left corner
+     * @param y - the y coordinate of the text box's bottom left corner
+     * @param h - the height, in pixels, of the text box
+     * @param w - the width, in pixels, of the text box
+     * @returns - the new TextBox object
      */
     constructor(font: Font, x: number, y: number, h: number, w: number);
     /**
      * Get/set the content of the text box
-     * @param {string} newText - the text
-     * @param {number} fontSize - the font size
-     * @returns {string} - the text
+     * @param newText - the text
+     * @param fontSize - the font size
+     * @returns - the text
      */
     text(newText: string, fontSize: number): string;
     /**
      * Get/set the vertical alignment of the text in the text box
-     * @param {string} alignment - alignment command, must be BOTTOM, CENTER, or TOP
-     * @returns {string} - the alignment
+     * @param alignment - alignment command, must be BOTTOM, CENTER, or TOP
+     * @returns - the alignment
      */
     verticalAlign(alignment: VerticalAlignOpts): VerticalAlignOpts;
     /**
      * Get/set the horizontal alignment of the text in the text box
-     * @param {string} alignment - alignment command, must be LEFT, CENTER, or RIGHT
-     * @returns {string} - the alignment
+     * @param alignment - alignment command, must be LEFT, CENTER, or RIGHT
+     * @returns - the alignment
      */
     horizontalAlign(alignment: HorizontalAlignOpts): HorizontalAlignOpts;
     /**
      * Explicitly specify where to draw text within the text box
-     * @param {number} x - x coordinate to place text (bottom left corner)
-     * @param {number} y - x coordinate to place text (bottom left corner)
+     * @param x - x coordinate to place text (bottom left corner)
+     * @param y - y coordinate to place text (bottom left corner)
      */
     exactTextPosition(x: number, y: number): void;
     /**
      * Set if the text box should be outlined
-     * @param {bool} outline - outline the text box?
-     * @returns {bool} - if the text box outline is activated
+     * @param outline - outline the text box?
+     * @returns - if the text box outline is activated
      */
     outlinePath(outline: boolean): boolean;
     /**
      * Set if the the text should be underlined
-     * @param {bool} underline - underline the text in the text box?
-     * @returns {bool} - if the underlines are active
+     * @param underline - underline the text in the text box?
+     * @returns - if the underlines are active
      */
     underline(underline: boolean): boolean;
     /**
-     * Calculate the x and y coordinates to start drawing the text
-     * @returns {object} - the x and y coords, via result.x and result.y
+     * Create chunks of text such that each is less than the width of the
+     * textbox plus the vertical margins
      */
-    _calculateTextRenderXY(): DrawPos;
+    _createChunks(): Chunk[];
+    /**
+     * Calculate the x and y coordinates to start drawing the text
+     * @returns - the x and y coords, via result.x and result.y
+     */
+    _calculateTextRenderXY(): Chunk[];
     _calculateUnderlineRenderXY(): void;
     /**
      * The renderer function for this text box
-     * @param {object} state - the state object
+     * @param state - the state object
      */
     renderer(state: RendererPayload): void;
 }

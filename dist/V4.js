@@ -13,7 +13,7 @@
 
     /**
      * The default background renderer function
-     * @param {object} state - the current state of the animation
+     * @param state - the current state of the animation
      */
     var backgroundRenderer = function (state) {
         state.context.fillStyle = state.backgroundColor;
@@ -21,11 +21,12 @@
     };
     /**
      * Renderer that clears previous canvas
-     * @param {object} state - the current state of the animation
+     * @param state - the current state of the animation
      */
     var clearPrevRenderer = function (state) {
         state.context.clearRect(0, 0, state.canvas.width, state.canvas.height);
     };
+    //# sourceMappingURL=Renderers.js.map
 
     var empty = function () { return false; };
     var RendererPayload = /** @class */ (function () {
@@ -42,6 +43,7 @@
         }
         return RendererPayload;
     }());
+    //# sourceMappingURL=RendererPayload.js.map
 
     /**
      * @exports V4.Animator
@@ -65,8 +67,8 @@
         }
         /**
          * Check the status of the canvas
-         * @param {bool} quietly - don't throw error if canvas DNE?
-         * @returns {bool} - if the canvas exists
+         * @param quietly - don't throw error if canvas DNE?
+         * @returns - if the canvas exists
          */
         Animator.prototype.hasCanvas = function (quietly) {
             if (quietly === void 0) { quietly = false; }
@@ -80,8 +82,8 @@
         };
         /**
          * Check the status of the canvas' context
-         * @param {bool} quietly - don't throw error if context DNE?
-         * @returns {bool} - if the context exists
+         * @param quietly - don't throw error if context DNE?
+         * @returns - if the context exists
          */
         Animator.prototype.hasContext = function (quietly) {
             if (quietly === void 0) { quietly = false; }
@@ -95,8 +97,8 @@
         };
         /**
          * Get/set the background color of the canvas
-         * @param {string} color - the color to fill, in hex
-         * @returns {string} - the background color, in hex
+         * @param color - the color to fill, in hex
+         * @returns - the background color, in hex
          */
         Animator.prototype.backgroundColor = function (color) {
             if (color)
@@ -105,8 +107,8 @@
         };
         /**
          * Get/set the target frames per second of canvas animations
-         * @param {number} num - target FPS
-         * @param {number} - target FPS
+         * @param num - target FPS
+         * @param - target FPS
          */
         Animator.prototype.framesPerSecond = function (num) {
             if (num) {
@@ -117,7 +119,7 @@
         };
         /**
          * Add a renderer function to the animation
-         * @param {Function} renderer - the render function to be executed
+         * @param renderer - the render function to be executed
          */
         Animator.prototype.addToAnimation = function (renderer) {
             this._animationBuffer.push(renderer);
@@ -139,7 +141,7 @@
         };
         /**
          * The animation loop running at the target frames per second
-         * @param {TextCanvas} self - TextCanvas class reference
+         * @param self - TextCanvas class reference
          */
         Animator.prototype._animationLoop = function (self) {
             if (self._loop && self.hasCanvas() && self.hasContext()) {
@@ -192,6 +194,7 @@
         };
         return Animator;
     }());
+    //# sourceMappingURL=Animator.js.map
 
     /*! *****************************************************************************
     Copyright (c) Microsoft Corporation. All rights reserved.
@@ -252,9 +255,9 @@
     var FontWrapper = /** @class */ (function () {
         /**
          * Create a new Font object
-         * @param {string} name - the font's name
-         * @param {array} variants - the font's variants (Italic, Regular, etc.)
-         * @returns {Font} - the new Font object
+         * @param name - the font's name
+         * @param variants - the font's variants (Italic, Regular, etc.)
+         * @returns - the new Font object
          */
         function FontWrapper(name, variants) {
             if (name === void 0) { name = ""; }
@@ -265,8 +268,8 @@
         }
         /**
          * Load a font and its styles from Google Fonts
-         * @param {string} name - the name of the font, case and space sensitive
-         * @param {array} variants - a list of font variants (strings), case and space sensitive (Italic, Regular, Bold Italic, etc.)
+         * @param name - the name of the font, case and space sensitive
+         * @param variants - a list of font variants (strings), case and space sensitive (Italic, Regular, Bold Italic, etc.)
          */
         FontWrapper.prototype.loadGFonts = function (name, variants) {
             if (name === void 0) { name = this.name; }
@@ -301,9 +304,9 @@
         };
         /**
          * Load a font from a url or path
-         * @param {string} loc - the url/path containing the font .ttf/.otf file
-         * @param {string} name - the name of the font
-         * @param {string} variant - the variant of the font (Italic, Regular, Bold Italic, etc.)
+         * @param loc - the url/path containing the font .ttf/.otf file
+         * @param name - the name of the font
+         * @param variant - the variant of the font (Italic, Regular, Bold Italic, etc.)
          */
         FontWrapper.prototype.loadFont = function (loc, name, variant) {
             if (loc === void 0) { loc = ""; }
@@ -326,7 +329,7 @@
         };
         /**
          * Wrapper for opentype.js' load function to provide async/await functionality
-         * @param {string} url - the path/url to load the font
+         * @param url - the path/url to load the font
          */
         FontWrapper.prototype._load = function (url) {
             return new Promise(function (resolve) {
@@ -342,17 +345,17 @@
         };
         /**
          * Get a specific font variant
-         * @param {string} variant - the variant to get, case and space sensitive (Italic, Bold Italic, etc.)
-         * @returns {opentype.font} - the opentype.js font object
+         * @param variant - the variant to get, case and space sensitive (Italic, Bold Italic, etc.)
+         * @returns - the opentype.js font object
          */
         FontWrapper.prototype.getFontVariant = function (variant) {
             return this._fonts[variant];
         };
         /**
          * Create the urls to retrieve a font and its variants from Google Fonts
-         * @param {string} name - the name of the font, case and space sensitive
-         * @param {array} variants - a list of font variants (strings), case and space sensitive (Italic, Regular, Bold Italic, etc.)
-         * @returns {array} - a list of urls containing .ttf files for each of the font's variants
+         * @param name - the name of the font, case and space sensitive
+         * @param variants - a list of font variants (strings), case and space sensitive (Italic, Regular, Bold Italic, etc.)
+         * @returns - a list of urls containing .ttf files for each of the font's variants
          */
         FontWrapper.prototype._makeGFontUrls = function (name, variants) {
             // make a url like this:
@@ -369,6 +372,7 @@
         };
         return FontWrapper;
     }());
+    //# sourceMappingURL=FontWrapper.js.map
 
     /**
      * @exports V4.TextBox
@@ -377,12 +381,12 @@
     var TextBox = /** @class */ (function () {
         /**
          * Create a new TextBox object
-         * @param {Font} font - the font object
-         * @param {number} x - the x coordinate of the text box's bottom left corner
-         * @param {number} y - the y coordinate of the text box's bottom left corner
-         * @param {number} h - the height, in pixels, of the text box
-         * @param {number} w - the width, in pixels, of the text box
-         * @returns {V4.TextBox} - the new TextBox object
+         * @param font - the font object
+         * @param x - the x coordinate of the text box's bottom left corner
+         * @param y - the y coordinate of the text box's bottom left corner
+         * @param h - the height, in pixels, of the text box
+         * @param w - the width, in pixels, of the text box
+         * @returns - the new TextBox object
          */
         function TextBox(font, x, y, h, w) {
             this.font = font;
@@ -410,19 +414,24 @@
             // set defaut properties
             this._verticalAlign = "BOTTOM";
             this._horizontalAlign = "RIGHT";
-            this._animating = false;
+            // this._animating = false;
             this._debug = false;
             this._drawExact = false;
             this._underline = false;
-            this._drawPos = { x: 0, y: 0 };
-            this._textStats = { textWidth: 0, textHeight: 0, textOffsetBottom: 0 };
+            this._chunks = null;
+            this._textStats = {
+                textWidth: 0,
+                textHeight: 0,
+                totalTextHeight: 0,
+                textOffsetBottom: this._fontSize / 3
+            };
             this.renderer = this.renderer.bind(this);
         }
         /**
          * Get/set the content of the text box
-         * @param {string} newText - the text
-         * @param {number} fontSize - the font size
-         * @returns {string} - the text
+         * @param newText - the text
+         * @param fontSize - the font size
+         * @returns - the text
          */
         TextBox.prototype.text = function (newText, fontSize) {
             if (newText)
@@ -432,48 +441,50 @@
             var absPath = this.font.getPath(this._text, 0, 0, this._fontSize);
             var bb = absPath.getBoundingBox();
             this._textStats.textHeight = bb.y2 - bb.y1;
-            this._textStats.textOffsetBottom = bb.y2;
+            this._textStats.textOffsetBottom = bb.y2 + fontSize / 3;
             this._textStats.textWidth = this.font.getAdvanceWidth(newText, fontSize);
-            this._drawPos = this._calculateTextRenderXY();
+            this._chunks = this._createChunks();
+            this._chunks = this._calculateTextRenderXY();
             return this._text;
         };
         /**
          * Get/set the vertical alignment of the text in the text box
-         * @param {string} alignment - alignment command, must be BOTTOM, CENTER, or TOP
-         * @returns {string} - the alignment
+         * @param alignment - alignment command, must be BOTTOM, CENTER, or TOP
+         * @returns - the alignment
          */
         TextBox.prototype.verticalAlign = function (alignment) {
             if (alignment) {
                 this._verticalAlign = alignment;
-                this._drawPos = this._calculateTextRenderXY();
+                this._chunks = this._calculateTextRenderXY();
             }
             return this._verticalAlign;
         };
         /**
          * Get/set the horizontal alignment of the text in the text box
-         * @param {string} alignment - alignment command, must be LEFT, CENTER, or RIGHT
-         * @returns {string} - the alignment
+         * @param alignment - alignment command, must be LEFT, CENTER, or RIGHT
+         * @returns - the alignment
          */
         TextBox.prototype.horizontalAlign = function (alignment) {
             if (alignment) {
                 this._horizontalAlign = alignment;
-                this._drawPos = this._calculateTextRenderXY();
+                this._chunks = this._calculateTextRenderXY();
             }
             return this._horizontalAlign;
         };
         /**
          * Explicitly specify where to draw text within the text box
-         * @param {number} x - x coordinate to place text (bottom left corner)
-         * @param {number} y - x coordinate to place text (bottom left corner)
+         * @param x - x coordinate to place text (bottom left corner)
+         * @param y - y coordinate to place text (bottom left corner)
          */
         TextBox.prototype.exactTextPosition = function (x, y) {
-            this._drawPos = { x: x, y: y };
+            // this._drawPos = { x: x, y: y };
+            console.log(x, y);
             this._drawExact = true;
         };
         /**
          * Set if the text box should be outlined
-         * @param {bool} outline - outline the text box?
-         * @returns {bool} - if the text box outline is activated
+         * @param outline - outline the text box?
+         * @returns - if the text box outline is activated
          */
         TextBox.prototype.outlinePath = function (outline) {
             if (outline !== null)
@@ -482,8 +493,8 @@
         };
         /**
          * Set if the the text should be underlined
-         * @param {bool} underline - underline the text in the text box?
-         * @returns {bool} - if the underlines are active
+         * @param underline - underline the text in the text box?
+         * @returns - if the underlines are active
          */
         TextBox.prototype.underline = function (underline) {
             if (underline !== null)
@@ -491,57 +502,106 @@
             return this._underline;
         };
         /**
+         * Create chunks of text such that each is less than the width of the
+         * textbox plus the vertical margins
+         */
+        TextBox.prototype._createChunks = function () {
+            var words = this._text.split(" ");
+            var computedChunks = [];
+            var currentWidth = 0;
+            var currentChunk = "";
+            for (var _i = 0, words_1 = words; _i < words_1.length; _i++) {
+                var word = words_1[_i];
+                var curPlusWord = currentChunk !== "" ? currentChunk + " " + word : word;
+                var p = this.font.getPath(curPlusWord, 0, 0, this._fontSize);
+                var bb = p.getBoundingBox();
+                if (bb.x2 - bb.x1 < this.bounds.w) {
+                    currentChunk = curPlusWord;
+                    currentWidth = bb.x2 - bb.x1;
+                }
+                else {
+                    computedChunks.push({
+                        text: currentChunk,
+                        pos: { x: 0, y: 0 },
+                        num: computedChunks.length + 1,
+                        width: currentWidth
+                    });
+                    currentChunk = word;
+                    currentWidth = 0;
+                }
+            }
+            if (currentWidth === 0) {
+                var p = this.font.getPath(currentChunk, 0, 0, this._fontSize);
+                var bb = p.getBoundingBox();
+                currentWidth = bb.x2 - bb.x1;
+            }
+            computedChunks.push({
+                text: currentChunk,
+                pos: { x: 0, y: 0 },
+                num: computedChunks.length + 1,
+                width: currentWidth
+            });
+            this._textStats.totalTextHeight = computedChunks.length * this._textStats.textHeight;
+            console.log(computedChunks);
+            return computedChunks;
+        };
+        /**
          * Calculate the x and y coordinates to start drawing the text
-         * @returns {object} - the x and y coords, via result.x and result.y
+         * @returns - the x and y coords, via result.x and result.y
          */
         TextBox.prototype._calculateTextRenderXY = function () {
             var x;
             var y;
+            var chunksCopy = this._chunks;
             // user gave a position, use it
-            if (this._drawExact) {
-                return this._drawPos;
-            }
-            else {
-                // user has not specified a position, calculate based on alignment
-                // calc y
-                if (this._verticalAlign === "BOTTOM") {
-                    y = this.bounds.y1 - this._textStats.textOffsetBottom;
-                }
-                else if (this._verticalAlign === "CENTER") {
-                    y =
-                        this.bounds.y1 -
-                            this.bounds.h / 2 +
-                            this._textStats.textHeight / 2 -
+            for (var _i = 0, chunksCopy_1 = chunksCopy; _i < chunksCopy_1.length; _i++) {
+                var chunk = chunksCopy_1[_i];
+                if (this._drawExact) ;
+                else {
+                    // user has not specified a position, calculate based on alignment
+                    // calc y
+                    if (this._verticalAlign === "BOTTOM") {
+                        var totalHeight = (this._textStats.textHeight + this._textStats.textOffsetBottom) *
+                            this._chunks.length;
+                        y =
+                            this.bounds.y1 -
+                                ((totalHeight / this._chunks.length) * (this._chunks.length - chunk.num) +
+                                    this._textStats.textOffsetBottom);
+                    }
+                    else if (this._verticalAlign === "CENTER") {
+                        var totalHeight = (this._textStats.textHeight + this._textStats.textOffsetBottom) *
+                            this._chunks.length;
+                        var rowPosRelative = (totalHeight / this._chunks.length) * (this._chunks.length - chunk.num) +
                             this._textStats.textOffsetBottom;
+                        y = this.bounds.y1 - (this.bounds.h / 2 - totalHeight / 2) - rowPosRelative;
+                    }
+                    else if (this._verticalAlign === "TOP") {
+                        var totalHeight = (this._textStats.textHeight + this._textStats.textOffsetBottom) *
+                            this._chunks.length;
+                        var rowPosRelative = (totalHeight / this._chunks.length) * (this._chunks.length - chunk.num) +
+                            this._textStats.textOffsetBottom;
+                        y = this.bounds.y1 - (this.bounds.h - totalHeight) - rowPosRelative;
+                    }
+                    // calc x
+                    if (this._horizontalAlign === "LEFT") {
+                        x = this.bounds.x1;
+                    }
+                    else if (this._horizontalAlign === "CENTER") {
+                        x = this.bounds.x1 + this.bounds.w / 2 - chunk.width / 2;
+                    }
+                    else if (this._horizontalAlign === "RIGHT") {
+                        x = this.bounds.x1 + (this.bounds.w - chunk.width);
+                    }
                 }
-                else if (this._verticalAlign === "TOP") {
-                    y =
-                        this.bounds.y2 +
-                            (this._textStats.textHeight -
-                                this._textStats.textOffsetBottom);
-                }
-                // calc x
-                if (this._horizontalAlign === "LEFT") {
-                    x = this.bounds.x1;
-                }
-                else if (this._horizontalAlign === "CENTER") {
-                    x =
-                        this.bounds.x1 +
-                            this.bounds.w / 2 -
-                            this._textStats.textWidth / 2;
-                }
-                else if (this._horizontalAlign === "RIGHT") {
-                    x =
-                        this.bounds.x1 +
-                            (this.bounds.w - this._textStats.textWidth);
-                }
+                chunk.pos.x = x;
+                chunk.pos.y = y;
             }
-            return { x: x, y: y };
+            return chunksCopy;
         };
         TextBox.prototype._calculateUnderlineRenderXY = function () { };
         /**
          * The renderer function for this text box
-         * @param {object} state - the state object
+         * @param state - the state object
          */
         TextBox.prototype.renderer = function (state) {
             var ctx = state.context;
@@ -571,14 +631,17 @@
                 ctx.closePath();
                 ctx.stroke();
             }
-            var drawPos = this._animating
-                ? this._calculateTextRenderXY()
-                : this._drawPos;
-            // render font
-            var absPath = this.font.getPath(this._text, drawPos.x, drawPos.y, this._fontSize);
-            var drawPath = new Path2D(absPath.toPathData(2));
-            ctx.fillStyle = "white";
-            ctx.fill(drawPath);
+            // const drawPos = this._animating
+            //     ? this._calculateTextRenderXY()
+            //     : this._drawPos;
+            for (var _i = 0, _a = this._chunks; _i < _a.length; _i++) {
+                var chunk = _a[_i];
+                // render font
+                var absPath = this.font.getPath(chunk.text, chunk.pos.x, chunk.pos.y, this._fontSize);
+                var drawPath = new Path2D(absPath.toPathData(2));
+                ctx.fillStyle = "white";
+                ctx.fill(drawPath);
+            }
             ctx.restore();
         };
         return TextBox;

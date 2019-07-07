@@ -2,7 +2,7 @@ import { RendererPayload } from "./RendererPayload";
 
 /**
  * The default background renderer function
- * @param {object} state - the current state of the animation
+ * @param state - the current state of the animation
  */
 export const backgroundRenderer = (state: RendererPayload) => {
     state.context.fillStyle = state.backgroundColor;
@@ -11,7 +11,7 @@ export const backgroundRenderer = (state: RendererPayload) => {
 
 /**
  * Renderer that clears previous canvas
- * @param {object} state - the current state of the animation
+ * @param state - the current state of the animation
  */
 export const clearPrevRenderer = (state: RendererPayload) => {
     state.context.clearRect(0, 0, state.canvas.width, state.canvas.height);
