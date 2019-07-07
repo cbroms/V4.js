@@ -45,15 +45,14 @@ export class TextBox {
     private _fontSize: number;
     //  private _animating: boolean;
     private _debug: boolean;
-    private _drawExact: boolean;
     private _underline: boolean;
     private _chunks: Chunk[] | null;
     private _textStats: TextStats;
     private _verticalAlign: VerticalAlignOpts;
     private _horizontalAlign: HorizontalAlignOpts;
+    private _bounds: Bounds;
 
     public font: Font;
-    public bounds: Bounds;
 
     /**
      * Create a new TextBox object
@@ -62,39 +61,21 @@ export class TextBox {
      * @param y - the y coordinate of the text box's bottom left corner
      * @param h - the height, in pixels, of the text box
      * @param w - the width, in pixels, of the text box
+     * @param bounds - specific bounds for the function (includes points defined with (x1,y1) - (x4,y4) and h and w)
      * @returns - the new TextBox object
      */
-    constructor(font: Font, x: number, y: number, h: number, w: number) {
+    constructor(font: Font, x?: number | Bounds, y?: number, h?: number, w?: number) {
         this.font = font;
         this._text = "";
         this._fontSize = 24;
 
-        // Corner points are assigned clockwise from bottom left:
-        /*
-         *   (x2, y2) *--------------* (x3, y3)
-         *            |              |
-         *            |              |
-         *   (x1, y1) *______________* (x4, y4)
-         */
-        this.bounds = {
-            x1: x,
-            y1: y,
-            x2: x,
-            y2: y - h,
-            x3: x + w,
-            y3: y - h,
-            x4: x + w,
-            y4: y,
-            w: w,
-            h: h
-        };
+        this._bounds = this.bounds(x, y, h, w);
 
         // set defaut properties
         this._verticalAlign = "BOTTOM";
         this._horizontalAlign = "RIGHT";
         // this._animating = false;
         this._debug = false;
-        this._drawExact = false;
         this._underline = false;
         this._chunks = null;
         this._textStats = {
@@ -104,6 +85,45 @@ export class TextBox {
             textOffsetBottom: this._fontSize / 3
         };
         this.renderer = this.renderer.bind(this);
+    }
+
+    /**
+     * Get/set the textbox's boundaries
+     * @param x - the x coordinate of the text box's bottom left corner, or an object containing specific bounds for the textbox
+     * @param y - the y coordinate of the text box's bottom left corner
+     * @param h - the height, in pixels, of the text box
+     * @param w - the width, in pixels, of the text box
+     * @returns - an object containing the boundary points of the textbox
+     */
+    bounds(x?: number | Bounds, y?: number, h?: number, w?: number): Bounds {
+        const _isBounds = (tbd: number | Bounds): tbd is Bounds => {
+            return (tbd as Bounds).x1 !== undefined;
+        };
+
+        // Corner points are assigned clockwise from bottom left:
+        /*
+         *   (x2, y2) *--------------* (x3, y3)
+         *            |              |
+         *            |              |
+         *   (x1, y1) *______________* (x4, y4)
+         */
+        if (x !== undefined && y !== undefined && h !== undefined && w !== undefined) {
+            this._bounds = {
+                x1: x as number,
+                y1: y,
+                x2: x as number,
+                y2: y - h,
+                x3: (x as number) + w,
+                y3: y - h,
+                x4: (x as number) + w,
+                y4: y,
+                w: w,
+                h: h
+            };
+        } else if (_isBounds(x)) {
+            this._bounds = x as Bounds;
+        }
+        return this._bounds;
     }
 
     /**
@@ -155,17 +175,6 @@ export class TextBox {
     }
 
     /**
-     * Explicitly specify where to draw text within the text box
-     * @param x - x coordinate to place text (bottom left corner)
-     * @param y - y coordinate to place text (bottom left corner)
-     */
-    exactTextPosition(x: number, y: number): void {
-        // this._drawPos = { x: x, y: y };
-        console.log(x, y);
-        this._drawExact = true;
-    }
-
-    /**
      * Set if the text box should be outlined
      * @param outline - outline the text box?
      * @returns - if the text box outline is activated
@@ -201,7 +210,7 @@ export class TextBox {
             const p = this.font.getPath(curPlusWord, 0, 0, this._fontSize);
             const bb = p.getBoundingBox();
 
-            if (bb.x2 - bb.x1 < this.bounds.w) {
+            if (bb.x2 - bb.x1 < this._bounds.w) {
                 currentChunk = curPlusWord;
                 currentWidth = bb.x2 - bb.x1;
             } else {
@@ -228,7 +237,7 @@ export class TextBox {
         });
 
         this._textStats.totalTextHeight = computedChunks.length * this._textStats.textHeight;
-        console.log(computedChunks);
+
         return computedChunks;
     }
 
@@ -243,45 +252,41 @@ export class TextBox {
         let chunksCopy = this._chunks;
         // user gave a position, use it
         for (let chunk of chunksCopy) {
-            if (this._drawExact) {
-                // return this._drawPos;
-            } else {
-                // user has not specified a position, calculate based on alignment
-                // calc y
-                if (this._verticalAlign === "BOTTOM") {
-                    const totalHeight =
-                        (this._textStats.textHeight + this._textStats.textOffsetBottom) *
-                        this._chunks.length;
-                    y =
-                        this.bounds.y1 -
-                        ((totalHeight / this._chunks.length) * (this._chunks.length - chunk.num) +
-                            this._textStats.textOffsetBottom);
-                } else if (this._verticalAlign === "CENTER") {
-                    const totalHeight =
-                        (this._textStats.textHeight + this._textStats.textOffsetBottom) *
-                        this._chunks.length;
-                    const rowPosRelative =
-                        (totalHeight / this._chunks.length) * (this._chunks.length - chunk.num) +
-                        this._textStats.textOffsetBottom;
-                    y = this.bounds.y1 - (this.bounds.h / 2 - totalHeight / 2) - rowPosRelative;
-                } else if (this._verticalAlign === "TOP") {
-                    const totalHeight =
-                        (this._textStats.textHeight + this._textStats.textOffsetBottom) *
-                        this._chunks.length;
-                    const rowPosRelative =
-                        (totalHeight / this._chunks.length) * (this._chunks.length - chunk.num) +
-                        this._textStats.textOffsetBottom;
-                    y = this.bounds.y1 - (this.bounds.h - totalHeight) - rowPosRelative;
-                }
-                // calc x
-                if (this._horizontalAlign === "LEFT") {
-                    x = this.bounds.x1;
-                } else if (this._horizontalAlign === "CENTER") {
-                    x = this.bounds.x1 + this.bounds.w / 2 - chunk.width / 2;
-                } else if (this._horizontalAlign === "RIGHT") {
-                    x = this.bounds.x1 + (this.bounds.w - chunk.width);
-                }
+            // calc y
+            if (this._verticalAlign === "BOTTOM") {
+                const totalHeight =
+                    (this._textStats.textHeight + this._textStats.textOffsetBottom) *
+                    this._chunks.length;
+                y =
+                    this._bounds.y1 -
+                    ((totalHeight / this._chunks.length) * (this._chunks.length - chunk.num) +
+                        this._textStats.textOffsetBottom);
+            } else if (this._verticalAlign === "CENTER") {
+                const totalHeight =
+                    (this._textStats.textHeight + this._textStats.textOffsetBottom) *
+                    this._chunks.length;
+                const rowPosRelative =
+                    (totalHeight / this._chunks.length) * (this._chunks.length - chunk.num) +
+                    this._textStats.textOffsetBottom;
+                y = this._bounds.y1 - (this._bounds.h / 2 - totalHeight / 2) - rowPosRelative;
+            } else if (this._verticalAlign === "TOP") {
+                const totalHeight =
+                    (this._textStats.textHeight + this._textStats.textOffsetBottom) *
+                    this._chunks.length;
+                const rowPosRelative =
+                    (totalHeight / this._chunks.length) * (this._chunks.length - chunk.num) +
+                    this._textStats.textOffsetBottom;
+                y = this._bounds.y1 - (this._bounds.h - totalHeight) - rowPosRelative;
             }
+            // calc x
+            if (this._horizontalAlign === "LEFT") {
+                x = this._bounds.x1;
+            } else if (this._horizontalAlign === "CENTER") {
+                x = this._bounds.x1 + this._bounds.w / 2 - chunk.width / 2;
+            } else if (this._horizontalAlign === "RIGHT") {
+                x = this._bounds.x1 + (this._bounds.w - chunk.width);
+            }
+
             chunk.pos.x = x;
             chunk.pos.y = y;
         }
@@ -302,12 +307,12 @@ export class TextBox {
 
         //create clipping mask
         ctx.beginPath();
-        ctx.moveTo(this.bounds.x1, this.bounds.y1);
-        ctx.lineTo(this.bounds.x2, this.bounds.y2);
-        ctx.lineTo(this.bounds.x4, this.bounds.y4);
-        ctx.moveTo(this.bounds.x3, this.bounds.y3);
-        ctx.lineTo(this.bounds.x4, this.bounds.y4);
-        ctx.lineTo(this.bounds.x2, this.bounds.y2);
+        ctx.moveTo(this._bounds.x1, this._bounds.y1);
+        ctx.lineTo(this._bounds.x2, this._bounds.y2);
+        ctx.lineTo(this._bounds.x4, this._bounds.y4);
+        ctx.moveTo(this._bounds.x3, this._bounds.y3);
+        ctx.lineTo(this._bounds.x4, this._bounds.y4);
+        ctx.lineTo(this._bounds.x2, this._bounds.y2);
         ctx.closePath();
         ctx.clip();
 
@@ -315,14 +320,14 @@ export class TextBox {
             ctx.lineWidth = 1;
             ctx.strokeStyle = "red";
             ctx.beginPath();
-            ctx.moveTo(this.bounds.x1, this.bounds.y1);
-            ctx.lineTo(this.bounds.x2, this.bounds.y2);
-            ctx.moveTo(this.bounds.x2, this.bounds.y2);
-            ctx.lineTo(this.bounds.x3, this.bounds.y3);
-            ctx.moveTo(this.bounds.x3, this.bounds.y3);
-            ctx.lineTo(this.bounds.x4, this.bounds.y4);
-            ctx.moveTo(this.bounds.x4, this.bounds.y4);
-            ctx.lineTo(this.bounds.x1, this.bounds.y1);
+            ctx.moveTo(this._bounds.x1, this._bounds.y1);
+            ctx.lineTo(this._bounds.x2, this._bounds.y2);
+            ctx.moveTo(this._bounds.x2, this._bounds.y2);
+            ctx.lineTo(this._bounds.x3, this._bounds.y3);
+            ctx.moveTo(this._bounds.x3, this._bounds.y3);
+            ctx.lineTo(this._bounds.x4, this._bounds.y4);
+            ctx.moveTo(this._bounds.x4, this._bounds.y4);
+            ctx.lineTo(this._bounds.x1, this._bounds.y1);
             ctx.closePath();
             ctx.stroke();
         }

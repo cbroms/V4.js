@@ -37,8 +37,19 @@
                 // textBox.verticalAlign("CENTER");
                 // textBox.horizontalAlign("CENTER");
                 // animator.addToAnimation(textBox.renderer);
-
-                var textBox2 = new V4.TextBox(font, 0, 450, 300, 600);
+                const bounds = {
+                    x1: 0,
+                    y1: 250,
+                    x2: 0,
+                    y2: 0,
+                    x3: 400,
+                    y3: 0,
+                    x4: 400,
+                    y4: 250,
+                    h: 250,
+                    w: 400
+                }
+                var textBox2 = new V4.TextBox(font, bounds);
                 textBox2.text("Here's a text!", 72);
                 textBox2.outlinePath(true);
                 textBox2.verticalAlign("TOP");

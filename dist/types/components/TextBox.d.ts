@@ -32,14 +32,13 @@ export declare class TextBox {
     private _text;
     private _fontSize;
     private _debug;
-    private _drawExact;
     private _underline;
     private _chunks;
     private _textStats;
     private _verticalAlign;
     private _horizontalAlign;
+    private _bounds;
     font: Font;
-    bounds: Bounds;
     /**
      * Create a new TextBox object
      * @param font - the font object
@@ -47,9 +46,19 @@ export declare class TextBox {
      * @param y - the y coordinate of the text box's bottom left corner
      * @param h - the height, in pixels, of the text box
      * @param w - the width, in pixels, of the text box
+     * @param bounds - specific bounds for the function (includes points defined with (x1,y1) - (x4,y4) and h and w)
      * @returns - the new TextBox object
      */
-    constructor(font: Font, x: number, y: number, h: number, w: number);
+    constructor(font: Font, x?: number | Bounds, y?: number, h?: number, w?: number);
+    /**
+     * Get/set the textbox's boundaries
+     * @param x - the x coordinate of the text box's bottom left corner, or an object containing specific bounds for the textbox
+     * @param y - the y coordinate of the text box's bottom left corner
+     * @param h - the height, in pixels, of the text box
+     * @param w - the width, in pixels, of the text box
+     * @returns - an object containing the boundary points of the textbox
+     */
+    bounds(x?: number | Bounds, y?: number, h?: number, w?: number): Bounds;
     /**
      * Get/set the content of the text box
      * @param newText - the text
@@ -69,12 +78,6 @@ export declare class TextBox {
      * @returns - the alignment
      */
     horizontalAlign(alignment: HorizontalAlignOpts): HorizontalAlignOpts;
-    /**
-     * Explicitly specify where to draw text within the text box
-     * @param x - x coordinate to place text (bottom left corner)
-     * @param y - y coordinate to place text (bottom left corner)
-     */
-    exactTextPosition(x: number, y: number): void;
     /**
      * Set if the text box should be outlined
      * @param outline - outline the text box?
