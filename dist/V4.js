@@ -46,6 +46,17 @@
     //# sourceMappingURL=RendererPayload.js.map
 
     /**
+     * Create a new error and print it to the console
+     * @param newError - error string to print
+     * @returns - false
+     */
+    var Error = function (newError) {
+        var errorString = "V4.js Error => ";
+        console.error(errorString + newError);
+        return false;
+    };
+
+    /**
      * @exports V4.Animator
      * @class
      */
@@ -71,12 +82,12 @@
          * @returns - if the canvas exists
          */
         Animator.prototype.hasCanvas = function (quietly) {
-            if (quietly === void 0) { quietly = false; }
+            if (quietly === void 0) { quietly = true; }
             if (!this.canvas) {
                 if (quietly)
                     return false;
                 else
-                    throw "Trying to access null canvas";
+                    Error("Trying to access null canvas");
             }
             return true;
         };
@@ -86,12 +97,12 @@
          * @returns - if the context exists
          */
         Animator.prototype.hasContext = function (quietly) {
-            if (quietly === void 0) { quietly = false; }
+            if (quietly === void 0) { quietly = true; }
             if (!this.context) {
                 if (quietly)
                     return false;
                 else
-                    throw "Trying to access null canvas context";
+                    Error("Trying to access null canvas context");
             }
             return true;
         };
@@ -180,7 +191,12 @@
                             renderer(payload);
                         }
                         catch (e) {
-                            throw "Error in renderer function: " + e;
+                            Error('Renderer function "' +
+                                renderer.name +
+                                '" threw an uncaught exception: "' +
+                                e +
+                                '" ');
+                            self._loop = false;
                         }
                     }
                     self.context.restore();
@@ -194,7 +210,6 @@
         };
         return Animator;
     }());
-    //# sourceMappingURL=Animator.js.map
 
     /*! *****************************************************************************
     Copyright (c) Microsoft Corporation. All rights reserved.
@@ -393,6 +408,7 @@
             this.font = font;
             this._text = "";
             this._fontSize = 24;
+            this._modified = true;
             this._bounds = this.bounds(x, y, h, w);
             // set defaut properties
             this._verticalAlign = "BOTTOM";
@@ -441,9 +457,11 @@
                     w: w,
                     h: h
                 };
+                this._modified = true;
             }
             else if (_isBounds(x)) {
                 this._bounds = x;
+                this._modified = true;
             }
             return this._bounds;
         };
@@ -454,17 +472,22 @@
          * @returns - the text
          */
         TextBox.prototype.text = function (newText, fontSize) {
-            if (newText)
+            if (newText !== undefined) {
                 this._text = newText;
-            if (fontSize)
+                if (fontSize !== undefined)
+                    this._fontSize = fontSize;
+                var absPath = this.font.getPath(this._text, 0, 0, this._fontSize);
+                var bb = absPath.getBoundingBox();
+                this._textStats.textHeight = bb.y2 - bb.y1;
+                this._textStats.textOffsetBottom = bb.y2 + fontSize / 3;
+                this._textStats.textWidth = this.font.getAdvanceWidth(newText, fontSize);
+                this._chunks = this._createChunks();
+                this._modified = true;
+            }
+            else if (fontSize !== undefined) {
                 this._fontSize = fontSize;
-            var absPath = this.font.getPath(this._text, 0, 0, this._fontSize);
-            var bb = absPath.getBoundingBox();
-            this._textStats.textHeight = bb.y2 - bb.y1;
-            this._textStats.textOffsetBottom = bb.y2 + fontSize / 3;
-            this._textStats.textWidth = this.font.getAdvanceWidth(newText, fontSize);
-            this._chunks = this._createChunks();
-            this._chunks = this._calculateTextRenderXY();
+                this._modified = true;
+            }
             return this._text;
         };
         /**
@@ -475,7 +498,7 @@
         TextBox.prototype.verticalAlign = function (alignment) {
             if (alignment) {
                 this._verticalAlign = alignment;
-                this._chunks = this._calculateTextRenderXY();
+                this._modified = true;
             }
             return this._verticalAlign;
         };
@@ -485,9 +508,9 @@
          * @returns - the alignment
          */
         TextBox.prototype.horizontalAlign = function (alignment) {
-            if (alignment) {
+            if (alignment !== undefined) {
                 this._horizontalAlign = alignment;
-                this._chunks = this._calculateTextRenderXY();
+                this._modified = true;
             }
             return this._horizontalAlign;
         };
@@ -497,8 +520,10 @@
          * @returns - if the text box outline is activated
          */
         TextBox.prototype.outlinePath = function (outline) {
-            if (outline !== null)
+            if (outline !== undefined) {
                 this._debug = outline;
+                this._modified = true;
+            }
             return this._debug;
         };
         /**
@@ -507,8 +532,10 @@
          * @returns - if the underlines are active
          */
         TextBox.prototype.underline = function (underline) {
-            if (underline !== null)
+            if (underline !== null) {
                 this._underline = underline;
+                this._modified = true;
+            }
             return this._underline;
         };
         /**
@@ -559,6 +586,7 @@
          * @returns - the x and y coords, via result.x and result.y
          */
         TextBox.prototype._calculateTextRenderXY = function () {
+            console.log("calculating");
             var x;
             var y;
             var chunksCopy = this._chunks;
@@ -639,6 +667,10 @@
             // const drawPos = this._animating
             //     ? this._calculateTextRenderXY()
             //     : this._drawPos;
+            if (this._modified) {
+                this._calculateTextRenderXY();
+                this._modified = false;
+            }
             for (var _i = 0, _a = this._chunks; _i < _a.length; _i++) {
                 var chunk = _a[_i];
                 // render font
@@ -651,6 +683,7 @@
         };
         return TextBox;
     }());
+    //# sourceMappingURL=TextBox.js.map
 
     exports.Animator = Animator;
     exports.FontWrapper = FontWrapper;

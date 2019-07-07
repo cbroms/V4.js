@@ -31,6 +31,7 @@ declare type Chunk = {
 export declare class TextBox {
     private _text;
     private _fontSize;
+    private _modified;
     private _debug;
     private _underline;
     private _chunks;
@@ -65,31 +66,31 @@ export declare class TextBox {
      * @param fontSize - the font size
      * @returns - the text
      */
-    text(newText: string, fontSize: number): string;
+    text(newText?: string, fontSize?: number): string;
     /**
      * Get/set the vertical alignment of the text in the text box
      * @param alignment - alignment command, must be BOTTOM, CENTER, or TOP
      * @returns - the alignment
      */
-    verticalAlign(alignment: VerticalAlignOpts): VerticalAlignOpts;
+    verticalAlign(alignment?: VerticalAlignOpts): VerticalAlignOpts;
     /**
      * Get/set the horizontal alignment of the text in the text box
      * @param alignment - alignment command, must be LEFT, CENTER, or RIGHT
      * @returns - the alignment
      */
-    horizontalAlign(alignment: HorizontalAlignOpts): HorizontalAlignOpts;
+    horizontalAlign(alignment?: HorizontalAlignOpts): HorizontalAlignOpts;
     /**
      * Set if the text box should be outlined
      * @param outline - outline the text box?
      * @returns - if the text box outline is activated
      */
-    outlinePath(outline: boolean): boolean;
+    outlinePath(outline?: boolean): boolean;
     /**
      * Set if the the text should be underlined
      * @param underline - underline the text in the text box?
      * @returns - if the underlines are active
      */
-    underline(underline: boolean): boolean;
+    underline(underline?: boolean): boolean;
     /**
      * Create chunks of text such that each is less than the width of the
      * textbox plus the vertical margins

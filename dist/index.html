@@ -54,7 +54,15 @@
                 textBox2.outlinePath(true);
                 textBox2.verticalAlign("TOP");
                 textBox2.horizontalAlign("LEFT");
-                animator.addToAnimation(textBox2.renderer);
+
+                function customRenderer(state) {
+                    var ctx = state.context;
+                    var bounds = textBox2.bounds()
+
+                    textBox2.bounds(bounds.x * state.deltaTime, bounds.y, bounds.h, bounds.w)
+                    textBox2.renderer(state);
+                }
+                animator.addToAnimation(customRenderer);
 
                 animator.framesPerSecond(30);
                 // var x = 0;

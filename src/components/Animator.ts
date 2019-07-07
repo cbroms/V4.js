@@ -1,5 +1,6 @@
 import { backgroundRenderer, clearPrevRenderer } from "./Renderers";
 import { RendererPayload } from "./RendererPayload";
+import { Error } from "./Error";
 
 /**
  * @exports V4.Animator
@@ -41,10 +42,10 @@ export class Animator {
      * @param quietly - don't throw error if canvas DNE?
      * @returns - if the canvas exists
      */
-    hasCanvas(quietly = false): boolean | Error {
+    hasCanvas(quietly = true): boolean | Error {
         if (!this.canvas) {
             if (quietly) return false;
-            else throw "Trying to access null canvas";
+            else Error("Trying to access null canvas");
         }
         return true;
     }
@@ -54,10 +55,10 @@ export class Animator {
      * @param quietly - don't throw error if context DNE?
      * @returns - if the context exists
      */
-    hasContext(quietly = false): boolean | Error {
+    hasContext(quietly = true): boolean | Error {
         if (!this.context) {
             if (quietly) return false;
-            else throw "Trying to access null canvas context";
+            else Error("Trying to access null canvas context");
         }
         return true;
     }
@@ -139,7 +140,6 @@ export class Animator {
 
                 // create the rendererPayload object to be sent to each render function
                 const payload = new RendererPayload();
-
                 payload.canvas = self.canvas;
                 payload.context = self.context;
                 payload.hasContext = self.hasContext;
@@ -157,7 +157,14 @@ export class Animator {
                     try {
                         renderer(payload);
                     } catch (e) {
-                        throw "Error in renderer function: " + e;
+                        Error(
+                            'Renderer function "' +
+                                renderer.name +
+                                '" threw an uncaught exception: "' +
+                                e +
+                                '" '
+                        );
+                        self._loop = false;
                     }
                 }
 

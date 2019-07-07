@@ -43,7 +43,7 @@ type Chunk = {
 export class TextBox {
     private _text: string;
     private _fontSize: number;
-    //  private _animating: boolean;
+    private _modified: boolean;
     private _debug: boolean;
     private _underline: boolean;
     private _chunks: Chunk[] | null;
@@ -68,7 +68,7 @@ export class TextBox {
         this.font = font;
         this._text = "";
         this._fontSize = 24;
-
+        this._modified = true;
         this._bounds = this.bounds(x, y, h, w);
 
         // set defaut properties
@@ -120,9 +120,12 @@ export class TextBox {
                 w: w,
                 h: h
             };
+            this._modified = true;
         } else if (_isBounds(x)) {
             this._bounds = x as Bounds;
+            this._modified = true;
         }
+
         return this._bounds;
     }
 
@@ -132,18 +135,24 @@ export class TextBox {
      * @param fontSize - the font size
      * @returns - the text
      */
-    text(newText: string, fontSize: number): string {
-        if (newText) this._text = newText;
-        if (fontSize) this._fontSize = fontSize;
+    text(newText?: string, fontSize?: number): string {
+        if (newText !== undefined) {
+            this._text = newText;
 
-        const absPath = this.font.getPath(this._text, 0, 0, this._fontSize);
-        const bb = absPath.getBoundingBox();
+            if (fontSize !== undefined) this._fontSize = fontSize;
 
-        this._textStats.textHeight = bb.y2 - bb.y1;
-        this._textStats.textOffsetBottom = bb.y2 + fontSize / 3;
-        this._textStats.textWidth = this.font.getAdvanceWidth(newText, fontSize);
-        this._chunks = this._createChunks();
-        this._chunks = this._calculateTextRenderXY();
+            const absPath = this.font.getPath(this._text, 0, 0, this._fontSize);
+            const bb = absPath.getBoundingBox();
+
+            this._textStats.textHeight = bb.y2 - bb.y1;
+            this._textStats.textOffsetBottom = bb.y2 + fontSize / 3;
+            this._textStats.textWidth = this.font.getAdvanceWidth(newText, fontSize);
+            this._chunks = this._createChunks();
+            this._modified = true;
+        } else if (fontSize !== undefined) {
+            this._fontSize = fontSize;
+            this._modified = true;
+        }
 
         return this._text;
     }
@@ -153,11 +162,12 @@ export class TextBox {
      * @param alignment - alignment command, must be BOTTOM, CENTER, or TOP
      * @returns - the alignment
      */
-    verticalAlign(alignment: VerticalAlignOpts): VerticalAlignOpts {
+    verticalAlign(alignment?: VerticalAlignOpts): VerticalAlignOpts {
         if (alignment) {
             this._verticalAlign = alignment;
-            this._chunks = this._calculateTextRenderXY();
+            this._modified = true;
         }
+
         return this._verticalAlign;
     }
 
@@ -166,11 +176,12 @@ export class TextBox {
      * @param alignment - alignment command, must be LEFT, CENTER, or RIGHT
      * @returns - the alignment
      */
-    horizontalAlign(alignment: HorizontalAlignOpts): HorizontalAlignOpts {
-        if (alignment) {
+    horizontalAlign(alignment?: HorizontalAlignOpts): HorizontalAlignOpts {
+        if (alignment !== undefined) {
             this._horizontalAlign = alignment;
-            this._chunks = this._calculateTextRenderXY();
+            this._modified = true;
         }
+
         return this._horizontalAlign;
     }
 
@@ -179,8 +190,12 @@ export class TextBox {
      * @param outline - outline the text box?
      * @returns - if the text box outline is activated
      */
-    outlinePath(outline: boolean): boolean {
-        if (outline !== null) this._debug = outline;
+    outlinePath(outline?: boolean): boolean {
+        if (outline !== undefined) {
+            this._debug = outline;
+            this._modified = true;
+        }
+
         return this._debug;
     }
 
@@ -189,8 +204,11 @@ export class TextBox {
      * @param underline - underline the text in the text box?
      * @returns - if the underlines are active
      */
-    underline(underline: boolean): boolean {
-        if (underline !== null) this._underline = underline;
+    underline(underline?: boolean): boolean {
+        if (underline !== null) {
+            this._underline = underline;
+            this._modified = true;
+        }
         return this._underline;
     }
 
@@ -246,6 +264,7 @@ export class TextBox {
      * @returns - the x and y coords, via result.x and result.y
      */
     _calculateTextRenderXY() {
+        console.log("calculating");
         let x: number;
         let y: number;
 
@@ -335,6 +354,11 @@ export class TextBox {
         // const drawPos = this._animating
         //     ? this._calculateTextRenderXY()
         //     : this._drawPos;
+
+        if (this._modified) {
+            this._calculateTextRenderXY();
+            this._modified = false;
+        }
 
         for (const chunk of this._chunks) {
             // render font
