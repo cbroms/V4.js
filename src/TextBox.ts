@@ -69,7 +69,8 @@ export class TextBox {
         this._text = "";
         this._fontSize = 24;
         this._modified = true;
-        this._bounds = this.bounds(x, y, h, w);
+
+        this.bounds(x, y, h, w);
 
         // set defaut properties
         this._verticalAlign = "BOTTOM";
@@ -82,7 +83,7 @@ export class TextBox {
             textWidth: 0,
             textHeight: 0,
             totalTextHeight: 0,
-            textOffsetBottom: this._fontSize / 3
+            textOffsetBottom: this._fontSize / 3 // line height
         };
         this.renderer = this.renderer.bind(this);
     }
@@ -121,7 +122,7 @@ export class TextBox {
                 h: h
             };
             this._modified = true;
-        } else if (_isBounds(x)) {
+        } else if (x !== undefined && _isBounds(x)) {
             this._bounds = x as Bounds;
             this._modified = true;
         }
@@ -147,7 +148,7 @@ export class TextBox {
             this._textStats.textHeight = bb.y2 - bb.y1;
             this._textStats.textOffsetBottom = bb.y2 + fontSize / 3;
             this._textStats.textWidth = this.font.getAdvanceWidth(newText, fontSize);
-            this._chunks = this._createChunks();
+            this._createChunks();
             this._modified = true;
         } else if (fontSize !== undefined) {
             this._fontSize = fontSize;
@@ -216,7 +217,7 @@ export class TextBox {
      * Create chunks of text such that each is less than the width of the
      * textbox plus the vertical margins
      */
-    _createChunks(): Chunk[] {
+    _createChunks(): void {
         const words = this._text.split(" ");
         let computedChunks = [];
         let currentWidth = 0;
@@ -256,7 +257,7 @@ export class TextBox {
 
         this._textStats.totalTextHeight = computedChunks.length * this._textStats.textHeight;
 
-        return computedChunks;
+        this._chunks = computedChunks;
     }
 
     /**
@@ -264,7 +265,6 @@ export class TextBox {
      * @returns - the x and y coords, via result.x and result.y
      */
     _calculateTextRenderXY() {
-        console.log("calculating");
         let x: number;
         let y: number;
 

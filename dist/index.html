@@ -12,12 +12,13 @@
         <script>
             var start = async function() {
                 var canvas = document.getElementById("testCanvas");
+                canvas.height = 500;
+                canvas.width = 800;
+
                 var animator = new V4.Animator(canvas, false);
-                animator.canvas.height = 500;
-                animator.canvas.width = 800;
                 animator.backgroundColor("#000");
 
-                var fontObj = new V4.FontWrapper();
+                var fontObj = new V4.FontGroup();
                 await fontObj.loadFont(
                     "assets/CrimsonText-Regular.ttf",
                     "Crimson Text",
@@ -37,7 +38,7 @@
                 // textBox.verticalAlign("CENTER");
                 // textBox.horizontalAlign("CENTER");
                 // animator.addToAnimation(textBox.renderer);
-                const bounds = {
+                let bounds = {
                     x1: 0,
                     y1: 250,
                     x2: 0,
@@ -55,16 +56,15 @@
                 textBox2.verticalAlign("TOP");
                 textBox2.horizontalAlign("LEFT");
 
-                function customRenderer(state) {
-                    var ctx = state.context;
-                    var bounds = textBox2.bounds()
-
-                    textBox2.bounds(bounds.x * state.deltaTime, bounds.y, bounds.h, bounds.w)
-                    textBox2.renderer(state);
-                }
-                animator.addToAnimation(customRenderer);
-
-                animator.framesPerSecond(30);
+                // function customRenderer(state) {
+                //     var ctx = state.context;
+                   
+                //     textBox2.bounds(bounds.x1 += 10 * state.deltaTime, bounds.y1, bounds.h, bounds.w)
+                //     textBox2.renderer(state);
+                // }
+                // animator.addToAnimation(customRenderer);
+                animator.addToAnimation(textBox2.renderer);
+                animator.framesPerSecond(60);
                 // var x = 0;
                 // var right = true;
                 // var speed = 20;

@@ -26,7 +26,6 @@
     var clearPrevRenderer = function (state) {
         state.context.clearRect(0, 0, state.canvas.width, state.canvas.height);
     };
-    //# sourceMappingURL=Renderers.js.map
 
     var empty = function () { return false; };
     var RendererPayload = /** @class */ (function () {
@@ -43,7 +42,6 @@
         }
         return RendererPayload;
     }());
-    //# sourceMappingURL=RendererPayload.js.map
 
     /**
      * Create a new error and print it to the console
@@ -54,6 +52,307 @@
         var errorString = "V4.js Error => ";
         console.error(errorString + newError);
         return false;
+    };
+
+    /*
+     * Open source under the BSD License.
+     *
+     * Copyright © 2001 Robert Penner
+     * All rights reserved.
+     *
+     * Redistribution and use in source and binary forms, with or without modification,
+     * are permitted provided that the following conditions are met:
+     *
+     * Redistributions of source code must retain the above copyright notice, this list of
+     * conditions and the following disclaimer.
+     * Redistributions in binary form must reproduce the above copyright notice, this list
+     * of conditions and the following disclaimer in the documentation and/or other materials
+     * provided with the distribution.
+     *
+     * Neither the name of the author nor the names of contributors may be used to endorse
+     * or promote products derived from this software without specific prior written permission.
+     *
+     * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+     * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+     * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+     * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+     * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+     * GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+     * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+     * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+     * OF THE POSSIBILITY OF SUCH DAMAGE.
+     */
+    /**
+     * Easing functions, originally from Rober Penner, javascript implementation from
+     * https://github.com/chenglou/tween-functions, typescript port unique to this lib
+     */
+    var Easing = {
+        linear: function (t, b, end, d) {
+            var c = end - b;
+            return (c * t) / d + b;
+        },
+        easeInQuad: function (t, b, end, d) {
+            var c = end - b;
+            return c * (t /= d) * t + b;
+        },
+        easeOutQuad: function (t, b, end, d) {
+            var c = end - b;
+            return -c * (t /= d) * (t - 2) + b;
+        },
+        easeInOutQuad: function (t, b, end, d) {
+            var c = end - b;
+            if ((t /= d / 2) < 1) {
+                return (c / 2) * t * t + b;
+            }
+            else {
+                return (-c / 2) * (--t * (t - 2) - 1) + b;
+            }
+        },
+        easeInCubic: function (t, b, end, d) {
+            var c = end - b;
+            return c * (t /= d) * t * t + b;
+        },
+        easeOutCubic: function (t, b, end, d) {
+            var c = end - b;
+            return c * ((t = t / d - 1) * t * t + 1) + b;
+        },
+        easeInOutCubic: function (t, b, end, d) {
+            var c = end - b;
+            if ((t /= d / 2) < 1) {
+                return (c / 2) * t * t * t + b;
+            }
+            else {
+                return (c / 2) * ((t -= 2) * t * t + 2) + b;
+            }
+        },
+        easeInQuart: function (t, b, end, d) {
+            var c = end - b;
+            return c * (t /= d) * t * t * t + b;
+        },
+        easeOutQuart: function (t, b, end, d) {
+            var c = end - b;
+            return -c * ((t = t / d - 1) * t * t * t - 1) + b;
+        },
+        easeInOutQuart: function (t, b, end, d) {
+            var c = end - b;
+            if ((t /= d / 2) < 1) {
+                return (c / 2) * t * t * t * t + b;
+            }
+            else {
+                return (-c / 2) * ((t -= 2) * t * t * t - 2) + b;
+            }
+        },
+        easeInQuint: function (t, b, end, d) {
+            var c = end - b;
+            return c * (t /= d) * t * t * t * t + b;
+        },
+        easeOutQuint: function (t, b, end, d) {
+            var c = end - b;
+            return c * ((t = t / d - 1) * t * t * t * t + 1) + b;
+        },
+        easeInOutQuint: function (t, b, end, d) {
+            var c = end - b;
+            if ((t /= d / 2) < 1) {
+                return (c / 2) * t * t * t * t * t + b;
+            }
+            else {
+                return (c / 2) * ((t -= 2) * t * t * t * t + 2) + b;
+            }
+        },
+        easeInSine: function (t, b, end, d) {
+            var c = end - b;
+            return -c * Math.cos((t / d) * (Math.PI / 2)) + c + b;
+        },
+        easeOutSine: function (t, b, end, d) {
+            var c = end - b;
+            return c * Math.sin((t / d) * (Math.PI / 2)) + b;
+        },
+        easeInOutSine: function (t, b, end, d) {
+            var c = end - b;
+            return (-c / 2) * (Math.cos((Math.PI * t) / d) - 1) + b;
+        },
+        easeInExpo: function (t, b, end, d) {
+            var c = end - b;
+            return t == 0 ? b : c * Math.pow(2, 10 * (t / d - 1)) + b;
+        },
+        easeOutExpo: function (t, b, end, d) {
+            var c = end - b;
+            return t == d ? b + c : c * (-Math.pow(2, (-10 * t) / d) + 1) + b;
+        },
+        easeInOutExpo: function (t, b, end, d) {
+            var c = end - b;
+            if (t === 0) {
+                return b;
+            }
+            if (t === d) {
+                return b + c;
+            }
+            if ((t /= d / 2) < 1) {
+                return (c / 2) * Math.pow(2, 10 * (t - 1)) + b;
+            }
+            else {
+                return (c / 2) * (-Math.pow(2, -10 * --t) + 2) + b;
+            }
+        },
+        easeInCirc: function (t, b, end, d) {
+            var c = end - b;
+            return -c * (Math.sqrt(1 - (t /= d) * t) - 1) + b;
+        },
+        easeOutCirc: function (t, b, end, d) {
+            var c = end - b;
+            return c * Math.sqrt(1 - (t = t / d - 1) * t) + b;
+        },
+        easeInOutCirc: function (t, b, end, d) {
+            var c = end - b;
+            if ((t /= d / 2) < 1) {
+                return (-c / 2) * (Math.sqrt(1 - t * t) - 1) + b;
+            }
+            else {
+                return (c / 2) * (Math.sqrt(1 - (t -= 2) * t) + 1) + b;
+            }
+        },
+        easeInElastic: function (t, b, end, d) {
+            var c = end - b;
+            var a, p, s;
+            s = 1.70158;
+            p = 0;
+            a = c;
+            if (t === 0) {
+                return b;
+            }
+            else if ((t /= d) === 1) {
+                return b + c;
+            }
+            if (!p) {
+                p = d * 0.3;
+            }
+            if (a < Math.abs(c)) {
+                a = c;
+                s = p / 4;
+            }
+            else {
+                s = (p / (2 * Math.PI)) * Math.asin(c / a);
+            }
+            return -(a * Math.pow(2, 10 * (t -= 1)) * Math.sin(((t * d - s) * (2 * Math.PI)) / p)) + b;
+        },
+        easeOutElastic: function (t, b, end, d) {
+            var c = end - b;
+            var a, p, s;
+            s = 1.70158;
+            p = 0;
+            a = c;
+            if (t === 0) {
+                return b;
+            }
+            else if ((t /= d) === 1) {
+                return b + c;
+            }
+            if (!p) {
+                p = d * 0.3;
+            }
+            if (a < Math.abs(c)) {
+                a = c;
+                s = p / 4;
+            }
+            else {
+                s = (p / (2 * Math.PI)) * Math.asin(c / a);
+            }
+            return a * Math.pow(2, -10 * t) * Math.sin(((t * d - s) * (2 * Math.PI)) / p) + c + b;
+        },
+        easeInOutElastic: function (t, b, end, d) {
+            var c = end - b;
+            var a, p, s;
+            s = 1.70158;
+            p = 0;
+            a = c;
+            if (t === 0) {
+                return b;
+            }
+            else if ((t /= d / 2) === 2) {
+                return b + c;
+            }
+            if (!p) {
+                p = d * (0.3 * 1.5);
+            }
+            if (a < Math.abs(c)) {
+                a = c;
+                s = p / 4;
+            }
+            else {
+                s = (p / (2 * Math.PI)) * Math.asin(c / a);
+            }
+            if (t < 1) {
+                return (-0.5 *
+                    (a * Math.pow(2, 10 * (t -= 1)) * Math.sin(((t * d - s) * (2 * Math.PI)) / p)) +
+                    b);
+            }
+            else {
+                return (a *
+                    Math.pow(2, -10 * (t -= 1)) *
+                    Math.sin(((t * d - s) * (2 * Math.PI)) / p) *
+                    0.5 +
+                    c +
+                    b);
+            }
+        },
+        easeInBack: function (t, b, end, d, s) {
+            var c = end - b;
+            if (s === void 0) {
+                s = 1.70158;
+            }
+            return c * (t /= d) * t * ((s + 1) * t - s) + b;
+        },
+        easeOutBack: function (t, b, end, d, s) {
+            var c = end - b;
+            if (s === void 0) {
+                s = 1.70158;
+            }
+            return c * ((t = t / d - 1) * t * ((s + 1) * t + s) + 1) + b;
+        },
+        easeInOutBack: function (t, b, end, d, s) {
+            var c = end - b;
+            if (s === void 0) {
+                s = 1.70158;
+            }
+            if ((t /= d / 2) < 1) {
+                return (c / 2) * (t * t * (((s *= 1.525) + 1) * t - s)) + b;
+            }
+            else {
+                return (c / 2) * ((t -= 2) * t * (((s *= 1.525) + 1) * t + s) + 2) + b;
+            }
+        },
+        easeInBounce: function (t, b, end, d) {
+            var c = end - b;
+            var v = Easing.easeOutBounce(d - t, 0, c, d);
+            return c - v + b;
+        },
+        easeOutBounce: function (t, b, end, d) {
+            var c = end - b;
+            if ((t /= d) < 1 / 2.75) {
+                return c * (7.5625 * t * t) + b;
+            }
+            else if (t < 2 / 2.75) {
+                return c * (7.5625 * (t -= 1.5 / 2.75) * t + 0.75) + b;
+            }
+            else if (t < 2.5 / 2.75) {
+                return c * (7.5625 * (t -= 2.25 / 2.75) * t + 0.9375) + b;
+            }
+            else {
+                return c * (7.5625 * (t -= 2.625 / 2.75) * t + 0.984375) + b;
+            }
+        },
+        easeInOutBounce: function (t, b, end, d) {
+            var c = end - b;
+            var v;
+            if (t < d / 2) {
+                v = Easing.easeInBounce(t * 2, 0, c, d);
+                return v * 0.5 + b;
+            }
+            else {
+                v = Easing.easeOutBounce(t * 2 - d, 0, c, d);
+                return v * 0.5 + c * 0.5 + b;
+            }
+        }
     };
 
     /**
@@ -73,8 +372,18 @@
             this._startTime = Date.now();
             this._then = Date.now();
             this.framesPerSecond(30);
-            // add renderer to animation buffer
+            // add default renderers to animation buffer
             this._animationBuffer = [clearPrevRenderer, backgroundRenderer];
+            // set HDPI canvas scale for retina displays
+            var ratio = window.devicePixelRatio;
+            var width = this.canvas.width;
+            var height = this.canvas.height;
+            canvas.width = width * ratio;
+            canvas.height = height * ratio;
+            canvas.style.width = width + "px";
+            canvas.style.height = height + "px";
+            this.context.scale(ratio, ratio);
+            console.log(Easing["linear"]);
         }
         /**
          * Check the status of the canvas
@@ -155,6 +464,7 @@
          * @param self - TextCanvas class reference
          */
         Animator.prototype._animationLoop = function (self) {
+            console.log("loop");
             if (self._loop && self.hasCanvas() && self.hasContext()) {
                 // calculate the deltaTime
                 var now = window.performance.now();
@@ -267,14 +577,14 @@
      * @exports V4.FontWrapper
      * @class
      */
-    var FontWrapper = /** @class */ (function () {
+    var FontGroup = /** @class */ (function () {
         /**
          * Create a new Font object
          * @param name - the font's name
          * @param variants - the font's variants (Italic, Regular, etc.)
          * @returns - the new Font object
          */
-        function FontWrapper(name, variants) {
+        function FontGroup(name, variants) {
             if (name === void 0) { name = ""; }
             if (variants === void 0) { variants = ["Regular"]; }
             this.name = name;
@@ -286,7 +596,7 @@
          * @param name - the name of the font, case and space sensitive
          * @param variants - a list of font variants (strings), case and space sensitive (Italic, Regular, Bold Italic, etc.)
          */
-        FontWrapper.prototype.loadGFonts = function (name, variants) {
+        FontGroup.prototype.loadGFonts = function (name, variants) {
             if (name === void 0) { name = this.name; }
             if (variants === void 0) { variants = this._variants; }
             return __awaiter(this, void 0, void 0, function () {
@@ -323,7 +633,7 @@
          * @param name - the name of the font
          * @param variant - the variant of the font (Italic, Regular, Bold Italic, etc.)
          */
-        FontWrapper.prototype.loadFont = function (loc, name, variant) {
+        FontGroup.prototype.loadFont = function (loc, name, variant) {
             if (loc === void 0) { loc = ""; }
             if (name === void 0) { name = this.name; }
             if (variant === void 0) { variant = "Regular"; }
@@ -346,7 +656,7 @@
          * Wrapper for opentype.js' load function to provide async/await functionality
          * @param url - the path/url to load the font
          */
-        FontWrapper.prototype._load = function (url) {
+        FontGroup.prototype._load = function (url) {
             return new Promise(function (resolve) {
                 opentype_js.load(url, function (err, font) {
                     if (err) {
@@ -363,7 +673,7 @@
          * @param variant - the variant to get, case and space sensitive (Italic, Bold Italic, etc.)
          * @returns - the opentype.js font object
          */
-        FontWrapper.prototype.getFontVariant = function (variant) {
+        FontGroup.prototype.getFontVariant = function (variant) {
             return this._fonts[variant];
         };
         /**
@@ -372,22 +682,17 @@
          * @param variants - a list of font variants (strings), case and space sensitive (Italic, Regular, Bold Italic, etc.)
          * @returns - a list of urls containing .ttf files for each of the font's variants
          */
-        FontWrapper.prototype._makeGFontUrls = function (name, variants) {
+        FontGroup.prototype._makeGFontUrls = function (name, variants) {
             // make a url like this:
             // https://raw.githubusercontent.com/google/fonts/master/ofl/crimsontext/CrimsonText-Regular.ttf
             var baseUrl = "https://raw.githubusercontent.com/google/fonts/master/ofl/";
             var nameNoSpace = name.replace(" ", "");
             var nameCleaned = nameNoSpace.toLowerCase();
-            var varsCleaned = variants.map(function (val) {
-                return val.replace(" ", "").replace("-", "");
-            });
-            return varsCleaned.map(function (val) {
-                return baseUrl + nameCleaned + "/" + nameNoSpace + "-" + val + ".ttf";
-            });
+            var varsCleaned = variants.map(function (val) { return val.replace(" ", "").replace("-", ""); });
+            return varsCleaned.map(function (val) { return baseUrl + nameCleaned + "/" + nameNoSpace + "-" + val + ".ttf"; });
         };
-        return FontWrapper;
+        return FontGroup;
     }());
-    //# sourceMappingURL=FontWrapper.js.map
 
     /**
      * @exports V4.TextBox
@@ -409,7 +714,7 @@
             this._text = "";
             this._fontSize = 24;
             this._modified = true;
-            this._bounds = this.bounds(x, y, h, w);
+            this.bounds(x, y, h, w);
             // set defaut properties
             this._verticalAlign = "BOTTOM";
             this._horizontalAlign = "RIGHT";
@@ -421,7 +726,7 @@
                 textWidth: 0,
                 textHeight: 0,
                 totalTextHeight: 0,
-                textOffsetBottom: this._fontSize / 3
+                textOffsetBottom: this._fontSize / 3 // line height
             };
             this.renderer = this.renderer.bind(this);
         }
@@ -459,7 +764,7 @@
                 };
                 this._modified = true;
             }
-            else if (_isBounds(x)) {
+            else if (x !== undefined && _isBounds(x)) {
                 this._bounds = x;
                 this._modified = true;
             }
@@ -481,7 +786,7 @@
                 this._textStats.textHeight = bb.y2 - bb.y1;
                 this._textStats.textOffsetBottom = bb.y2 + fontSize / 3;
                 this._textStats.textWidth = this.font.getAdvanceWidth(newText, fontSize);
-                this._chunks = this._createChunks();
+                this._createChunks();
                 this._modified = true;
             }
             else if (fontSize !== undefined) {
@@ -579,14 +884,13 @@
                 width: currentWidth
             });
             this._textStats.totalTextHeight = computedChunks.length * this._textStats.textHeight;
-            return computedChunks;
+            this._chunks = computedChunks;
         };
         /**
          * Calculate the x and y coordinates to start drawing the text
          * @returns - the x and y coords, via result.x and result.y
          */
         TextBox.prototype._calculateTextRenderXY = function () {
-            console.log("calculating");
             var x;
             var y;
             var chunksCopy = this._chunks;
@@ -683,10 +987,9 @@
         };
         return TextBox;
     }());
-    //# sourceMappingURL=TextBox.js.map
 
     exports.Animator = Animator;
-    exports.FontWrapper = FontWrapper;
+    exports.FontGroup = FontGroup;
     exports.TextBox = TextBox;
     exports.backgroundRenderer = backgroundRenderer;
     exports.clearPrevRenderer = clearPrevRenderer;

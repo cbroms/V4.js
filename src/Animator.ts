@@ -1,6 +1,7 @@
 import { backgroundRenderer, clearPrevRenderer } from "./Renderers";
 import { RendererPayload } from "./RendererPayload";
 import { Error } from "./Error";
+import { Easing } from "./Easing";
 
 /**
  * @exports V4.Animator
@@ -33,8 +34,21 @@ export class Animator {
 
         this.framesPerSecond(30);
 
-        // add renderer to animation buffer
+        // add default renderers to animation buffer
         this._animationBuffer = [clearPrevRenderer, backgroundRenderer];
+
+        // set HDPI canvas scale for retina displays
+        const ratio = window.devicePixelRatio;
+        const width = this.canvas.width;
+        const height = this.canvas.height;
+
+        canvas.width = width * ratio;
+        canvas.height = height * ratio;
+        canvas.style.width = width + "px";
+        canvas.style.height = height + "px";
+        this.context.scale(ratio, ratio);
+
+        console.log(Easing["linear"]);
     }
 
     /**
@@ -116,8 +130,10 @@ export class Animator {
      * @param self - TextCanvas class reference
      */
     _animationLoop(self: this) {
+        console.log("loop");
         if (self._loop && self.hasCanvas() && self.hasContext()) {
             // calculate the deltaTime
+
             const now = window.performance.now();
             let elapsed = now - self._then;
 

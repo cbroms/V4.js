@@ -4,7 +4,7 @@ import { load, Font } from "opentype.js";
  * @exports V4.FontWrapper
  * @class
  */
-export class FontWrapper {
+export class FontGroup {
     private _fonts: { [s: string]: Font };
     private _variants: string[];
 
@@ -82,17 +82,13 @@ export class FontWrapper {
     _makeGFontUrls(name: string, variants: string[]): string[] {
         // make a url like this:
         // https://raw.githubusercontent.com/google/fonts/master/ofl/crimsontext/CrimsonText-Regular.ttf
-        const baseUrl =
-            "https://raw.githubusercontent.com/google/fonts/master/ofl/";
+        const baseUrl = "https://raw.githubusercontent.com/google/fonts/master/ofl/";
         const nameNoSpace = name.replace(" ", "");
         const nameCleaned = nameNoSpace.toLowerCase();
-        const varsCleaned = variants.map(val =>
-            val.replace(" ", "").replace("-", "")
-        );
+        const varsCleaned = variants.map(val => val.replace(" ", "").replace("-", ""));
 
         return varsCleaned.map(
-            val =>
-                baseUrl + nameCleaned + "/" + nameNoSpace + "-" + val + ".ttf"
+            val => baseUrl + nameCleaned + "/" + nameNoSpace + "-" + val + ".ttf"
         );
     }
 }
