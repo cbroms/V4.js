@@ -31,7 +31,7 @@
  * Easing functions, originally from Rober Penner, javascript implementation from
  * https://github.com/chenglou/tween-functions, typescript port unique to this lib
  */
-export const Easing = {
+export const Easing: any = {
     linear: (t: number, b: number, end: number, d: number): number => {
         const c = end - b;
         return (c * t) / d + b;

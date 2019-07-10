@@ -1,13 +1,12 @@
 import { backgroundRenderer, clearPrevRenderer } from "./Renderers";
 import { RendererPayload } from "./RendererPayload";
 import { Error } from "./Error";
-import { Easing } from "./Easing";
 
 /**
- * @exports V4.Animator
+ * @exports V4.Loop
  * @class
  */
-export class Animator {
+export class Loop {
     private _loop: boolean;
     private _frameCount: number;
     private _animationBuffer: { (rendererPayload: object): void }[];
@@ -39,16 +38,17 @@ export class Animator {
 
         // set HDPI canvas scale for retina displays
         const ratio = window.devicePixelRatio;
-        const width = this.canvas.width;
-        const height = this.canvas.height;
 
-        canvas.width = width * ratio;
-        canvas.height = height * ratio;
-        canvas.style.width = width + "px";
-        canvas.style.height = height + "px";
-        this.context.scale(ratio, ratio);
+        if (ratio !== 1) {
+            const width = this.canvas.width;
+            const height = this.canvas.height;
 
-        console.log(Easing["linear"]);
+            this.canvas.width = width * ratio;
+            this.canvas.height = height * ratio;
+            this.canvas.style.width = width + "px";
+            this.canvas.style.height = height + "px";
+            this.context.scale(ratio, ratio);
+        }
     }
 
     /**
@@ -104,24 +104,24 @@ export class Animator {
      * Add a renderer function to the animation
      * @param renderer - the render function to be executed
      */
-    addToAnimation(renderer: { (rendererPayload: object): void }): void {
+    addToLoop(renderer: { (rendererPayload: object): void }): void {
         this._animationBuffer.push(renderer);
     }
 
     /**
      * Start the canvas animation
      */
-    startAnimationLoop() {
+    startLoop() {
         this._loop = true;
         this._then = window.performance.now();
         this._startTime = this._then;
-        this._animationLoop(this);
+        this._renderLoop(this);
     }
 
     /**
      * Stop/pause the canvas animation
      */
-    stopAnimationLoop() {
+    stopLoop() {
         this._loop = false;
     }
 
@@ -129,7 +129,7 @@ export class Animator {
      * The animation loop running at the target frames per second
      * @param self - TextCanvas class reference
      */
-    _animationLoop(self: this) {
+    _renderLoop(self: this) {
         console.log("loop");
         if (self._loop && self.hasCanvas() && self.hasContext()) {
             // calculate the deltaTime
@@ -161,7 +161,7 @@ export class Animator {
                 payload.hasContext = self.hasContext;
                 payload.hasCanvas = self.hasCanvas;
                 payload.backgroundColor = self._backgroundColor;
-                payload.deltaTime = elapsed / 100;
+                payload.deltaTime = elapsed / 1000;
                 payload.frameCount = self._frameCount;
                 payload.startTime = self._startTime;
                 payload.fps = fps;
@@ -188,7 +188,7 @@ export class Animator {
             }
 
             const callback = () => {
-                self._animationLoop(self);
+                self._renderLoop(self);
             };
             // request next frame
             requestAnimationFrame(callback);
