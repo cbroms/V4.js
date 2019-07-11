@@ -57,6 +57,7 @@
 
                 var elapsed = 0;
                 var anim = new V4.TextBoxAnim(textBox2, {x: 0, y:250}, {x:300, y:500}, 3, "easeInOutCubic")
+                var anim2 = new V4.TextBoxAnim(textBox2, {x:300, y:500}, {x: 0, y:250}, 3, "easeOutExpo")
 
                 function customRenderer(state) {
                   
@@ -65,9 +66,16 @@
                     // if (elapsed > 2) textBox2.text("Two seconds elapsed!", 24)
                   // textBox2.bounds(bounds.x1 += 10 * state.deltaTime, bounds.y1, bounds.h, bounds.w)
 
-                    anim.move(state);
-                    textBox2.renderer(state);
+                
+                    anim.move(state, () => {
+                       anim2.move(state, () => {
+                        
+                       })
+                    })
+                   // textBox2.renderer(state);
+                
                 }
+                    
 
 
                 loop.addToLoop(customRenderer);

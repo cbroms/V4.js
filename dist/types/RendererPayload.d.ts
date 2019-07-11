@@ -1,3 +1,4 @@
+import { Loop } from "./Loop";
 export declare class RendererPayload {
     canvas: HTMLCanvasElement | null;
     context: CanvasRenderingContext2D | null;
@@ -12,5 +13,6 @@ export declare class RendererPayload {
     frameCount: number;
     startTime: number;
     fps: number;
+    loop: Loop;
     constructor();
 }

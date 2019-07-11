@@ -1,6 +1,9 @@
 import { backgroundRenderer, clearPrevRenderer } from "./Renderers";
 import { RendererPayload } from "./RendererPayload";
+import { RenderQueue } from "./RenderQueue";
 import { Error } from "./Error";
+
+type Renderer = { (rendererPayload: object): void };
 
 /**
  * @exports V4.Loop
@@ -9,7 +12,8 @@ import { Error } from "./Error";
 export class Loop {
     private _loop: boolean;
     private _frameCount: number;
-    private _animationBuffer: { (rendererPayload: object): void }[];
+    private _rendererBuffer: Renderer[];
+    private _renderQueueBuffer: RenderQueue[];
     private _backgroundColor: string;
     private _fps: number;
     private _fpsInterval: number;
@@ -34,7 +38,8 @@ export class Loop {
         this.framesPerSecond(30);
 
         // add default renderers to animation buffer
-        this._animationBuffer = [clearPrevRenderer, backgroundRenderer];
+        this._rendererBuffer = [clearPrevRenderer, backgroundRenderer];
+        this._renderQueueBuffer = [];
 
         // set HDPI canvas scale for retina displays
         const ratio = window.devicePixelRatio;
@@ -101,11 +106,12 @@ export class Loop {
     }
 
     /**
-     * Add a renderer function to the animation
-     * @param renderer - the render function to be executed
+     * Add a renderer function or RenderQueue to the animation
+     * @param renderer - the render function or RenderQueue to be executed
      */
-    addToLoop(renderer: { (rendererPayload: object): void }): void {
-        this._animationBuffer.push(renderer);
+    addToLoop(renderer: Renderer | RenderQueue): void {
+        if (renderer.length !== undefined) this._renderQueueBuffer.push(renderer as RenderQueue);
+        else this._rendererBuffer.push(renderer as Renderer);
     }
 
     /**
@@ -130,10 +136,8 @@ export class Loop {
      * @param self - TextCanvas class reference
      */
     _renderLoop(self: this) {
-        console.log("loop");
         if (self._loop && self.hasCanvas() && self.hasContext()) {
             // calculate the deltaTime
-
             const now = window.performance.now();
             let elapsed = now - self._then;
 
@@ -165,11 +169,12 @@ export class Loop {
                 payload.frameCount = self._frameCount;
                 payload.startTime = self._startTime;
                 payload.fps = fps;
+                payload.loop = self;
 
                 self.context.save();
 
                 // call each render function and pass rendererPayload
-                for (const renderer of self._animationBuffer) {
+                for (const renderer of self._rendererBuffer) {
                     try {
                         renderer(payload);
                     } catch (e) {
@@ -181,6 +186,25 @@ export class Loop {
                                 '" '
                         );
                         self._loop = false;
+                    }
+                }
+
+                // loop through the list of RenderQueues and call the render functions
+                // within each
+                for (const rq of self._renderQueueBuffer) {
+                    for (const renderer of rq.rendererBuffer) {
+                        try {
+                            renderer(payload);
+                        } catch (e) {
+                            Error(
+                                'Renderer function "' +
+                                    renderer.name +
+                                    '" threw an uncaught exception: "' +
+                                    e +
+                                    '" '
+                            );
+                            self._loop = false;
+                        }
                     }
                 }
 

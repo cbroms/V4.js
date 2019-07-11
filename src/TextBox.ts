@@ -97,10 +97,6 @@ export class TextBox {
      * @returns - an object containing the boundary points of the textbox
      */
     bounds(x?: number | Bounds, y?: number, h?: number, w?: number): Bounds {
-        const _isBounds = (tbd: number | Bounds): tbd is Bounds => {
-            return (tbd as Bounds).x1 !== undefined;
-        };
-
         // Corner points are assigned clockwise from bottom left:
         /*
          *   (x2, y2) *--------------* (x3, y3)
@@ -122,7 +118,7 @@ export class TextBox {
                 h: h
             };
             this._modified = true;
-        } else if (x !== undefined && _isBounds(x)) {
+        } else if (x !== undefined) {
             this._bounds = x as Bounds;
             this._modified = true;
         }

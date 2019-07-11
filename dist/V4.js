@@ -40,10 +40,10 @@
             this.frameCount = 0;
             this.startTime = 0;
             this.fps = 0;
+            this.loop = null;
         }
         return RendererPayload;
     }());
-    //# sourceMappingURL=RendererPayload.js.map
 
     /**
      * Create a new error and print it to the console
@@ -75,7 +75,8 @@
             this._then = Date.now();
             this.framesPerSecond(30);
             // add default renderers to animation buffer
-            this._animationBuffer = [clearPrevRenderer, backgroundRenderer];
+            this._rendererBuffer = [clearPrevRenderer, backgroundRenderer];
+            this._renderQueueBuffer = [];
             // set HDPI canvas scale for retina displays
             var ratio = window.devicePixelRatio;
             if (ratio !== 1) {
@@ -141,11 +142,14 @@
             return this._fps;
         };
         /**
-         * Add a renderer function to the animation
-         * @param renderer - the render function to be executed
+         * Add a renderer function or RenderQueue to the animation
+         * @param renderer - the render function or RenderQueue to be executed
          */
         Loop.prototype.addToLoop = function (renderer) {
-            this._animationBuffer.push(renderer);
+            if (renderer.length !== undefined)
+                this._renderQueueBuffer.push(renderer);
+            else
+                this._rendererBuffer.push(renderer);
         };
         /**
          * Start the canvas animation
@@ -167,7 +171,6 @@
          * @param self - TextCanvas class reference
          */
         Loop.prototype._renderLoop = function (self) {
-            console.log("loop");
             if (self._loop && self.hasCanvas() && self.hasContext()) {
                 // calculate the deltaTime
                 var now = window.performance.now();
@@ -196,9 +199,10 @@
                     payload.frameCount = self._frameCount;
                     payload.startTime = self._startTime;
                     payload.fps = fps;
+                    payload.loop = self;
                     self.context.save();
                     // call each render function and pass rendererPayload
-                    for (var _i = 0, _a = self._animationBuffer; _i < _a.length; _i++) {
+                    for (var _i = 0, _a = self._rendererBuffer; _i < _a.length; _i++) {
                         var renderer = _a[_i];
                         try {
                             renderer(payload);
@@ -212,6 +216,25 @@
                             self._loop = false;
                         }
                     }
+                    // loop through the list of RenderQueues and call the render functions
+                    // within each
+                    for (var _b = 0, _c = self._renderQueueBuffer; _b < _c.length; _b++) {
+                        var rq = _c[_b];
+                        for (var _d = 0, _e = rq.rendererBuffer; _d < _e.length; _d++) {
+                            var renderer = _e[_d];
+                            try {
+                                renderer(payload);
+                            }
+                            catch (e) {
+                                Error('Renderer function "' +
+                                    renderer.name +
+                                    '" threw an uncaught exception: "' +
+                                    e +
+                                    '" ');
+                                self._loop = false;
+                            }
+                        }
+                    }
                     self.context.restore();
                 }
                 var callback = function () {
@@ -223,7 +246,6 @@
         };
         return Loop;
     }());
-    //# sourceMappingURL=Loop.js.map
 
     /*! *****************************************************************************
     Copyright (c) Microsoft Corporation. All rights reserved.
@@ -444,9 +466,6 @@
          * @returns - an object containing the boundary points of the textbox
          */
         TextBox.prototype.bounds = function (x, y, h, w) {
-            var _isBounds = function (tbd) {
-                return tbd.x1 !== undefined;
-            };
             // Corner points are assigned clockwise from bottom left:
             /*
              *   (x2, y2) *--------------* (x3, y3)
@@ -469,7 +488,7 @@
                 };
                 this._modified = true;
             }
-            else if (x !== undefined && _isBounds(x)) {
+            else if (x !== undefined) {
                 this._bounds = x;
                 this._modified = true;
             }
@@ -1008,16 +1027,22 @@
             this._h = bounds.h;
             this._w = bounds.w;
         }
-        TextBoxAnim.prototype.move = function (state) {
+        TextBoxAnim.prototype.move = function (state, nextAnimation) {
             this._elapsed += state.deltaTime;
             if (this._elapsed < this._duration) {
                 var xPos = this._easingFunc(this._elapsed, this._origin.x, this._destination.x, this._duration);
                 var yPos = this._easingFunc(this._elapsed, this._origin.y, this._destination.y, this._duration);
                 this._box.bounds(xPos, yPos, this._h, this._w);
             }
+            else {
+                if (nextAnimation !== undefined)
+                    nextAnimation();
+            }
+            this._box.renderer(state);
         };
         return TextBoxAnim;
     }());
+    //# sourceMappingURL=TextBoxAnim.js.map
 
     exports.FontGroup = FontGroup;
     exports.Loop = Loop;

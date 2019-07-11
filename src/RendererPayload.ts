@@ -1,3 +1,5 @@
+import { Loop } from "./Loop";
+
 const empty = () => false;
 
 export class RendererPayload {
@@ -10,6 +12,7 @@ export class RendererPayload {
     public frameCount: number;
     public startTime: number;
     public fps: number;
+    public loop: Loop;
 
     constructor() {
         this.canvas = null;
@@ -21,5 +24,6 @@ export class RendererPayload {
         this.frameCount = 0;
         this.startTime = 0;
         this.fps = 0;
+        this.loop = null;
     }
 }

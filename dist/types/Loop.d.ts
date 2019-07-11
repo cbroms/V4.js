@@ -1,3 +1,7 @@
+import { RenderQueue } from "./RenderQueue";
+declare type Renderer = {
+    (rendererPayload: object): void;
+};
 /**
  * @exports V4.Loop
  * @class
@@ -5,7 +9,8 @@
 export declare class Loop {
     private _loop;
     private _frameCount;
-    private _animationBuffer;
+    private _rendererBuffer;
+    private _renderQueueBuffer;
     private _backgroundColor;
     private _fps;
     private _fpsInterval;
@@ -39,12 +44,10 @@ export declare class Loop {
      */
     framesPerSecond(num: number): number;
     /**
-     * Add a renderer function to the animation
-     * @param renderer - the render function to be executed
+     * Add a renderer function or RenderQueue to the animation
+     * @param renderer - the render function or RenderQueue to be executed
      */
-    addToLoop(renderer: {
-        (rendererPayload: object): void;
-    }): void;
+    addToLoop(renderer: Renderer | RenderQueue): void;
     /**
      * Start the canvas animation
      */
@@ -59,3 +62,4 @@ export declare class Loop {
      */
     _renderLoop(self: this): void;
 }
+export {};

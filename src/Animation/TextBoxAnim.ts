@@ -36,7 +36,7 @@ export class TextBoxAnim {
         this._w = bounds.w;
     }
 
-    move(state: RendererPayload) {
+    move(state: RendererPayload, nextAnimation?: any) {
         this._elapsed += state.deltaTime;
 
         if (this._elapsed < this._duration) {
@@ -53,6 +53,9 @@ export class TextBoxAnim {
                 this._duration
             );
             this._box.bounds(xPos, yPos, this._h, this._w);
+        } else {
+            if (nextAnimation !== undefined) nextAnimation();
         }
+        this._box.renderer(state);
     }
 }
