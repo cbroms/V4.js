@@ -12,19 +12,14 @@
 }(this, function (exports, opentype_js) { 'use strict';
 
     /**
-     * The default background renderer function
-     * @param state - the current state of the animation
+     * Create a new error and print it to the console
+     * @param newError - error string to print
+     * @returns - false
      */
-    var backgroundRenderer = function (state) {
-        state.context.fillStyle = state.backgroundColor;
-        state.context.fillRect(0, 0, state.canvas.width, state.canvas.height);
-    };
-    /**
-     * Renderer that clears previous canvas
-     * @param state - the current state of the animation
-     */
-    var clearPrevRenderer = function (state) {
-        state.context.clearRect(0, 0, state.canvas.width, state.canvas.height);
+    var Error = function (newError) {
+        var errorString = "V4.js Error => ";
+        console.error(errorString + newError);
+        return false;
     };
 
     var empty = function () { return false; };
@@ -45,6 +40,22 @@
     }());
 
     /**
+     * The default background renderer function
+     * @param state - the current state of the animation
+     */
+    var backgroundRenderer = function (state) {
+        state.context.fillStyle = state.backgroundColor;
+        state.context.fillRect(0, 0, state.canvas.width, state.canvas.height);
+    };
+    /**
+     * Renderer that clears previous canvas
+     * @param state - the current state of the animation
+     */
+    var clearPrevRenderer = function (state) {
+        state.context.clearRect(0, 0, state.canvas.width, state.canvas.height);
+    };
+
+    /**
      * @exports V4.RenderQueue
      * @class
      */
@@ -63,8 +74,9 @@
          */
         RenderQueue.prototype.push = function (renderer, onDone) {
             var done = function () { };
-            if (onDone !== undefined)
+            if (onDone !== undefined) {
                 done = onDone;
+            }
             var renderPacket = { r: renderer, d: done };
             this._rendererBuffer.push(renderPacket);
         };
@@ -95,17 +107,6 @@
         };
         return RenderQueue;
     }());
-
-    /**
-     * Create a new error and print it to the console
-     * @param newError - error string to print
-     * @returns - false
-     */
-    var Error = function (newError) {
-        var errorString = "V4.js Error => ";
-        console.error(errorString + newError);
-        return false;
-    };
 
     /**
      * @exports V4.Loop
@@ -147,10 +148,12 @@
         Loop.prototype.hasCanvas = function (quietly) {
             if (quietly === void 0) { quietly = true; }
             if (!this.canvas) {
-                if (quietly)
+                if (quietly) {
                     return false;
-                else
+                }
+                else {
                     Error("Trying to access null canvas");
+                }
             }
             return true;
         };
@@ -162,10 +165,12 @@
         Loop.prototype.hasContext = function (quietly) {
             if (quietly === void 0) { quietly = true; }
             if (!this.context) {
-                if (quietly)
+                if (quietly) {
                     return false;
-                else
+                }
+                else {
                     Error("Trying to access null canvas context");
+                }
             }
             return true;
         };
@@ -175,8 +180,9 @@
          * @returns - the background color, in hex
          */
         Loop.prototype.backgroundColor = function (color) {
-            if (color)
+            if (color) {
                 this._backgroundColor = color;
+            }
             return this._backgroundColor;
         };
         /**
@@ -196,10 +202,12 @@
          * @param renderer - the render function or RenderQueue object to be executed
          */
         Loop.prototype.addToLoop = function (renderer) {
-            if (renderer instanceof RenderQueue)
+            if (renderer instanceof RenderQueue) {
                 this._renderQueueBuffer.push(renderer);
-            else
+            }
+            else {
                 this._rendererBuffer.push(renderer);
+            }
         };
         /**
          * Start the canvas animation
@@ -237,7 +245,7 @@
                     self._frameCount += 1;
                     var sinceStart = now - self._startTime;
                     var fps = Math.round(1000 / (sinceStart / self._frameCount));
-                    //console.log(fps);
+                    // console.log(fps);
                     // create the rendererPayload object to be sent to each render function
                     var payload = new RendererPayload();
                     payload.canvas = self.canvas;
@@ -377,6 +385,7 @@
                         case 1:
                             if (!(_i < _a.length)) return [3 /*break*/, 4];
                             i = _a[_i];
+                            if (!variants.hasOwnProperty(i)) return [3 /*break*/, 3];
                             return [4 /*yield*/, this._load(urls[i])];
                         case 2:
                             font = _c.sent();
@@ -486,10 +495,10 @@
             this._underline = false;
             this._chunks = null;
             this._textStats = {
-                textWidth: 0,
                 textHeight: 0,
-                totalTextHeight: 0,
-                textOffsetBottom: this._fontSize / 3 // line height
+                textOffsetBottom: this._fontSize / 3,
+                textWidth: 0,
+                totalTextHeight: 0
             };
             this.renderer = this.renderer.bind(this);
         }
@@ -511,16 +520,16 @@
              */
             if (x !== undefined && y !== undefined && h !== undefined && w !== undefined) {
                 this._bounds = {
-                    x1: x,
-                    y1: y,
-                    x2: x,
-                    y2: y - h,
-                    x3: x + w,
-                    y3: y - h,
-                    x4: x + w,
-                    y4: y,
+                    h: h,
                     w: w,
-                    h: h
+                    x1: x,
+                    x2: x,
+                    x3: x + w,
+                    x4: x + w,
+                    y1: y,
+                    y2: y - h,
+                    y3: y - h,
+                    y4: y
                 };
                 this._modified = true;
             }
@@ -539,8 +548,9 @@
         TextBox.prototype.text = function (newText, fontSize) {
             if (newText !== undefined) {
                 this._text = newText;
-                if (fontSize !== undefined)
+                if (fontSize !== undefined) {
                     this._fontSize = fontSize;
+                }
                 var absPath = this.font.getPath(this._text, 0, 0, this._fontSize);
                 var bb = absPath.getBoundingBox();
                 this._textStats.textHeight = bb.y2 - bb.y1;
@@ -604,6 +614,55 @@
             return this._underline;
         };
         /**
+         * The renderer function for this text box
+         * @param state - the state object
+         */
+        TextBox.prototype.renderer = function (state) {
+            var ctx = state.context;
+            ctx.save();
+            // create clipping mask
+            ctx.beginPath();
+            ctx.moveTo(this._bounds.x1, this._bounds.y1);
+            ctx.lineTo(this._bounds.x2, this._bounds.y2);
+            ctx.lineTo(this._bounds.x4, this._bounds.y4);
+            ctx.moveTo(this._bounds.x3, this._bounds.y3);
+            ctx.lineTo(this._bounds.x4, this._bounds.y4);
+            ctx.lineTo(this._bounds.x2, this._bounds.y2);
+            ctx.closePath();
+            ctx.clip();
+            if (this._debug) {
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = "red";
+                ctx.beginPath();
+                ctx.moveTo(this._bounds.x1, this._bounds.y1);
+                ctx.lineTo(this._bounds.x2, this._bounds.y2);
+                ctx.moveTo(this._bounds.x2, this._bounds.y2);
+                ctx.lineTo(this._bounds.x3, this._bounds.y3);
+                ctx.moveTo(this._bounds.x3, this._bounds.y3);
+                ctx.lineTo(this._bounds.x4, this._bounds.y4);
+                ctx.moveTo(this._bounds.x4, this._bounds.y4);
+                ctx.lineTo(this._bounds.x1, this._bounds.y1);
+                ctx.closePath();
+                ctx.stroke();
+            }
+            // const drawPos = this._animating
+            //     ? this._calculateTextRenderXY()
+            //     : this._drawPos;
+            if (this._modified) {
+                this._calculateTextRenderXY();
+                this._modified = false;
+            }
+            for (var _i = 0, _a = this._chunks; _i < _a.length; _i++) {
+                var chunk = _a[_i];
+                // render font
+                var absPath = this.font.getPath(chunk.text, chunk.pos.x, chunk.pos.y, this._fontSize);
+                var drawPath = new Path2D(absPath.toPathData(2));
+                ctx.fillStyle = "white";
+                ctx.fill(drawPath);
+            }
+            ctx.restore();
+        };
+        /**
          * Create chunks of text such that each is less than the width of the
          * textbox plus the vertical margins
          */
@@ -623,9 +682,9 @@
                 }
                 else {
                     computedChunks.push({
-                        text: currentChunk,
-                        pos: { x: 0, y: 0 },
                         num: computedChunks.length + 1,
+                        pos: { x: 0, y: 0 },
+                        text: currentChunk,
                         width: currentWidth
                     });
                     currentChunk = word;
@@ -638,9 +697,9 @@
                 currentWidth = bb.x2 - bb.x1;
             }
             computedChunks.push({
-                text: currentChunk,
-                pos: { x: 0, y: 0 },
                 num: computedChunks.length + 1,
+                pos: { x: 0, y: 0 },
+                text: currentChunk,
                 width: currentWidth
             });
             this._textStats.totalTextHeight = computedChunks.length * this._textStats.textHeight;
@@ -695,56 +754,6 @@
             }
             return chunksCopy;
         };
-        TextBox.prototype._calculateUnderlineRenderXY = function () { };
-        /**
-         * The renderer function for this text box
-         * @param state - the state object
-         */
-        TextBox.prototype.renderer = function (state) {
-            var ctx = state.context;
-            ctx.save();
-            //create clipping mask
-            ctx.beginPath();
-            ctx.moveTo(this._bounds.x1, this._bounds.y1);
-            ctx.lineTo(this._bounds.x2, this._bounds.y2);
-            ctx.lineTo(this._bounds.x4, this._bounds.y4);
-            ctx.moveTo(this._bounds.x3, this._bounds.y3);
-            ctx.lineTo(this._bounds.x4, this._bounds.y4);
-            ctx.lineTo(this._bounds.x2, this._bounds.y2);
-            ctx.closePath();
-            ctx.clip();
-            if (this._debug) {
-                ctx.lineWidth = 1;
-                ctx.strokeStyle = "red";
-                ctx.beginPath();
-                ctx.moveTo(this._bounds.x1, this._bounds.y1);
-                ctx.lineTo(this._bounds.x2, this._bounds.y2);
-                ctx.moveTo(this._bounds.x2, this._bounds.y2);
-                ctx.lineTo(this._bounds.x3, this._bounds.y3);
-                ctx.moveTo(this._bounds.x3, this._bounds.y3);
-                ctx.lineTo(this._bounds.x4, this._bounds.y4);
-                ctx.moveTo(this._bounds.x4, this._bounds.y4);
-                ctx.lineTo(this._bounds.x1, this._bounds.y1);
-                ctx.closePath();
-                ctx.stroke();
-            }
-            // const drawPos = this._animating
-            //     ? this._calculateTextRenderXY()
-            //     : this._drawPos;
-            if (this._modified) {
-                this._calculateTextRenderXY();
-                this._modified = false;
-            }
-            for (var _i = 0, _a = this._chunks; _i < _a.length; _i++) {
-                var chunk = _a[_i];
-                // render font
-                var absPath = this.font.getPath(chunk.text, chunk.pos.x, chunk.pos.y, this._fontSize);
-                var drawPath = new Path2D(absPath.toPathData(2));
-                ctx.fillStyle = "white";
-                ctx.fill(drawPath);
-            }
-            ctx.restore();
-        };
         return TextBox;
     }());
 
@@ -776,105 +785,102 @@
      * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
      * OF THE POSSIBILITY OF SUCH DAMAGE.
      */
+
     /**
      * Easing functions, originally from Rober Penner, javascript implementation from
      * https://github.com/chenglou/tween-functions, typescript port unique to this lib
      */
-    var Easing = {
-        linear: function (t, b, end, d) {
-            var c = end - b;
+    const Easing = {
+        linear: (t, b, end, d) => {
+            const c = end - b;
             return (c * t) / d + b;
         },
-        easeInQuad: function (t, b, end, d) {
-            var c = end - b;
+        easeInQuad: (t, b, end, d) => {
+            const c = end - b;
             return c * (t /= d) * t + b;
         },
-        easeOutQuad: function (t, b, end, d) {
-            var c = end - b;
+        easeOutQuad: (t, b, end, d) => {
+            const c = end - b;
             return -c * (t /= d) * (t - 2) + b;
         },
-        easeInOutQuad: function (t, b, end, d) {
-            var c = end - b;
+        easeInOutQuad: (t, b, end, d) => {
+            const c = end - b;
             if ((t /= d / 2) < 1) {
                 return (c / 2) * t * t + b;
-            }
-            else {
+            } else {
                 return (-c / 2) * (--t * (t - 2) - 1) + b;
             }
         },
-        easeInCubic: function (t, b, end, d) {
-            var c = end - b;
+        easeInCubic: (t, b, end, d) => {
+            const c = end - b;
             return c * (t /= d) * t * t + b;
         },
-        easeOutCubic: function (t, b, end, d) {
-            var c = end - b;
+        easeOutCubic: (t, b, end, d) => {
+            const c = end - b;
             return c * ((t = t / d - 1) * t * t + 1) + b;
         },
-        easeInOutCubic: function (t, b, end, d) {
-            var c = end - b;
+        easeInOutCubic: (t, b, end, d) => {
+            const c = end - b;
             if ((t /= d / 2) < 1) {
                 return (c / 2) * t * t * t + b;
-            }
-            else {
+            } else {
                 return (c / 2) * ((t -= 2) * t * t + 2) + b;
             }
         },
-        easeInQuart: function (t, b, end, d) {
-            var c = end - b;
+        easeInQuart: (t, b, end, d) => {
+            const c = end - b;
             return c * (t /= d) * t * t * t + b;
         },
-        easeOutQuart: function (t, b, end, d) {
-            var c = end - b;
+        easeOutQuart: (t, b, end, d) => {
+            const c = end - b;
             return -c * ((t = t / d - 1) * t * t * t - 1) + b;
         },
-        easeInOutQuart: function (t, b, end, d) {
-            var c = end - b;
+        easeInOutQuart: (t, b, end, d) => {
+            const c = end - b;
             if ((t /= d / 2) < 1) {
                 return (c / 2) * t * t * t * t + b;
-            }
-            else {
+            } else {
                 return (-c / 2) * ((t -= 2) * t * t * t - 2) + b;
             }
         },
-        easeInQuint: function (t, b, end, d) {
-            var c = end - b;
+        easeInQuint: (t, b, end, d) => {
+            const c = end - b;
             return c * (t /= d) * t * t * t * t + b;
         },
-        easeOutQuint: function (t, b, end, d) {
-            var c = end - b;
+        easeOutQuint: (t, b, end, d) => {
+            const c = end - b;
             return c * ((t = t / d - 1) * t * t * t * t + 1) + b;
         },
-        easeInOutQuint: function (t, b, end, d) {
-            var c = end - b;
+        easeInOutQuint: (t, b, end, d) => {
+            const c = end - b;
             if ((t /= d / 2) < 1) {
                 return (c / 2) * t * t * t * t * t + b;
-            }
-            else {
+            } else {
                 return (c / 2) * ((t -= 2) * t * t * t * t + 2) + b;
             }
         },
-        easeInSine: function (t, b, end, d) {
-            var c = end - b;
+        easeInSine: (t, b, end, d) => {
+            const c = end - b;
             return -c * Math.cos((t / d) * (Math.PI / 2)) + c + b;
         },
-        easeOutSine: function (t, b, end, d) {
-            var c = end - b;
+        easeOutSine: (t, b, end, d) => {
+            const c = end - b;
             return c * Math.sin((t / d) * (Math.PI / 2)) + b;
         },
-        easeInOutSine: function (t, b, end, d) {
-            var c = end - b;
+        easeInOutSine: (t, b, end, d) => {
+            const c = end - b;
             return (-c / 2) * (Math.cos((Math.PI * t) / d) - 1) + b;
         },
-        easeInExpo: function (t, b, end, d) {
-            var c = end - b;
+        easeInExpo: (t, b, end, d) => {
+            const c = end - b;
             return t == 0 ? b : c * Math.pow(2, 10 * (t / d - 1)) + b;
         },
-        easeOutExpo: function (t, b, end, d) {
-            var c = end - b;
+        easeOutExpo: (t, b, end, d) => {
+            const c = end - b;
             return t == d ? b + c : c * (-Math.pow(2, (-10 * t) / d) + 1) + b;
         },
-        easeInOutExpo: function (t, b, end, d) {
-            var c = end - b;
+        easeInOutExpo: (t, b, end, d) => {
+            const c = end - b;
             if (t === 0) {
                 return b;
             }
@@ -883,38 +889,35 @@
             }
             if ((t /= d / 2) < 1) {
                 return (c / 2) * Math.pow(2, 10 * (t - 1)) + b;
-            }
-            else {
+            } else {
                 return (c / 2) * (-Math.pow(2, -10 * --t) + 2) + b;
             }
         },
-        easeInCirc: function (t, b, end, d) {
-            var c = end - b;
+        easeInCirc: (t, b, end, d) => {
+            const c = end - b;
             return -c * (Math.sqrt(1 - (t /= d) * t) - 1) + b;
         },
-        easeOutCirc: function (t, b, end, d) {
-            var c = end - b;
+        easeOutCirc: (t, b, end, d) => {
+            const c = end - b;
             return c * Math.sqrt(1 - (t = t / d - 1) * t) + b;
         },
-        easeInOutCirc: function (t, b, end, d) {
-            var c = end - b;
+        easeInOutCirc: (t, b, end, d) => {
+            const c = end - b;
             if ((t /= d / 2) < 1) {
                 return (-c / 2) * (Math.sqrt(1 - t * t) - 1) + b;
-            }
-            else {
+            } else {
                 return (c / 2) * (Math.sqrt(1 - (t -= 2) * t) + 1) + b;
             }
         },
-        easeInElastic: function (t, b, end, d) {
-            var c = end - b;
-            var a, p, s;
+        easeInElastic: (t, b, end, d) => {
+            const c = end - b;
+            let a, p, s;
             s = 1.70158;
             p = 0;
             a = c;
             if (t === 0) {
                 return b;
-            }
-            else if ((t /= d) === 1) {
+            } else if ((t /= d) === 1) {
                 return b + c;
             }
             if (!p) {
@@ -923,22 +926,20 @@
             if (a < Math.abs(c)) {
                 a = c;
                 s = p / 4;
-            }
-            else {
+            } else {
                 s = (p / (2 * Math.PI)) * Math.asin(c / a);
             }
             return -(a * Math.pow(2, 10 * (t -= 1)) * Math.sin(((t * d - s) * (2 * Math.PI)) / p)) + b;
         },
-        easeOutElastic: function (t, b, end, d) {
-            var c = end - b;
-            var a, p, s;
+        easeOutElastic: function(t, b, end, d) {
+            const c = end - b;
+            let a, p, s;
             s = 1.70158;
             p = 0;
             a = c;
             if (t === 0) {
                 return b;
-            }
-            else if ((t /= d) === 1) {
+            } else if ((t /= d) === 1) {
                 return b + c;
             }
             if (!p) {
@@ -947,22 +948,20 @@
             if (a < Math.abs(c)) {
                 a = c;
                 s = p / 4;
-            }
-            else {
+            } else {
                 s = (p / (2 * Math.PI)) * Math.asin(c / a);
             }
             return a * Math.pow(2, -10 * t) * Math.sin(((t * d - s) * (2 * Math.PI)) / p) + c + b;
         },
-        easeInOutElastic: function (t, b, end, d) {
-            var c = end - b;
-            var a, p, s;
+        easeInOutElastic: (t, b, end, d) => {
+            const c = end - b;
+            let a, p, s;
             s = 1.70158;
             p = 0;
             a = c;
             if (t === 0) {
                 return b;
-            }
-            else if ((t /= d / 2) === 2) {
+            } else if ((t /= d / 2) === 2) {
                 return b + c;
             }
             if (!p) {
@@ -971,78 +970,75 @@
             if (a < Math.abs(c)) {
                 a = c;
                 s = p / 4;
-            }
-            else {
+            } else {
                 s = (p / (2 * Math.PI)) * Math.asin(c / a);
             }
             if (t < 1) {
-                return (-0.5 *
-                    (a * Math.pow(2, 10 * (t -= 1)) * Math.sin(((t * d - s) * (2 * Math.PI)) / p)) +
-                    b);
-            }
-            else {
-                return (a *
-                    Math.pow(2, -10 * (t -= 1)) *
-                    Math.sin(((t * d - s) * (2 * Math.PI)) / p) *
-                    0.5 +
+                return (
+                    -0.5 *
+                        (a * Math.pow(2, 10 * (t -= 1)) * Math.sin(((t * d - s) * (2 * Math.PI)) / p)) +
+                    b
+                );
+            } else {
+                return (
+                    a *
+                        Math.pow(2, -10 * (t -= 1)) *
+                        Math.sin(((t * d - s) * (2 * Math.PI)) / p) *
+                        0.5 +
                     c +
-                    b);
+                    b
+                );
             }
         },
-        easeInBack: function (t, b, end, d, s) {
-            var c = end - b;
+        easeInBack: (t, b, end, d, s) => {
+            const c = end - b;
             if (s === void 0) {
                 s = 1.70158;
             }
             return c * (t /= d) * t * ((s + 1) * t - s) + b;
         },
-        easeOutBack: function (t, b, end, d, s) {
-            var c = end - b;
+        easeOutBack: (t, b, end, d, s) => {
+            const c = end - b;
             if (s === void 0) {
                 s = 1.70158;
             }
             return c * ((t = t / d - 1) * t * ((s + 1) * t + s) + 1) + b;
         },
-        easeInOutBack: function (t, b, end, d, s) {
-            var c = end - b;
+        easeInOutBack: (t, b, end, d, s) => {
+            const c = end - b;
             if (s === void 0) {
                 s = 1.70158;
             }
             if ((t /= d / 2) < 1) {
                 return (c / 2) * (t * t * (((s *= 1.525) + 1) * t - s)) + b;
-            }
-            else {
+            } else {
                 return (c / 2) * ((t -= 2) * t * (((s *= 1.525) + 1) * t + s) + 2) + b;
             }
         },
-        easeInBounce: function (t, b, end, d) {
-            var c = end - b;
-            var v = Easing.easeOutBounce(d - t, 0, c, d);
+        easeInBounce: (t, b, end, d) => {
+            const c = end - b;
+            const v = Easing.easeOutBounce(d - t, 0, c, d);
             return c - v + b;
         },
-        easeOutBounce: function (t, b, end, d) {
-            var c = end - b;
+        easeOutBounce: (t, b, end, d) => {
+            const c = end - b;
             if ((t /= d) < 1 / 2.75) {
                 return c * (7.5625 * t * t) + b;
-            }
-            else if (t < 2 / 2.75) {
+            } else if (t < 2 / 2.75) {
                 return c * (7.5625 * (t -= 1.5 / 2.75) * t + 0.75) + b;
-            }
-            else if (t < 2.5 / 2.75) {
+            } else if (t < 2.5 / 2.75) {
                 return c * (7.5625 * (t -= 2.25 / 2.75) * t + 0.9375) + b;
-            }
-            else {
+            } else {
                 return c * (7.5625 * (t -= 2.625 / 2.75) * t + 0.984375) + b;
             }
         },
-        easeInOutBounce: function (t, b, end, d) {
-            var c = end - b;
-            var v;
+        easeInOutBounce: (t, b, end, d) => {
+            const c = end - b;
+            let v;
             if (t < d / 2) {
                 v = Easing.easeInBounce(t * 2, 0, c, d);
                 return v * 0.5 + b;
-            }
-            else {
+            } else {
                 v = Easing.easeOutBounce(t * 2 - d, 0, c, d);
                 return v * 0.5 + c * 0.5 + b;
             }
@@ -1056,7 +1052,7 @@
             this._destination = destination;
             this._elapsed = 0;
             this._duration = duration !== undefined ? duration : 1.5;
-            this._easingFunc = easing !== undefined ? Easing[easing] : Easing["easeInQuad"];
+            this._easingFunc = easing !== undefined ? Easing[easing] : Easing.easeInQuad;
             this.renderer = this.renderer.bind(this);
             var bounds = box.bounds();
             this._h = bounds.h;
@@ -1070,8 +1066,9 @@
                 this._box.bounds(xPos, yPos, this._h, this._w);
             }
             else {
-                if (nextAnimation !== undefined)
+                if (nextAnimation !== undefined) {
                     nextAnimation();
+                }
                 return false;
             }
             this._box.renderer(state);

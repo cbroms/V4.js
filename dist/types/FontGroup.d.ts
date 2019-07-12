@@ -4,9 +4,9 @@ import { Font } from "opentype.js";
  * @class
  */
 export declare class FontGroup {
+    name: string;
     private _fonts;
     private _variants;
-    name: string;
     /**
      * Create a new Font object
      * @param name - the font's name

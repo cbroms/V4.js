@@ -1,12 +1,12 @@
 import { RenderQueue } from "./RenderQueue";
-declare type Renderer = {
-    (rendererPayload: object): void;
-};
+declare type Renderer = (rendererPayload: object) => void;
 /**
  * @exports V4.Loop
  * @class
  */
 export declare class Loop {
+    canvas: HTMLCanvasElement | null;
+    context: CanvasRenderingContext2D | null;
     private _loop;
     private _frameCount;
     private _rendererBuffer;
@@ -16,8 +16,6 @@ export declare class Loop {
     private _fpsInterval;
     private _startTime;
     private _then;
-    canvas: HTMLCanvasElement | null;
-    context: CanvasRenderingContext2D | null;
     constructor(canvas: HTMLCanvasElement | null);
     /**
      * Check the status of the canvas

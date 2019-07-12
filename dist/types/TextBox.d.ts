@@ -2,7 +2,7 @@ import { Font } from "opentype.js";
 import { RendererPayload } from "./RendererPayload";
 declare type VerticalAlignOpts = "BOTTOM" | "TOP" | "CENTER";
 declare type HorizontalAlignOpts = "RIGHT" | "LEFT" | "CENTER";
-declare type Bounds = {
+interface IBounds {
     x1: number;
     x2: number;
     x3: number;
@@ -13,22 +13,13 @@ declare type Bounds = {
     y4: number;
     w: number;
     h: number;
-};
-declare type DrawPos = {
-    x: number;
-    y: number;
-};
-declare type Chunk = {
-    text: string;
-    pos: DrawPos;
-    num: number;
-    width: number;
-};
+}
 /**
  * @exports V4.TextBox
  * @class
  */
 export declare class TextBox {
+    font: Font;
     private _text;
     private _fontSize;
     private _modified;
@@ -39,7 +30,6 @@ export declare class TextBox {
     private _verticalAlign;
     private _horizontalAlign;
     private _bounds;
-    font: Font;
     /**
      * Create a new TextBox object
      * @param font - the font object
@@ -50,7 +40,7 @@ export declare class TextBox {
      * @param bounds - specific bounds for the function (includes points defined with (x1,y1) - (x4,y4) and h and w)
      * @returns - the new TextBox object
      */
-    constructor(font: Font, x?: number | Bounds, y?: number, h?: number, w?: number);
+    constructor(font: Font, x?: number | IBounds, y?: number, h?: number, w?: number);
     /**
      * Get/set the textbox's boundaries
      * @param x - the x coordinate of the text box's bottom left corner, or an object containing specific bounds for the textbox
@@ -59,7 +49,7 @@ export declare class TextBox {
      * @param w - the width, in pixels, of the text box
      * @returns - an object containing the boundary points of the textbox
      */
-    bounds(x?: number | Bounds, y?: number, h?: number, w?: number): Bounds;
+    bounds(x?: number | IBounds, y?: number, h?: number, w?: number): IBounds;
     /**
      * Get/set the content of the text box
      * @param newText - the text
@@ -92,20 +82,19 @@ export declare class TextBox {
      */
     underline(underline?: boolean): boolean;
     /**
-     * Create chunks of text such that each is less than the width of the
-     * textbox plus the vertical margins
-     */
-    _createChunks(): void;
-    /**
-     * Calculate the x and y coordinates to start drawing the text
-     * @returns - the x and y coords, via result.x and result.y
-     */
-    _calculateTextRenderXY(): Chunk[];
-    _calculateUnderlineRenderXY(): void;
-    /**
      * The renderer function for this text box
      * @param state - the state object
      */
     renderer(state: RendererPayload): void;
+    /**
+     * Create chunks of text such that each is less than the width of the
+     * textbox plus the vertical margins
+     */
+    private _createChunks;
+    /**
+     * Calculate the x and y coordinates to start drawing the text
+     * @returns - the x and y coords, via result.x and result.y
+     */
+    private _calculateTextRenderXY;
 }
 export {};

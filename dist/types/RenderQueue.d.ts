@@ -1,14 +1,10 @@
 import { RendererPayload } from "./RendererPayload";
-declare type Renderer = {
-    (rendererPayload: object): boolean;
-};
-declare type OnDone = {
-    (): void;
-};
-declare type QueuePacket = {
+declare type Renderer = (rendererPayload: object) => boolean;
+declare type OnDone = () => void;
+interface IQueuePacket {
     r: Renderer;
     d: OnDone;
-};
+}
 /**
  * @exports V4.RenderQueue
  * @class
@@ -30,7 +26,7 @@ export declare class RenderQueue {
      * Remove the last renderer and done function packet from the queue
      * @returns - a packet containing the the renderer and done functions
      */
-    pop(): QueuePacket;
+    pop(): IQueuePacket;
     /**
      * The renderer for the queue- calls all render functions in the queue
      * @param state - the current state of the render loop

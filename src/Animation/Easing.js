@@ -31,20 +31,20 @@
  * Easing functions, originally from Rober Penner, javascript implementation from
  * https://github.com/chenglou/tween-functions, typescript port unique to this lib
  */
-export const Easing: any = {
-    linear: (t: number, b: number, end: number, d: number): number => {
+export const Easing = {
+    linear: (t, b, end, d) => {
         const c = end - b;
         return (c * t) / d + b;
     },
-    easeInQuad: (t: number, b: number, end: number, d: number): number => {
+    easeInQuad: (t, b, end, d) => {
         const c = end - b;
         return c * (t /= d) * t + b;
     },
-    easeOutQuad: (t: number, b: number, end: number, d: number) => {
+    easeOutQuad: (t, b, end, d) => {
         const c = end - b;
         return -c * (t /= d) * (t - 2) + b;
     },
-    easeInOutQuad: (t: number, b: number, end: number, d: number) => {
+    easeInOutQuad: (t, b, end, d) => {
         const c = end - b;
         if ((t /= d / 2) < 1) {
             return (c / 2) * t * t + b;
@@ -52,15 +52,15 @@ export const Easing: any = {
             return (-c / 2) * (--t * (t - 2) - 1) + b;
         }
     },
-    easeInCubic: (t: number, b: number, end: number, d: number): number => {
+    easeInCubic: (t, b, end, d) => {
         const c = end - b;
         return c * (t /= d) * t * t + b;
     },
-    easeOutCubic: (t: number, b: number, end: number, d: number): number => {
+    easeOutCubic: (t, b, end, d) => {
         const c = end - b;
         return c * ((t = t / d - 1) * t * t + 1) + b;
     },
-    easeInOutCubic: (t: number, b: number, end: number, d: number): number => {
+    easeInOutCubic: (t, b, end, d) => {
         const c = end - b;
         if ((t /= d / 2) < 1) {
             return (c / 2) * t * t * t + b;
@@ -68,15 +68,15 @@ export const Easing: any = {
             return (c / 2) * ((t -= 2) * t * t + 2) + b;
         }
     },
-    easeInQuart: (t: number, b: number, end: number, d: number) => {
+    easeInQuart: (t, b, end, d) => {
         const c = end - b;
         return c * (t /= d) * t * t * t + b;
     },
-    easeOutQuart: (t: number, b: number, end: number, d: number) => {
+    easeOutQuart: (t, b, end, d) => {
         const c = end - b;
         return -c * ((t = t / d - 1) * t * t * t - 1) + b;
     },
-    easeInOutQuart: (t: number, b: number, end: number, d: number): number => {
+    easeInOutQuart: (t, b, end, d) => {
         const c = end - b;
         if ((t /= d / 2) < 1) {
             return (c / 2) * t * t * t * t + b;
@@ -84,15 +84,15 @@ export const Easing: any = {
             return (-c / 2) * ((t -= 2) * t * t * t - 2) + b;
         }
     },
-    easeInQuint: (t: number, b: number, end: number, d: number): number => {
+    easeInQuint: (t, b, end, d) => {
         const c = end - b;
         return c * (t /= d) * t * t * t * t + b;
     },
-    easeOutQuint: (t: number, b: number, end: number, d: number): number => {
+    easeOutQuint: (t, b, end, d) => {
         const c = end - b;
         return c * ((t = t / d - 1) * t * t * t * t + 1) + b;
     },
-    easeInOutQuint: (t: number, b: number, end: number, d: number): number => {
+    easeInOutQuint: (t, b, end, d) => {
         const c = end - b;
         if ((t /= d / 2) < 1) {
             return (c / 2) * t * t * t * t * t + b;
@@ -100,27 +100,27 @@ export const Easing: any = {
             return (c / 2) * ((t -= 2) * t * t * t * t + 2) + b;
         }
     },
-    easeInSine: (t: number, b: number, end: number, d: number): number => {
+    easeInSine: (t, b, end, d) => {
         const c = end - b;
         return -c * Math.cos((t / d) * (Math.PI / 2)) + c + b;
     },
-    easeOutSine: (t: number, b: number, end: number, d: number): number => {
+    easeOutSine: (t, b, end, d) => {
         const c = end - b;
         return c * Math.sin((t / d) * (Math.PI / 2)) + b;
     },
-    easeInOutSine: (t: number, b: number, end: number, d: number): number => {
+    easeInOutSine: (t, b, end, d) => {
         const c = end - b;
         return (-c / 2) * (Math.cos((Math.PI * t) / d) - 1) + b;
     },
-    easeInExpo: (t: number, b: number, end: number, d: number): number => {
+    easeInExpo: (t, b, end, d) => {
         const c = end - b;
         return t == 0 ? b : c * Math.pow(2, 10 * (t / d - 1)) + b;
     },
-    easeOutExpo: (t: number, b: number, end: number, d: number): number => {
+    easeOutExpo: (t, b, end, d) => {
         const c = end - b;
         return t == d ? b + c : c * (-Math.pow(2, (-10 * t) / d) + 1) + b;
     },
-    easeInOutExpo: (t: number, b: number, end: number, d: number): number => {
+    easeInOutExpo: (t, b, end, d) => {
         const c = end - b;
         if (t === 0) {
             return b;
@@ -134,15 +134,15 @@ export const Easing: any = {
             return (c / 2) * (-Math.pow(2, -10 * --t) + 2) + b;
         }
     },
-    easeInCirc: (t: number, b: number, end: number, d: number): number => {
+    easeInCirc: (t, b, end, d) => {
         const c = end - b;
         return -c * (Math.sqrt(1 - (t /= d) * t) - 1) + b;
     },
-    easeOutCirc: (t: number, b: number, end: number, d: number): number => {
+    easeOutCirc: (t, b, end, d) => {
         const c = end - b;
         return c * Math.sqrt(1 - (t = t / d - 1) * t) + b;
     },
-    easeInOutCirc: (t: number, b: number, end: number, d: number): number => {
+    easeInOutCirc: (t, b, end, d) => {
         const c = end - b;
         if ((t /= d / 2) < 1) {
             return (-c / 2) * (Math.sqrt(1 - t * t) - 1) + b;
@@ -150,7 +150,7 @@ export const Easing: any = {
             return (c / 2) * (Math.sqrt(1 - (t -= 2) * t) + 1) + b;
         }
     },
-    easeInElastic: (t: number, b: number, end: number, d: number) => {
+    easeInElastic: (t, b, end, d) => {
         const c = end - b;
         let a, p, s;
         s = 1.70158;
@@ -172,7 +172,7 @@ export const Easing: any = {
         }
         return -(a * Math.pow(2, 10 * (t -= 1)) * Math.sin(((t * d - s) * (2 * Math.PI)) / p)) + b;
     },
-    easeOutElastic: function(t: number, b: number, end: number, d: number): number {
+    easeOutElastic: function(t, b, end, d) {
         const c = end - b;
         let a, p, s;
         s = 1.70158;
@@ -194,7 +194,7 @@ export const Easing: any = {
         }
         return a * Math.pow(2, -10 * t) * Math.sin(((t * d - s) * (2 * Math.PI)) / p) + c + b;
     },
-    easeInOutElastic: (t: number, b: number, end: number, d: number): number => {
+    easeInOutElastic: (t, b, end, d) => {
         const c = end - b;
         let a, p, s;
         s = 1.70158;
@@ -231,21 +231,21 @@ export const Easing: any = {
             );
         }
     },
-    easeInBack: (t: number, b: number, end: number, d: number, s: number): number => {
+    easeInBack: (t, b, end, d, s) => {
         const c = end - b;
         if (s === void 0) {
             s = 1.70158;
         }
         return c * (t /= d) * t * ((s + 1) * t - s) + b;
     },
-    easeOutBack: (t: number, b: number, end: number, d: number, s: number): number => {
+    easeOutBack: (t, b, end, d, s) => {
         const c = end - b;
         if (s === void 0) {
             s = 1.70158;
         }
         return c * ((t = t / d - 1) * t * ((s + 1) * t + s) + 1) + b;
     },
-    easeInOutBack: (t: number, b: number, end: number, d: number, s: number): number => {
+    easeInOutBack: (t, b, end, d, s) => {
         const c = end - b;
         if (s === void 0) {
             s = 1.70158;
@@ -256,12 +256,12 @@ export const Easing: any = {
             return (c / 2) * ((t -= 2) * t * (((s *= 1.525) + 1) * t + s) + 2) + b;
         }
     },
-    easeInBounce: (t: number, b: number, end: number, d: number): number => {
+    easeInBounce: (t, b, end, d) => {
         const c = end - b;
         const v = Easing.easeOutBounce(d - t, 0, c, d);
         return c - v + b;
     },
-    easeOutBounce: (t: number, b: number, end: number, d: number): number => {
+    easeOutBounce: (t, b, end, d) => {
         const c = end - b;
         if ((t /= d) < 1 / 2.75) {
             return c * (7.5625 * t * t) + b;
@@ -273,7 +273,7 @@ export const Easing: any = {
             return c * (7.5625 * (t -= 2.625 / 2.75) * t + 0.984375) + b;
         }
     },
-    easeInOutBounce: (t: number, b: number, end: number, d: number): number => {
+    easeInOutBounce: (t, b, end, d) => {
         const c = end - b;
         let v;
         if (t < d / 2) {

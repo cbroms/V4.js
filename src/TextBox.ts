@@ -4,14 +4,14 @@ import { RendererPayload } from "./RendererPayload";
 type VerticalAlignOpts = "BOTTOM" | "TOP" | "CENTER";
 type HorizontalAlignOpts = "RIGHT" | "LEFT" | "CENTER";
 
-type TextStats = {
+interface ITextStats {
     textWidth: number;
     textHeight: number;
     totalTextHeight: number;
     textOffsetBottom: number;
-};
+}
 
-type Bounds = {
+interface IBounds {
     x1: number;
     x2: number;
     x3: number;
@@ -22,37 +22,36 @@ type Bounds = {
     y4: number;
     w: number;
     h: number;
-};
+}
 
-type DrawPos = {
+interface IDrawPos {
     x: number;
     y: number;
-};
+}
 
-type Chunk = {
+interface IChunk {
     text: string;
-    pos: DrawPos;
+    pos: IDrawPos;
     num: number;
     width: number;
-};
+}
 
 /**
  * @exports V4.TextBox
  * @class
  */
 export class TextBox {
+    public font: Font;
     private _text: string;
     private _fontSize: number;
     private _modified: boolean;
     private _debug: boolean;
     private _underline: boolean;
-    private _chunks: Chunk[] | null;
-    private _textStats: TextStats;
+    private _chunks: IChunk[] | null;
+    private _textStats: ITextStats;
     private _verticalAlign: VerticalAlignOpts;
     private _horizontalAlign: HorizontalAlignOpts;
-    private _bounds: Bounds;
-
-    public font: Font;
+    private _bounds: IBounds;
 
     /**
      * Create a new TextBox object
@@ -64,7 +63,7 @@ export class TextBox {
      * @param bounds - specific bounds for the function (includes points defined with (x1,y1) - (x4,y4) and h and w)
      * @returns - the new TextBox object
      */
-    constructor(font: Font, x?: number | Bounds, y?: number, h?: number, w?: number) {
+    constructor(font: Font, x?: number | IBounds, y?: number, h?: number, w?: number) {
         this.font = font;
         this._text = "";
         this._fontSize = 24;
@@ -80,10 +79,10 @@ export class TextBox {
         this._underline = false;
         this._chunks = null;
         this._textStats = {
-            textWidth: 0,
             textHeight: 0,
-            totalTextHeight: 0,
-            textOffsetBottom: this._fontSize / 3 // line height
+            textOffsetBottom: this._fontSize / 3, // line height
+            textWidth: 0,
+            totalTextHeight: 0
         };
         this.renderer = this.renderer.bind(this);
     }
@@ -96,7 +95,7 @@ export class TextBox {
      * @param w - the width, in pixels, of the text box
      * @returns - an object containing the boundary points of the textbox
      */
-    bounds(x?: number | Bounds, y?: number, h?: number, w?: number): Bounds {
+    public bounds(x?: number | IBounds, y?: number, h?: number, w?: number): IBounds {
         // Corner points are assigned clockwise from bottom left:
         /*
          *   (x2, y2) *--------------* (x3, y3)
@@ -106,20 +105,20 @@ export class TextBox {
          */
         if (x !== undefined && y !== undefined && h !== undefined && w !== undefined) {
             this._bounds = {
+                h,
+                w,
                 x1: x as number,
-                y1: y,
                 x2: x as number,
-                y2: y - h,
                 x3: (x as number) + w,
-                y3: y - h,
                 x4: (x as number) + w,
-                y4: y,
-                w: w,
-                h: h
+                y1: y,
+                y2: y - h,
+                y3: y - h,
+                y4: y
             };
             this._modified = true;
         } else if (x !== undefined) {
-            this._bounds = x as Bounds;
+            this._bounds = x as IBounds;
             this._modified = true;
         }
 
@@ -132,11 +131,13 @@ export class TextBox {
      * @param fontSize - the font size
      * @returns - the text
      */
-    text(newText?: string, fontSize?: number): string {
+    public text(newText?: string, fontSize?: number): string {
         if (newText !== undefined) {
             this._text = newText;
 
-            if (fontSize !== undefined) this._fontSize = fontSize;
+            if (fontSize !== undefined) {
+                this._fontSize = fontSize;
+            }
 
             const absPath = this.font.getPath(this._text, 0, 0, this._fontSize);
             const bb = absPath.getBoundingBox();
@@ -159,7 +160,7 @@ export class TextBox {
      * @param alignment - alignment command, must be BOTTOM, CENTER, or TOP
      * @returns - the alignment
      */
-    verticalAlign(alignment?: VerticalAlignOpts): VerticalAlignOpts {
+    public verticalAlign(alignment?: VerticalAlignOpts): VerticalAlignOpts {
         if (alignment) {
             this._verticalAlign = alignment;
             this._modified = true;
@@ -173,7 +174,7 @@ export class TextBox {
      * @param alignment - alignment command, must be LEFT, CENTER, or RIGHT
      * @returns - the alignment
      */
-    horizontalAlign(alignment?: HorizontalAlignOpts): HorizontalAlignOpts {
+    public horizontalAlign(alignment?: HorizontalAlignOpts): HorizontalAlignOpts {
         if (alignment !== undefined) {
             this._horizontalAlign = alignment;
             this._modified = true;
@@ -187,7 +188,7 @@ export class TextBox {
      * @param outline - outline the text box?
      * @returns - if the text box outline is activated
      */
-    outlinePath(outline?: boolean): boolean {
+    public outlinePath(outline?: boolean): boolean {
         if (outline !== undefined) {
             this._debug = outline;
             this._modified = true;
@@ -201,7 +202,7 @@ export class TextBox {
      * @param underline - underline the text in the text box?
      * @returns - if the underlines are active
      */
-    underline(underline?: boolean): boolean {
+    public underline(underline?: boolean): boolean {
         if (underline !== null) {
             this._underline = underline;
             this._modified = true;
@@ -210,117 +211,15 @@ export class TextBox {
     }
 
     /**
-     * Create chunks of text such that each is less than the width of the
-     * textbox plus the vertical margins
-     */
-    _createChunks(): void {
-        const words = this._text.split(" ");
-        let computedChunks = [];
-        let currentWidth = 0;
-        let currentChunk = "";
-
-        for (const word of words) {
-            const curPlusWord = currentChunk !== "" ? currentChunk + " " + word : word;
-
-            const p = this.font.getPath(curPlusWord, 0, 0, this._fontSize);
-            const bb = p.getBoundingBox();
-
-            if (bb.x2 - bb.x1 < this._bounds.w) {
-                currentChunk = curPlusWord;
-                currentWidth = bb.x2 - bb.x1;
-            } else {
-                computedChunks.push({
-                    text: currentChunk,
-                    pos: { x: 0, y: 0 },
-                    num: computedChunks.length + 1,
-                    width: currentWidth
-                });
-                currentChunk = word;
-                currentWidth = 0;
-            }
-        }
-        if (currentWidth === 0) {
-            const p = this.font.getPath(currentChunk, 0, 0, this._fontSize);
-            const bb = p.getBoundingBox();
-            currentWidth = bb.x2 - bb.x1;
-        }
-        computedChunks.push({
-            text: currentChunk,
-            pos: { x: 0, y: 0 },
-            num: computedChunks.length + 1,
-            width: currentWidth
-        });
-
-        this._textStats.totalTextHeight = computedChunks.length * this._textStats.textHeight;
-
-        this._chunks = computedChunks;
-    }
-
-    /**
-     * Calculate the x and y coordinates to start drawing the text
-     * @returns - the x and y coords, via result.x and result.y
-     */
-    _calculateTextRenderXY() {
-        let x: number;
-        let y: number;
-
-        let chunksCopy = this._chunks;
-        // user gave a position, use it
-        for (let chunk of chunksCopy) {
-            // calc y
-            if (this._verticalAlign === "BOTTOM") {
-                const totalHeight =
-                    (this._textStats.textHeight + this._textStats.textOffsetBottom) *
-                    this._chunks.length;
-                y =
-                    this._bounds.y1 -
-                    ((totalHeight / this._chunks.length) * (this._chunks.length - chunk.num) +
-                        this._textStats.textOffsetBottom);
-            } else if (this._verticalAlign === "CENTER") {
-                const totalHeight =
-                    (this._textStats.textHeight + this._textStats.textOffsetBottom) *
-                    this._chunks.length;
-                const rowPosRelative =
-                    (totalHeight / this._chunks.length) * (this._chunks.length - chunk.num) +
-                    this._textStats.textOffsetBottom;
-                y = this._bounds.y1 - (this._bounds.h / 2 - totalHeight / 2) - rowPosRelative;
-            } else if (this._verticalAlign === "TOP") {
-                const totalHeight =
-                    (this._textStats.textHeight + this._textStats.textOffsetBottom) *
-                    this._chunks.length;
-                const rowPosRelative =
-                    (totalHeight / this._chunks.length) * (this._chunks.length - chunk.num) +
-                    this._textStats.textOffsetBottom;
-                y = this._bounds.y1 - (this._bounds.h - totalHeight) - rowPosRelative;
-            }
-            // calc x
-            if (this._horizontalAlign === "LEFT") {
-                x = this._bounds.x1;
-            } else if (this._horizontalAlign === "CENTER") {
-                x = this._bounds.x1 + this._bounds.w / 2 - chunk.width / 2;
-            } else if (this._horizontalAlign === "RIGHT") {
-                x = this._bounds.x1 + (this._bounds.w - chunk.width);
-            }
-
-            chunk.pos.x = x;
-            chunk.pos.y = y;
-        }
-
-        return chunksCopy;
-    }
-
-    _calculateUnderlineRenderXY() {}
-
-    /**
      * The renderer function for this text box
      * @param state - the state object
      */
-    renderer(state: RendererPayload) {
+    public renderer(state: RendererPayload) {
         const ctx = state.context;
 
         ctx.save();
 
-        //create clipping mask
+        // create clipping mask
         ctx.beginPath();
         ctx.moveTo(this._bounds.x1, this._bounds.y1);
         ctx.lineTo(this._bounds.x2, this._bounds.y2);
@@ -368,4 +267,105 @@ export class TextBox {
 
         ctx.restore();
     }
+
+    /**
+     * Create chunks of text such that each is less than the width of the
+     * textbox plus the vertical margins
+     */
+    private _createChunks(): void {
+        const words = this._text.split(" ");
+        const computedChunks = [];
+        let currentWidth = 0;
+        let currentChunk = "";
+
+        for (const word of words) {
+            const curPlusWord = currentChunk !== "" ? currentChunk + " " + word : word;
+
+            const p = this.font.getPath(curPlusWord, 0, 0, this._fontSize);
+            const bb = p.getBoundingBox();
+
+            if (bb.x2 - bb.x1 < this._bounds.w) {
+                currentChunk = curPlusWord;
+                currentWidth = bb.x2 - bb.x1;
+            } else {
+                computedChunks.push({
+                    num: computedChunks.length + 1,
+                    pos: { x: 0, y: 0 },
+                    text: currentChunk,
+                    width: currentWidth
+                });
+                currentChunk = word;
+                currentWidth = 0;
+            }
+        }
+        if (currentWidth === 0) {
+            const p = this.font.getPath(currentChunk, 0, 0, this._fontSize);
+            const bb = p.getBoundingBox();
+            currentWidth = bb.x2 - bb.x1;
+        }
+        computedChunks.push({
+            num: computedChunks.length + 1,
+            pos: { x: 0, y: 0 },
+            text: currentChunk,
+            width: currentWidth
+        });
+
+        this._textStats.totalTextHeight = computedChunks.length * this._textStats.textHeight;
+
+        this._chunks = computedChunks;
+    }
+
+    /**
+     * Calculate the x and y coordinates to start drawing the text
+     * @returns - the x and y coords, via result.x and result.y
+     */
+    private _calculateTextRenderXY() {
+        let x: number;
+        let y: number;
+
+        const chunksCopy = this._chunks;
+        // user gave a position, use it
+        for (const chunk of chunksCopy) {
+            // calc y
+            if (this._verticalAlign === "BOTTOM") {
+                const totalHeight =
+                    (this._textStats.textHeight + this._textStats.textOffsetBottom) *
+                    this._chunks.length;
+                y =
+                    this._bounds.y1 -
+                    ((totalHeight / this._chunks.length) * (this._chunks.length - chunk.num) +
+                        this._textStats.textOffsetBottom);
+            } else if (this._verticalAlign === "CENTER") {
+                const totalHeight =
+                    (this._textStats.textHeight + this._textStats.textOffsetBottom) *
+                    this._chunks.length;
+                const rowPosRelative =
+                    (totalHeight / this._chunks.length) * (this._chunks.length - chunk.num) +
+                    this._textStats.textOffsetBottom;
+                y = this._bounds.y1 - (this._bounds.h / 2 - totalHeight / 2) - rowPosRelative;
+            } else if (this._verticalAlign === "TOP") {
+                const totalHeight =
+                    (this._textStats.textHeight + this._textStats.textOffsetBottom) *
+                    this._chunks.length;
+                const rowPosRelative =
+                    (totalHeight / this._chunks.length) * (this._chunks.length - chunk.num) +
+                    this._textStats.textOffsetBottom;
+                y = this._bounds.y1 - (this._bounds.h - totalHeight) - rowPosRelative;
+            }
+            // calc x
+            if (this._horizontalAlign === "LEFT") {
+                x = this._bounds.x1;
+            } else if (this._horizontalAlign === "CENTER") {
+                x = this._bounds.x1 + this._bounds.w / 2 - chunk.width / 2;
+            } else if (this._horizontalAlign === "RIGHT") {
+                x = this._bounds.x1 + (this._bounds.w - chunk.width);
+            }
+
+            chunk.pos.x = x;
+            chunk.pos.y = y;
+        }
+
+        return chunksCopy;
+    }
+    // private _calculateUnderlineRenderXY() {}
 }

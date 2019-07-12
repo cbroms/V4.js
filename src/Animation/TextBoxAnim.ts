@@ -1,26 +1,26 @@
-import { Easing } from "./Easing";
-import { TextBox } from "../TextBox";
 import { RendererPayload } from "../RendererPayload";
+import { TextBox } from "../TextBox";
+import { Easing } from "./Easing";
 
-type Point = {
+interface IPoint {
     x: number;
     y: number;
-};
+}
 
 export class TextBoxAnim {
-    private _origin: Point;
-    private _destination: Point;
+    private _origin: IPoint;
+    private _destination: IPoint;
     private _elapsed: number;
     private _duration: number;
     private _h: number;
     private _w: number;
     private _box: TextBox;
-    private _easingFunc: { (t: number, b: number, end: number, d: number): number };
+    private _easingFunc: (t: number, b: number, end: number, d: number) => number;
 
     constructor(
         box: TextBox,
-        origin: Point,
-        destination: Point,
+        origin: IPoint,
+        destination: IPoint,
         duration?: number,
         easing?: string
     ) {
@@ -29,7 +29,7 @@ export class TextBoxAnim {
         this._destination = destination;
         this._elapsed = 0;
         this._duration = duration !== undefined ? duration : 1.5;
-        this._easingFunc = easing !== undefined ? Easing[easing] : Easing["easeInQuad"];
+        this._easingFunc = easing !== undefined ? Easing[easing] : Easing.easeInQuad;
 
         this.renderer = this.renderer.bind(this);
         const bounds = box.bounds();
@@ -37,7 +37,7 @@ export class TextBoxAnim {
         this._w = bounds.w;
     }
 
-    renderer(state: RendererPayload, nextAnimation?: any) {
+    public renderer(state: RendererPayload, nextAnimation?: any) {
         this._elapsed += state.deltaTime;
 
         if (this._elapsed < this._duration) {
@@ -55,7 +55,9 @@ export class TextBoxAnim {
             );
             this._box.bounds(xPos, yPos, this._h, this._w);
         } else {
-            if (nextAnimation !== undefined) nextAnimation();
+            if (nextAnimation !== undefined) {
+                nextAnimation();
+            }
             return false;
         }
         this._box.renderer(state);

@@ -1,9 +1,9 @@
-import { TextBox } from "../TextBox";
 import { RendererPayload } from "../RendererPayload";
-declare type Point = {
+import { TextBox } from "../TextBox";
+interface IPoint {
     x: number;
     y: number;
-};
+}
 export declare class TextBoxAnim {
     private _origin;
     private _destination;
@@ -13,7 +13,7 @@ export declare class TextBoxAnim {
     private _w;
     private _box;
     private _easingFunc;
-    constructor(box: TextBox, origin: Point, destination: Point, duration?: number, easing?: string);
+    constructor(box: TextBox, origin: IPoint, destination: IPoint, duration?: number, easing?: string);
     renderer(state: RendererPayload, nextAnimation?: any): boolean;
 }
 export {};

@@ -5,8 +5,8 @@ const empty = () => false;
 export class RendererPayload {
     public canvas: HTMLCanvasElement | null;
     public context: CanvasRenderingContext2D | null;
-    public hasContext: { (): boolean | Error };
-    public hasCanvas: { (): boolean | Error };
+    public hasContext: () => boolean | Error;
+    public hasCanvas: () => boolean | Error;
     public backgroundColor: string;
     public deltaTime: number;
     public frameCount: number;
