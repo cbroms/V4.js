@@ -46,6 +46,59 @@
     }());
 
     /**
+     * @exports V4.RenderQueue
+     * @class
+     */
+    var RenderQueue = /** @class */ (function () {
+        /**
+         * Create a new render queue
+         * @returns - the new RenderQueue object
+         */
+        function RenderQueue() {
+            this._rendererBuffer = [];
+        }
+        /**
+         * Add a renderer and on done function to the end of the queue
+         * @param renderer - a renderer function to be excecuted in the loop
+         * @param onDone - a function that will be called when the renderer function returns false
+         */
+        RenderQueue.prototype.push = function (renderer, onDone) {
+            var done = function () { };
+            if (onDone !== undefined)
+                done = onDone;
+            var renderPacket = { r: renderer, d: done };
+            this._rendererBuffer.push(renderPacket);
+        };
+        /**
+         * Remove the last renderer and done function packet from the queue
+         * @returns - a packet containing the the renderer and done functions
+         */
+        RenderQueue.prototype.pop = function () {
+            return this._rendererBuffer.pop();
+        };
+        /**
+         * The renderer for the queue- calls all render functions in the queue
+         * @param state - the current state of the render loop
+         */
+        RenderQueue.prototype.render = function (state) {
+            for (var i = 0; i < this._rendererBuffer.length; i++) {
+                var packet = this.pop();
+                // excecute the render function
+                var res = packet.r(state);
+                if (res !== undefined && !res) {
+                    // renderer is complete, call on done function
+                    packet.d();
+                }
+                else {
+                    this._rendererBuffer.push(packet);
+                }
+            }
+        };
+        return RenderQueue;
+    }());
+    //# sourceMappingURL=RenderQueue.js.map
+
+    /**
      * Create a new error and print it to the console
      * @param newError - error string to print
      * @returns - false
@@ -143,10 +196,10 @@
         };
         /**
          * Add a renderer function or RenderQueue to the animation
-         * @param renderer - the render function or RenderQueue to be executed
+         * @param renderer - the render function or RenderQueue object to be executed
          */
         Loop.prototype.addToLoop = function (renderer) {
-            if (renderer.length !== undefined)
+            if (renderer instanceof RenderQueue)
                 this._renderQueueBuffer.push(renderer);
             else
                 this._rendererBuffer.push(renderer);
@@ -220,20 +273,7 @@
                     // within each
                     for (var _b = 0, _c = self._renderQueueBuffer; _b < _c.length; _b++) {
                         var rq = _c[_b];
-                        for (var _d = 0, _e = rq.rendererBuffer; _d < _e.length; _d++) {
-                            var renderer = _e[_d];
-                            try {
-                                renderer(payload);
-                            }
-                            catch (e) {
-                                Error('Renderer function "' +
-                                    renderer.name +
-                                    '" threw an uncaught exception: "' +
-                                    e +
-                                    '" ');
-                                self._loop = false;
-                            }
-                        }
+                        rq.render(payload);
                     }
                     self.context.restore();
                 }
@@ -1023,11 +1063,12 @@
             this._elapsed = 0;
             this._duration = duration !== undefined ? duration : 1.5;
             this._easingFunc = easing !== undefined ? Easing[easing] : Easing["easeInQuad"];
+            this.renderer = this.renderer.bind(this);
             var bounds = box.bounds();
             this._h = bounds.h;
             this._w = bounds.w;
         }
-        TextBoxAnim.prototype.move = function (state, nextAnimation) {
+        TextBoxAnim.prototype.renderer = function (state, nextAnimation) {
             this._elapsed += state.deltaTime;
             if (this._elapsed < this._duration) {
                 var xPos = this._easingFunc(this._elapsed, this._origin.x, this._destination.x, this._duration);
@@ -1037,8 +1078,10 @@
             else {
                 if (nextAnimation !== undefined)
                     nextAnimation();
+                return false;
             }
             this._box.renderer(state);
+            return true;
         };
         return TextBoxAnim;
     }());
@@ -1046,6 +1089,7 @@
 
     exports.FontGroup = FontGroup;
     exports.Loop = Loop;
+    exports.RenderQueue = RenderQueue;
     exports.TextBox = TextBox;
     exports.TextBoxAnim = TextBoxAnim;
     exports.backgroundRenderer = backgroundRenderer;

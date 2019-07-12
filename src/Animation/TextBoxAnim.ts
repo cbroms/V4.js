@@ -31,12 +31,13 @@ export class TextBoxAnim {
         this._duration = duration !== undefined ? duration : 1.5;
         this._easingFunc = easing !== undefined ? Easing[easing] : Easing["easeInQuad"];
 
+        this.renderer = this.renderer.bind(this);
         const bounds = box.bounds();
         this._h = bounds.h;
         this._w = bounds.w;
     }
 
-    move(state: RendererPayload, nextAnimation?: any) {
+    renderer(state: RendererPayload, nextAnimation?: any) {
         this._elapsed += state.deltaTime;
 
         if (this._elapsed < this._duration) {
@@ -55,7 +56,9 @@ export class TextBoxAnim {
             this._box.bounds(xPos, yPos, this._h, this._w);
         } else {
             if (nextAnimation !== undefined) nextAnimation();
+            return false;
         }
         this._box.renderer(state);
+        return true;
     }
 }

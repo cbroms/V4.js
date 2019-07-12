@@ -56,8 +56,40 @@
                 textBox2.horizontalAlign("LEFT");
 
                 var elapsed = 0;
-                var anim = new V4.TextBoxAnim(textBox2, {x: 0, y:250}, {x:300, y:500}, 3, "easeInOutCubic")
-                var anim2 = new V4.TextBoxAnim(textBox2, {x:300, y:500}, {x: 0, y:250}, 3, "easeOutExpo")
+               
+                
+
+                var rq = new V4.RenderQueue();
+
+                function backAndReturn() {
+                     var anim = new V4.TextBoxAnim(textBox2, {x: 0, y:250}, {x:300, y:500}, 3, "easeInOutCubic")
+                    rq.push(anim.renderer, () => {
+                        var anim2 = new V4.TextBoxAnim(textBox2, {x:300, y:500}, {x: 0, y:250}, 3, "easeOutExpo")
+                        rq.push(anim2.renderer, () => {
+                            
+                            backAndReturn()
+                        })
+                    })
+                }
+
+                backAndReturn()
+
+                // rq.push(anim.renderer, () => {
+                //     rq.push(anim2.renderer, () => {
+
+                //         anim = new V4.TextBoxAnim(textBox2, {x: 0, y:250}, {x:300, y:500}, 3, "easeInOutCubic")
+                        
+                //         rq.push(anim.renderer, () => {
+
+                //             anim2 = new V4.TextBoxAnim(textBox2, {x:300, y:500}, {x: 0, y:250}, 3, "easeOutExpo")
+
+                //             rq.push(anim2.renderer, () => {
+                //                 loop.addToLoop(textBox2.renderer)
+                //             })
+                //         })
+                //         //loop.addToLoop(textBox2.renderer)
+                //     })
+                // })
 
                 function customRenderer(state) {
                   
@@ -78,7 +110,7 @@
                     
 
 
-                loop.addToLoop(customRenderer);
+                loop.addToLoop(rq);
                 //animator.addToAnimation(textBox2.renderer);
                 loop.framesPerSecond(30);
                 // var x = 0;

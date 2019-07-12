@@ -45,7 +45,7 @@ export declare class Loop {
     framesPerSecond(num: number): number;
     /**
      * Add a renderer function or RenderQueue to the animation
-     * @param renderer - the render function or RenderQueue to be executed
+     * @param renderer - the render function or RenderQueue object to be executed
      */
     addToLoop(renderer: Renderer | RenderQueue): void;
     /**

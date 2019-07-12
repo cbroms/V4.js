@@ -14,6 +14,6 @@ export declare class TextBoxAnim {
     private _box;
     private _easingFunc;
     constructor(box: TextBox, origin: Point, destination: Point, duration?: number, easing?: string);
-    move(state: RendererPayload, nextAnimation?: any): void;
+    renderer(state: RendererPayload, nextAnimation?: any): boolean;
 }
 export {};

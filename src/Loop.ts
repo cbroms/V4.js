@@ -107,10 +107,10 @@ export class Loop {
 
     /**
      * Add a renderer function or RenderQueue to the animation
-     * @param renderer - the render function or RenderQueue to be executed
+     * @param renderer - the render function or RenderQueue object to be executed
      */
     addToLoop(renderer: Renderer | RenderQueue): void {
-        if (renderer.length !== undefined) this._renderQueueBuffer.push(renderer as RenderQueue);
+        if (renderer instanceof RenderQueue) this._renderQueueBuffer.push(renderer as RenderQueue);
         else this._rendererBuffer.push(renderer as Renderer);
     }
 
@@ -192,20 +192,7 @@ export class Loop {
                 // loop through the list of RenderQueues and call the render functions
                 // within each
                 for (const rq of self._renderQueueBuffer) {
-                    for (const renderer of rq.rendererBuffer) {
-                        try {
-                            renderer(payload);
-                        } catch (e) {
-                            Error(
-                                'Renderer function "' +
-                                    renderer.name +
-                                    '" threw an uncaught exception: "' +
-                                    e +
-                                    '" '
-                            );
-                            self._loop = false;
-                        }
-                    }
+                    rq.render(payload);
                 }
 
                 self.context.restore();

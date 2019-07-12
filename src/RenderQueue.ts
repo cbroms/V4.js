@@ -1,10 +1,62 @@
-type Renderer = { (rendererPayload: object): void };
+import { RendererPayload } from "./RendererPayload";
 
+type Renderer = { (rendererPayload: object): boolean };
+type OnDone = { (): void };
+type QueuePacket = { r: Renderer; d: OnDone };
+
+/**
+ * @exports V4.RenderQueue
+ * @class
+ */
 export class RenderQueue {
-    public length: number;
-    public rendererBuffer: Renderer[];
+    private _rendererBuffer: QueuePacket[];
+
+    /**
+     * Create a new render queue
+     * @returns - the new RenderQueue object
+     */
     constructor() {
-        this.length = 0;
-        this.rendererBuffer = [];
+        this._rendererBuffer = [];
+    }
+
+    /**
+     * Add a renderer and on done function to the end of the queue
+     * @param renderer - a renderer function to be excecuted in the loop
+     * @param onDone - a function that will be called when the renderer function returns false
+     */
+    push(renderer: Renderer, onDone?: OnDone) {
+        let done = () => {};
+        if (onDone !== undefined) done = onDone;
+
+        const renderPacket = { r: renderer, d: done };
+        this._rendererBuffer.push(renderPacket);
+    }
+
+    /**
+     * Remove the last renderer and done function packet from the queue
+     * @returns - a packet containing the the renderer and done functions
+     */
+    pop() {
+        return this._rendererBuffer.pop();
+    }
+
+    /**
+     * The renderer for the queue- calls all render functions in the queue
+     * @param state - the current state of the render loop
+     */
+    render(state: RendererPayload) {
+        for (let i = 0; i < this._rendererBuffer.length; i++) {
+            const packet = this.pop();
+
+            // excecute the render function
+            const res = packet.r(state);
+
+            if (res !== undefined && !res) {
+                // renderer is complete, call on done function
+                packet.d();
+            } else {
+                this._rendererBuffer.push(packet);
+            }
+        }
     }
 }
