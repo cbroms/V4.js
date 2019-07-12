@@ -26,7 +26,6 @@
     var clearPrevRenderer = function (state) {
         state.context.clearRect(0, 0, state.canvas.width, state.canvas.height);
     };
-    //# sourceMappingURL=Renderers.js.map
 
     var empty = function () { return false; };
     var RendererPayload = /** @class */ (function () {
@@ -96,7 +95,6 @@
         };
         return RenderQueue;
     }());
-    //# sourceMappingURL=RenderQueue.js.map
 
     /**
      * Create a new error and print it to the console
@@ -108,7 +106,6 @@
         console.error(errorString + newError);
         return false;
     };
-    //# sourceMappingURL=Error.js.map
 
     /**
      * @exports V4.Loop
@@ -459,7 +456,6 @@
         };
         return FontGroup;
     }());
-    //# sourceMappingURL=FontGroup.js.map
 
     /**
      * @exports V4.TextBox
@@ -751,7 +747,6 @@
         };
         return TextBox;
     }());
-    //# sourceMappingURL=TextBox.js.map
 
     /*
      * Open source under the BSD License.
@@ -1053,7 +1048,6 @@
             }
         }
     };
-    //# sourceMappingURL=Easing.js.map
 
     var TextBoxAnim = /** @class */ (function () {
         function TextBoxAnim(box, origin, destination, duration, easing) {
@@ -1085,7 +1079,6 @@
         };
         return TextBoxAnim;
     }());
-    //# sourceMappingURL=TextBoxAnim.js.map
 
     exports.FontGroup = FontGroup;
     exports.Loop = Loop;

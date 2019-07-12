@@ -10,14 +10,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CBR0MS/V4.js.git"
+    "url": "git+https://github.com/cbroms/V4.js.git"
   },
   "author": "Christian Broms <cb@rainfla.me>",
   "license": "LGPL-3.0-only",
   "bugs": {
-    "url": "https://github.com/CBR0MS/V4.js/issues"
+    "url": "https://github.com/cbroms/V4.js/issues"
   },
-  "homepage": "https://github.com/CBR0MS/V4.js#readme",
+  "homepage": "https://github.com/cbroms/V4.js#readme",
   "devDependencies": {
     "@babel/core": "^7.4.5",
     "@babel/preset-env": "^7.4.5",
