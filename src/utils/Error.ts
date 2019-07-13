@@ -4,7 +4,7 @@
  * @returns - false
  */
 export const Error = (newError: string) => {
-    const errorString = "V4.js Error => ";
-    console.error(errorString + newError);
-    return false;
+  const errorString = "V4.js Error => ";
+  console.error(errorString + newError);
+  return false;
 };

@@ -49,30 +49,40 @@
                     h: 250,
                     w: 400
                 }
-                var textBox2 = new V4.TextBox(font, bounds);
-                textBox2.text("Here's a text!", 72);
-                textBox2.outlinePath(true);
-                textBox2.verticalAlign("TOP");
-                textBox2.horizontalAlign("LEFT");
 
-                var elapsed = 0;
-               
-                
+                const options = {
+                    bounds: bounds,
+                    verticalAlign: "top",
+                    horizontalAlign: "left",
+                    fontSize: 72, 
+                    color: "red",
+                    strokeWidth: 2,
+                    strokeColor: "white",
 
-                var rq = new V4.RenderQueue();
-
-                function backAndReturn() {
-                     var anim = new V4.TextBoxAnim(textBox2, {x: 0, y:250}, {x:300, y:500}, 3, "easeInOutCubic")
-                    rq.push(anim.renderer, () => {
-                        var anim2 = new V4.TextBoxAnim(textBox2, {x:300, y:500}, {x: 0, y:250}, 3, "easeOutExpo")
-                        rq.push(anim2.renderer, () => {
-                            
-                            backAndReturn()
-                        })
-                    })
                 }
 
-                backAndReturn()
+                var textBox2 = new V4.TextBox({font: font, bounds: bounds, verticalAlign: "TOP", horizontalAlign: "LEFT", fontSize: 72});
+                textBox2.text("Here's a text!");
+                textBox2.outlinePath(true);
+                // textBox2.verticalAlign("TOP");
+                // textBox2.horizontalAlign("LEFT");
+
+               // var elapsed = 0;
+               
+                // var rq = new V4.RenderQueue();
+
+                // function backAndReturn() {
+                //      var anim = new V4.TextBoxAnim(textBox2, {x:300, y:500}, 3, "easeInOutCubic")
+                //     rq.push(anim.renderer, () => {
+                //         var anim2 = new V4.TextBoxAnim(textBox2, {x: 0, y:250}, 3, "easeOutExpo")
+                //         rq.push(anim2.renderer, () => {
+                            
+                //             backAndReturn()
+                //         })
+                //     })
+                // }
+
+                // backAndReturn()
 
                 // rq.push(anim.renderer, () => {
                 //     rq.push(anim2.renderer, () => {
@@ -110,7 +120,7 @@
                     
 
 
-                loop.addToLoop(rq);
+                loop.addToLoop(textBox2.renderer);
                 //animator.addToAnimation(textBox2.renderer);
                 loop.framesPerSecond(60);
                 // var x = 0;

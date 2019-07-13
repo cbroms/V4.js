@@ -13,7 +13,7 @@ export declare class TextBoxAnim {
     private _w;
     private _box;
     private _easingFunc;
-    constructor(box: TextBox, origin: IPoint, destination: IPoint, duration?: number, easing?: string);
+    constructor(box: TextBox, destination: IPoint, duration?: number, easing?: string);
     renderer(state: RendererPayload, nextAnimation?: any): boolean;
 }
 export {};

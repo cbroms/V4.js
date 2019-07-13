@@ -24,6 +24,21 @@ interface IBounds {
     h: number;
 }
 
+interface IOptions {
+    font: Font;
+    fontSize: number;
+    verticalAlign: VerticalAlignOpts;
+    horizontalAlign: HorizontalAlignOpts;
+    position: IDrawPos;
+    bounds: IBounds;
+    color: string;
+    stroke: boolean;
+    strokeWidth: number;
+    strokeColor: string;
+    lineHeight: number;
+    backgroundColor: string;
+}
+
 interface IDrawPos {
     x: number;
     y: number;
@@ -41,89 +56,108 @@ interface IChunk {
  * @class
  */
 export class TextBox {
-    public font: Font;
+    private _opts: IOptions;
+    // private _oldOpts: IOptions;
+    // private _destOpts: IOptions;
     private _text: string;
-    private _fontSize: number;
     private _modified: boolean;
     private _debug: boolean;
-    private _underline: boolean;
     private _chunks: IChunk[] | null;
     private _textStats: ITextStats;
-    private _verticalAlign: VerticalAlignOpts;
-    private _horizontalAlign: HorizontalAlignOpts;
-    private _bounds: IBounds;
 
     /**
      * Create a new TextBox object
-     * @param font - the font object
-     * @param x - the x coordinate of the text box's bottom left corner
-     * @param y - the y coordinate of the text box's bottom left corner
-     * @param h - the height, in pixels, of the text box
-     * @param w - the width, in pixels, of the text box
-     * @param bounds - specific bounds for the function (includes points defined with (x1,y1) - (x4,y4) and h and w)
+     * @param opts - object containing options
      * @returns - the new TextBox object
      */
-    constructor(font: Font, x?: number | IBounds, y?: number, h?: number, w?: number) {
-        this.font = font;
-        this._text = "";
-        this._fontSize = 24;
+    constructor(opts?: IOptions) {
+        const bounds = {
+            h: 0,
+            w: 0,
+            x1: 0,
+            x2: 0,
+            x3: 0,
+            x4: 0,
+            y1: 0,
+            y2: 0,
+            y3: 0,
+            y4: 0
+        };
+        // set defaults
+        this._opts = {
+            backgroundColor: "red",
+            bounds,
+            color: "white",
+            font: null,
+            fontSize: 24,
+            horizontalAlign: "RIGHT",
+            lineHeight: 8,
+            position: { x: 0, y: 0 },
+            stroke: false,
+            strokeColor: "white",
+            strokeWidth: 0,
+            verticalAlign: "BOTTOM"
+        };
+
+        // this._oldOpts = null;
+        // this._destOpts = null;
+
         this._modified = true;
 
-        this.bounds(x, y, h, w);
-
-        // set defaut properties
-        this._verticalAlign = "BOTTOM";
-        this._horizontalAlign = "RIGHT";
-        // this._animating = false;
+        this._text = "";
         this._debug = false;
-        this._underline = false;
         this._chunks = null;
         this._textStats = {
             textHeight: 0,
-            textOffsetBottom: this._fontSize / 3, // line height
+            textOffsetBottom: this._opts.lineHeight,
             textWidth: 0,
             totalTextHeight: 0
         };
         this.renderer = this.renderer.bind(this);
-    }
 
-    /**
-     * Get/set the textbox's boundaries
-     * @param x - the x coordinate of the text box's bottom left corner, or an object containing specific bounds for the textbox
-     * @param y - the y coordinate of the text box's bottom left corner
-     * @param h - the height, in pixels, of the text box
-     * @param w - the width, in pixels, of the text box
-     * @returns - an object containing the boundary points of the textbox
-     */
-    public bounds(x?: number | IBounds, y?: number, h?: number, w?: number): IBounds {
-        // Corner points are assigned clockwise from bottom left:
-        /*
-         *   (x2, y2) *--------------* (x3, y3)
-         *            |              |
-         *            |              |
-         *   (x1, y1) *______________* (x4, y4)
-         */
-        if (x !== undefined && y !== undefined && h !== undefined && w !== undefined) {
-            this._bounds = {
-                h,
-                w,
-                x1: x as number,
-                x2: x as number,
-                x3: (x as number) + w,
-                x4: (x as number) + w,
-                y1: y,
-                y2: y - h,
-                y3: y - h,
-                y4: y
-            };
-            this._modified = true;
-        } else if (x !== undefined) {
-            this._bounds = x as IBounds;
-            this._modified = true;
+        // if given options, set them
+        if (opts !== undefined) {
+            this._unwrapOptions(opts);
         }
-
-        return this._bounds;
     }
+
+    // /**
+    //  * Get/set the textbox's boundaries
+    //  * @param x - the x coordinate of the text box's bottom left corner, or an object containing specific bounds for the textbox
+    //  * @param y - the y coordinate of the text box's bottom left corner
+    //  * @param h - the height, in pixels, of the text box
+    //  * @param w - the width, in pixels, of the text box
+    //  * @returns - an object containing the boundary points of the textbox
+    //  */
+    // public bounds(x?: number | IBounds, y?: number, h?: number, w?: number): IBounds {
+    //     // Corner points are assigned clockwise from bottom left:
+
+    //      *   (x2, y2) *--------------* (x3, y3)
+    //      *            |              |
+    //      *            |              |
+    //      *   (x1, y1) *______________* (x4, y4)
+
+    //     if (x !== undefined && y !== undefined && h !== undefined && w !== undefined) {
+    //         this._opts.bounds = {
+    //             h,
+    //             w,
+    //             x1: x as number,
+    //             x2: x as number,
+    //             x3: (x as number) + w,
+    //             x4: (x as number) + w,
+    //             y1: y,
+    //             y2: y - h,
+    //             y3: y - h,
+    //             y4: y
+    //         };
+    //         this._modified = true;
+    //     } else if (x !== undefined) {
+    //         this._opts.bounds = x as IBounds;
+    //         this._modified = true;
+    //     }
+
+    //     return this._opts.bounds;
+    // }
 
     /**
      * Get/set the content of the text box
@@ -131,57 +165,53 @@ export class TextBox {
      * @param fontSize - the font size
      * @returns - the text
      */
-    public text(newText?: string, fontSize?: number): string {
+    public text(newText?: string): string {
         if (newText !== undefined) {
             this._text = newText;
 
-            if (fontSize !== undefined) {
-                this._fontSize = fontSize;
-            }
-
-            const absPath = this.font.getPath(this._text, 0, 0, this._fontSize);
+            const absPath = this._opts.font.getPath(this._text, 0, 0, this._opts.fontSize);
             const bb = absPath.getBoundingBox();
 
             this._textStats.textHeight = bb.y2 - bb.y1;
-            this._textStats.textOffsetBottom = bb.y2 + fontSize / 3;
-            this._textStats.textWidth = this.font.getAdvanceWidth(newText, fontSize);
+            this._textStats.textOffsetBottom = bb.y2 + this._opts.lineHeight;
+            this._textStats.textWidth = this._opts.font.getAdvanceWidth(
+                newText,
+                this._opts.fontSize
+            );
             this._createChunks();
-            this._modified = true;
-        } else if (fontSize !== undefined) {
-            this._fontSize = fontSize;
             this._modified = true;
         }
 
         return this._text;
     }
 
-    /**
-     * Get/set the vertical alignment of the text in the text box
-     * @param alignment - alignment command, must be BOTTOM, CENTER, or TOP
-     * @returns - the alignment
-     */
-    public verticalAlign(alignment?: VerticalAlignOpts): VerticalAlignOpts {
-        if (alignment) {
-            this._verticalAlign = alignment;
-            this._modified = true;
-        }
+    // /**
+    //  * Get/set the vertical alignment of the text in the text box
+    //  * @param alignment - alignment command, must be BOTTOM, CENTER, or TOP
+    //  * @returns - the alignment
+    //  */
+    // public verticalAlign(alignment?: VerticalAlignOpts): VerticalAlignOpts {
+    //     if (alignment) {
+    //         this._verticalAlign = alignment;
+    //         this._modified = true;
+    //     }
 
-        return this._verticalAlign;
-    }
+    //     return this._verticalAlign;
+    // }
 
-    /**
-     * Get/set the horizontal alignment of the text in the text box
-     * @param alignment - alignment command, must be LEFT, CENTER, or RIGHT
-     * @returns - the alignment
-     */
-    public horizontalAlign(alignment?: HorizontalAlignOpts): HorizontalAlignOpts {
-        if (alignment !== undefined) {
-            this._horizontalAlign = alignment;
-            this._modified = true;
-        }
+    // /**
+    //  * Get/set the horizontal alignment of the text in the text box
+    //  * @param alignment - alignment command, must be LEFT, CENTER, or RIGHT
+    //  * @returns - the alignment
+    //  */
+    // public horizontalAlign(alignment?: HorizontalAlignOpts): HorizontalAlignOpts {
+    //     if (alignment !== undefined) {
+    //         this._horizontalAlign = alignment;
+    //         this._modified = true;
+    //     }
 
-        return this._horizontalAlign;
-    }
+    //     return this._horizontalAlign;
+    // }
 
     /**
      * Set if the text box should be outlined
@@ -197,18 +227,18 @@ export class TextBox {
         return this._debug;
     }
 
-    /**
-     * Set if the the text should be underlined
-     * @param underline - underline the text in the text box?
-     * @returns - if the underlines are active
-     */
-    public underline(underline?: boolean): boolean {
-        if (underline !== null) {
-            this._underline = underline;
-            this._modified = true;
-        }
-        return this._underline;
-    }
+    // /**
+    //  * Set if the the text should be underlined
+    //  * @param underline - underline the text in the text box?
+    //  * @returns - if the underlines are active
+    //  */
+    // public underline(underline?: boolean): boolean {
+    //     if (underline !== null) {
+    //         this._underline = underline;
+    //         this._modified = true;
+    //     }
+    //     return this._underline;
+    // }
 
     /**
      * The renderer function for this text box
@@ -216,17 +246,16 @@ export class TextBox {
      */
     public renderer(state: RendererPayload) {
         const ctx = state.context;
-
         ctx.save();
 
         // create clipping mask
         ctx.beginPath();
-        ctx.moveTo(this._bounds.x1, this._bounds.y1);
-        ctx.lineTo(this._bounds.x2, this._bounds.y2);
-        ctx.lineTo(this._bounds.x4, this._bounds.y4);
-        ctx.moveTo(this._bounds.x3, this._bounds.y3);
-        ctx.lineTo(this._bounds.x4, this._bounds.y4);
-        ctx.lineTo(this._bounds.x2, this._bounds.y2);
+        ctx.moveTo(this._opts.bounds.x1, this._opts.bounds.y1);
+        ctx.lineTo(this._opts.bounds.x2, this._opts.bounds.y2);
+        ctx.lineTo(this._opts.bounds.x4, this._opts.bounds.y4);
+        ctx.moveTo(this._opts.bounds.x3, this._opts.bounds.y3);
+        ctx.lineTo(this._opts.bounds.x4, this._opts.bounds.y4);
+        ctx.lineTo(this._opts.bounds.x2, this._opts.bounds.y2);
         ctx.closePath();
         ctx.clip();
 
@@ -234,17 +263,25 @@ export class TextBox {
             ctx.lineWidth = 1;
             ctx.strokeStyle = "red";
             ctx.beginPath();
-            ctx.moveTo(this._bounds.x1, this._bounds.y1);
-            ctx.lineTo(this._bounds.x2, this._bounds.y2);
-            ctx.moveTo(this._bounds.x2, this._bounds.y2);
-            ctx.lineTo(this._bounds.x3, this._bounds.y3);
-            ctx.moveTo(this._bounds.x3, this._bounds.y3);
-            ctx.lineTo(this._bounds.x4, this._bounds.y4);
-            ctx.moveTo(this._bounds.x4, this._bounds.y4);
-            ctx.lineTo(this._bounds.x1, this._bounds.y1);
+            ctx.moveTo(this._opts.bounds.x1, this._opts.bounds.y1);
+            ctx.lineTo(this._opts.bounds.x2, this._opts.bounds.y2);
+            ctx.moveTo(this._opts.bounds.x2, this._opts.bounds.y2);
+            ctx.lineTo(this._opts.bounds.x3, this._opts.bounds.y3);
+            ctx.moveTo(this._opts.bounds.x3, this._opts.bounds.y3);
+            ctx.lineTo(this._opts.bounds.x4, this._opts.bounds.y4);
+            ctx.moveTo(this._opts.bounds.x4, this._opts.bounds.y4);
+            ctx.lineTo(this._opts.bounds.x1, this._opts.bounds.y1);
             ctx.closePath();
             ctx.stroke();
         }
+
+        ctx.fillStyle = this._opts.backgroundColor;
+        ctx.fillRect(
+            this._opts.bounds.x2,
+            this._opts.bounds.y2,
+            this._opts.bounds.w,
+            this._opts.bounds.h
+        );
 
         // const drawPos = this._animating
         //     ? this._calculateTextRenderXY()
@@ -257,15 +294,68 @@ export class TextBox {
 
         for (const chunk of this._chunks) {
             // render font
-            const absPath = this.font.getPath(chunk.text, chunk.pos.x, chunk.pos.y, this._fontSize);
+            const absPath = this._opts.font.getPath(
+                chunk.text,
+                chunk.pos.x,
+                chunk.pos.y,
+                this._opts.fontSize
+            );
 
             const drawPath = new Path2D(absPath.toPathData(2));
 
-            ctx.fillStyle = "white";
+            ctx.fillStyle = this._opts.color;
             ctx.fill(drawPath);
         }
 
         ctx.restore();
+    }
+
+    private _unwrapOptions(opts: IOptions): void {
+        for (const opt in opts) {
+            // console.log(opt);
+            if (opts.hasOwnProperty(opt)) {
+                switch (opt) {
+                    case "font":
+                        this._opts.font = opts[opt];
+                        break;
+                    case "fontSize":
+                        this._opts.fontSize = opts[opt] as number;
+                        break;
+                    case "horizontalAlign":
+                        this._opts.horizontalAlign = opts[opt] as HorizontalAlignOpts;
+                        break;
+                    case "verticalAlign":
+                        this._opts.verticalAlign = opts[opt] as VerticalAlignOpts;
+                        break;
+                    case "position":
+                        const b = opts[opt];
+                        this._opts.bounds = {
+                            h: this._opts.bounds.h,
+                            w: this._opts.bounds.w,
+                            x1: b.x,
+                            x2: b.x,
+                            x3: b.x + this._opts.bounds.w,
+                            x4: b.x + this._opts.bounds.w,
+                            y1: b.y,
+                            y2: b.y - this._opts.bounds.h,
+                            y3: b.y - this._opts.bounds.h,
+                            y4: b.y
+                        };
+                        break;
+                    case "bounds":
+                        this._opts.bounds = opts[opt] as IBounds;
+                        break;
+                    case "color":
+                        this._opts.color = opts[opt] as string;
+                        break;
+                    case "backgroundColor":
+                        this._opts.backgroundColor = opts[opt] as string;
+                        break;
+                }
+            }
+        }
+
+        this._modified = true;
     }
 
     /**
@@ -281,10 +371,10 @@ export class TextBox {
         for (const word of words) {
             const curPlusWord = currentChunk !== "" ? currentChunk + " " + word : word;
 
-            const p = this.font.getPath(curPlusWord, 0, 0, this._fontSize);
+            const p = this._opts.font.getPath(curPlusWord, 0, 0, this._opts.fontSize);
             const bb = p.getBoundingBox();
 
-            if (bb.x2 - bb.x1 < this._bounds.w) {
+            if (bb.x2 - bb.x1 < this._opts.bounds.w) {
                 currentChunk = curPlusWord;
                 currentWidth = bb.x2 - bb.x1;
             } else {
@@ -299,7 +389,7 @@ export class TextBox {
             }
         }
         if (currentWidth === 0) {
-            const p = this.font.getPath(currentChunk, 0, 0, this._fontSize);
+            const p = this._opts.font.getPath(currentChunk, 0, 0, this._opts.fontSize);
             const bb = p.getBoundingBox();
             currentWidth = bb.x2 - bb.x1;
         }
@@ -311,7 +401,6 @@ export class TextBox {
         });
 
         this._textStats.totalTextHeight = computedChunks.length * this._textStats.textHeight;
-
         this._chunks = computedChunks;
     }
 
@@ -327,40 +416,42 @@ export class TextBox {
         // user gave a position, use it
         for (const chunk of chunksCopy) {
             // calc y
-            if (this._verticalAlign === "BOTTOM") {
+            if (this._opts.verticalAlign === "BOTTOM") {
                 const totalHeight =
                     (this._textStats.textHeight + this._textStats.textOffsetBottom) *
                     this._chunks.length;
                 y =
-                    this._bounds.y1 -
+                    this._opts.bounds.y1 -
                     ((totalHeight / this._chunks.length) * (this._chunks.length - chunk.num) +
                         this._textStats.textOffsetBottom);
-            } else if (this._verticalAlign === "CENTER") {
+            } else if (this._opts.verticalAlign === "CENTER") {
                 const totalHeight =
                     (this._textStats.textHeight + this._textStats.textOffsetBottom) *
                     this._chunks.length;
                 const rowPosRelative =
                     (totalHeight / this._chunks.length) * (this._chunks.length - chunk.num) +
                     this._textStats.textOffsetBottom;
-                y = this._bounds.y1 - (this._bounds.h / 2 - totalHeight / 2) - rowPosRelative;
-            } else if (this._verticalAlign === "TOP") {
+                y =
+                    this._opts.bounds.y1 -
+                    (this._opts.bounds.h / 2 - totalHeight / 2) -
+                    rowPosRelative;
+            } else if (this._opts.verticalAlign === "TOP") {
                 const totalHeight =
                     (this._textStats.textHeight + this._textStats.textOffsetBottom) *
                     this._chunks.length;
                 const rowPosRelative =
                     (totalHeight / this._chunks.length) * (this._chunks.length - chunk.num) +
                     this._textStats.textOffsetBottom;
-                y = this._bounds.y1 - (this._bounds.h - totalHeight) - rowPosRelative;
+                y = this._opts.bounds.y1 - (this._opts.bounds.h - totalHeight) - rowPosRelative;
             }
             // calc x
-            if (this._horizontalAlign === "LEFT") {
-                x = this._bounds.x1;
-            } else if (this._horizontalAlign === "CENTER") {
-                x = this._bounds.x1 + this._bounds.w / 2 - chunk.width / 2;
-            } else if (this._horizontalAlign === "RIGHT") {
-                x = this._bounds.x1 + (this._bounds.w - chunk.width);
+            if (this._opts.horizontalAlign === "LEFT") {
+                x = this._opts.bounds.x1;
+            } else if (this._opts.horizontalAlign === "CENTER") {
+                x = this._opts.bounds.x1 + this._opts.bounds.w / 2 - chunk.width / 2;
+            } else if (this._opts.horizontalAlign === "RIGHT") {
+                x = this._opts.bounds.x1 + (this._opts.bounds.w - chunk.width);
             }
-
             chunk.pos.x = x;
             chunk.pos.y = y;
         }

@@ -1,7 +1,7 @@
-import { Error } from "./Error";
 import { RendererPayload } from "./RendererPayload";
 import { backgroundRenderer, clearPrevRenderer } from "./Renderers";
 import { RenderQueue } from "./RenderQueue";
+import { Error } from "./utils/Error";
 
 type Renderer = (rendererPayload: object) => void;
 
@@ -10,7 +10,6 @@ type Renderer = (rendererPayload: object) => void;
  * @class
  */
 export class Loop {
-
     public canvas: HTMLCanvasElement | null;
     public context: CanvasRenderingContext2D | null;
     private _loop: boolean;
@@ -63,8 +62,11 @@ export class Loop {
      */
     public hasCanvas(quietly = true): boolean | Error {
         if (!this.canvas) {
-            if (quietly) { return false; }
-            else { Error("Trying to access null canvas"); }
+            if (quietly) {
+                return false;
+            } else {
+                Error("Trying to access null canvas");
+            }
         }
         return true;
     }
@@ -76,8 +78,11 @@ export class Loop {
      */
     public hasContext(quietly = true): boolean | Error {
         if (!this.context) {
-            if (quietly) { return false; }
-            else { Error("Trying to access null canvas context"); }
+            if (quietly) {
+                return false;
+            } else {
+                Error("Trying to access null canvas context");
+            }
         }
         return true;
     }
@@ -88,7 +93,9 @@ export class Loop {
      * @returns - the background color, in hex
      */
     public backgroundColor(color: string): string {
-        if (color) { this._backgroundColor = color; }
+        if (color) {
+            this._backgroundColor = color;
+        }
         return this._backgroundColor;
     }
 
@@ -110,8 +117,11 @@ export class Loop {
      * @param renderer - the render function or RenderQueue object to be executed
      */
     public addToLoop(renderer: Renderer | RenderQueue): void {
-        if (renderer instanceof RenderQueue) { this._renderQueueBuffer.push(renderer as RenderQueue); }
-        else { this._rendererBuffer.push(renderer as Renderer); }
+        if (renderer instanceof RenderQueue) {
+            this._renderQueueBuffer.push(renderer as RenderQueue);
+        } else {
+            this._rendererBuffer.push(renderer as Renderer);
+        }
     }
 
     /**
