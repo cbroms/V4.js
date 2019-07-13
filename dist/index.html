@@ -61,7 +61,7 @@
 
                 }
 
-                var textBox2 = new V4.TextBox({font: font, bounds: bounds, verticalAlign: "TOP", horizontalAlign: "LEFT", fontSize: 72});
+                var textBox2 = new V4.TextBox({font: font, bounds: bounds, verticalAlign: "CENTER", horizontalAlign: "CENTER", fontSize: 72});
                 textBox2.text("Here's a text!");
                 textBox2.outlinePath(true);
                 // textBox2.verticalAlign("TOP");
@@ -69,20 +69,25 @@
 
                // var elapsed = 0;
                
-                // var rq = new V4.RenderQueue();
+                 var rq = new V4.RenderQueue();
+                
 
-                // function backAndReturn() {
-                //      var anim = new V4.TextBoxAnim(textBox2, {x:300, y:500}, 3, "easeInOutCubic")
-                //     rq.push(anim.renderer, () => {
-                //         var anim2 = new V4.TextBoxAnim(textBox2, {x: 0, y:250}, 3, "easeOutExpo")
-                //         rq.push(anim2.renderer, () => {
-                            
-                //             backAndReturn()
-                //         })
-                //     })
-                // }
+                
+                function backAndReturn() {
+                     var anim = new V4.Animation(textBox2, {fontSize: 120});
 
-                // backAndReturn()
+                    rq.push(anim.renderer, () => {
+                        var anim2 = new V4.Animation(textBox2, {fontSize: 72});
+                        rq.push(anim2.renderer, () => {
+                          
+                            backAndReturn()
+                        })
+                    })
+                }
+
+                loop.addToLoop(rq);
+
+                backAndReturn()
 
                 // rq.push(anim.renderer, () => {
                 //     rq.push(anim2.renderer, () => {
@@ -101,26 +106,26 @@
                 //     })
                 // })
 
-                function customRenderer(state) {
+                // function customRenderer(state) {
                   
-                    // var ctx = state.context;
-                    // elapsed += state.deltaTime;
-                    // if (elapsed > 2) textBox2.text("Two seconds elapsed!", 24)
-                  // textBox2.bounds(bounds.x1 += 10 * state.deltaTime, bounds.y1, bounds.h, bounds.w)
+                //     // var ctx = state.context;
+                //     // elapsed += state.deltaTime;
+                //     // if (elapsed > 2) textBox2.text("Two seconds elapsed!", 24)
+                //   // textBox2.bounds(bounds.x1 += 10 * state.deltaTime, bounds.y1, bounds.h, bounds.w)
 
                 
-                    anim.move(state, () => {
-                       anim2.move(state, () => {
+                //     anim.move(state, () => {
+                //        anim2.move(state, () => {
                         
-                       })
-                    })
-                   // textBox2.renderer(state);
+                //        })
+                //     })
+                //    // textBox2.renderer(state);
                 
-                }
+                // }
                     
 
 
-                loop.addToLoop(textBox2.renderer);
+                
                 //animator.addToAnimation(textBox2.renderer);
                 loop.framesPerSecond(60);
                 // var x = 0;

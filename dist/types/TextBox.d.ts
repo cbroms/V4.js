@@ -1,8 +1,8 @@
 import { Font } from "opentype.js";
 import { RendererPayload } from "./RendererPayload";
-declare type VerticalAlignOpts = "BOTTOM" | "TOP" | "CENTER";
-declare type HorizontalAlignOpts = "RIGHT" | "LEFT" | "CENTER";
-interface IBounds {
+export declare type VerticalAlignOpts = "BOTTOM" | "TOP" | "CENTER";
+export declare type HorizontalAlignOpts = "RIGHT" | "LEFT" | "CENTER";
+export interface IBounds {
     x1: number;
     x2: number;
     x3: number;
@@ -14,7 +14,7 @@ interface IBounds {
     w: number;
     h: number;
 }
-interface IOptions {
+export interface IOptions {
     font: Font;
     fontSize: number;
     verticalAlign: VerticalAlignOpts;
@@ -28,7 +28,7 @@ interface IOptions {
     lineHeight: number;
     backgroundColor: string;
 }
-interface IDrawPos {
+export interface IDrawPos {
     x: number;
     y: number;
 }
@@ -37,7 +37,7 @@ interface IDrawPos {
  * @class
  */
 export declare class TextBox {
-    private _opts;
+    opts: IOptions;
     private _text;
     private _modified;
     private _debug;
@@ -49,6 +49,7 @@ export declare class TextBox {
      * @returns - the new TextBox object
      */
     constructor(opts?: IOptions);
+    options(opts?: IOptions): IOptions;
     /**
      * Get/set the content of the text box
      * @param newText - the text
@@ -67,7 +68,7 @@ export declare class TextBox {
      * @param state - the state object
      */
     renderer(state: RendererPayload): void;
-    private _unwrapOptions;
+    private _calcStats;
     /**
      * Create chunks of text such that each is less than the width of the
      * textbox plus the vertical margins
@@ -79,4 +80,3 @@ export declare class TextBox {
      */
     private _calculateTextRenderXY;
 }
-export {};
