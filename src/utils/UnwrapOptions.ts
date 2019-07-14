@@ -1,9 +1,9 @@
 import {
-  IOptions,
-  IBounds,
   HorizontalAlignOpts,
-  VerticalAlignOpts,
+  IBounds,
+  IOptions,
   TextBox,
+  VerticalAlignOpts,
 } from "../TextBox";
 
 import { Animation, IAnimState } from "../Animation";

@@ -1,7 +1,7 @@
 import interpolate from "color-interpolate";
 
 import { RendererPayload } from "./RendererPayload";
-import { TextBox, IOptions } from "./TextBox";
+import { IOptions, TextBox } from "./TextBox";
 import { Easing } from "./utils/Easing";
 import { unwrapOptions } from "./utils/UnwrapOptions";
 
@@ -47,22 +47,22 @@ export class Animation {
 
         if (this._elapsed < this._duration) {
             const animationState = {
-                duration: this._duration,
-                easingFunc: this._easingFunc,
-                elapsed: this._elapsed,
-                ogOpts: this._ogOpts,
-                destOpts: this._destOpts,
-                colorLerp:
-                    this._destOpts.color !== undefined
-                        ? interpolate([this._ogOpts.color, this._destOpts.color])
-                        : () => "",
                 backgroundColorLerp:
                     this._destOpts.backgroundColor !== undefined
                         ? interpolate([
                               this._ogOpts.backgroundColor,
                               this._destOpts.backgroundColor
                           ])
-                        : () => ""
+                        : () => "",
+                colorLerp:
+                    this._destOpts.color !== undefined
+                        ? interpolate([this._ogOpts.color, this._destOpts.color])
+                        : () => "",
+                destOpts: this._destOpts,
+                duration: this._duration,
+                easingFunc: this._easingFunc,
+                elapsed: this._elapsed,
+                ogOpts: this._ogOpts
             };
             // update this.opts to reflect new positions
             unwrapOptions(this.opts, this, animationState);

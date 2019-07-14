@@ -40,7 +40,7 @@ export class RenderQueue {
                 const renderPacket = { r: renderFn, d: first ? done : () => {} };
                 this._rendererBuffer.push(renderPacket);
 
-                if (first) first = false;
+                if (first) { first = false; }
             }
         } else {
             const renderPacket = { r: renderer as Renderer, d: done };
