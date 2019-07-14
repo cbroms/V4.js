@@ -1,7 +1,19 @@
+import interpolate from "color-interpolate";
+
 import { RendererPayload } from "./RendererPayload";
 import { TextBox, IOptions } from "./TextBox";
 import { Easing } from "./utils/Easing";
 import { unwrapOptions } from "./utils/UnwrapOptions";
+
+export interface IAnimState {
+    backgroundColorLerp: (a: number) => string;
+    colorLerp: (a: number) => string;
+    duration: number;
+    easingFunc: (t: number, b: number, end: number, d: number) => number;
+    elapsed: number;
+    ogOpts: IOptions;
+    destOpts: IOptions;
+}
 
 export class Animation {
     public opts: IOptions;
@@ -15,7 +27,7 @@ export class Animation {
     constructor(box: TextBox, opts: IOptions, duration?: number, easing?: string) {
         if (box instanceof TextBox) {
             this._box = box;
-            this._ogOpts = box.opts;
+            this._ogOpts = Object.assign({}, box.opts);
             this.opts = box.opts;
             this._destOpts = opts;
 
@@ -31,6 +43,7 @@ export class Animation {
 
     public renderer(state: RendererPayload) {
         this._elapsed += state.deltaTime;
+        // console.log(this._duration);
 
         if (this._elapsed < this._duration) {
             const animationState = {
@@ -38,7 +51,18 @@ export class Animation {
                 easingFunc: this._easingFunc,
                 elapsed: this._elapsed,
                 ogOpts: this._ogOpts,
-                destOpts: this._destOpts
+                destOpts: this._destOpts,
+                colorLerp:
+                    this._destOpts.color !== undefined
+                        ? interpolate([this._ogOpts.color, this._destOpts.color])
+                        : () => "",
+                backgroundColorLerp:
+                    this._destOpts.backgroundColor !== undefined
+                        ? interpolate([
+                              this._ogOpts.backgroundColor,
+                              this._destOpts.backgroundColor
+                          ])
+                        : () => ""
             };
             // update this.opts to reflect new positions
             unwrapOptions(this.opts, this, animationState);
@@ -49,7 +73,6 @@ export class Animation {
             this._box.renderer(state);
             return false;
         }
-
         return true;
     }
 }

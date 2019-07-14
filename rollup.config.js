@@ -1,6 +1,7 @@
 import resolve from "rollup-plugin-node-resolve";
 import serve from "rollup-plugin-serve";
 import typescript from "rollup-plugin-typescript2";
+import commonjs from "rollup-plugin-commonjs";
 //import { uglify } from "rollup-plugin-uglify";
 
 const pkg = require("./package.json");
@@ -29,6 +30,7 @@ export default [
     plugins: [
       typescript({ useTsconfigDeclarationDir: true }),
       resolve(),
+      commonjs(),
       // babel(),
       // uglify(),
       serve({ contentBase: "dist", port: 8080 })

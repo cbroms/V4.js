@@ -15,7 +15,7 @@
                 canvas.width = 800;
 
                 var loop = new V4.Loop(canvas, false);
-                loop.backgroundColor("#000");
+                loop.backgroundColor("#fff");
 
                 var fontObj = new V4.FontGroup();
                 await fontObj.loadFont(
@@ -71,23 +71,62 @@
                
                  var rq = new V4.RenderQueue();
                 
+                function colorLoop() {
+                     var anim5 = new V4.Animation(textBox2, {color: "red", backgroundColor: "blue"});
 
-                
-                function backAndReturn() {
-                     var anim = new V4.Animation(textBox2, {fontSize: 120});
+                    rq.push(anim5.renderer, () => {
 
-                    rq.push(anim.renderer, () => {
-                        var anim2 = new V4.Animation(textBox2, {fontSize: 72});
-                        rq.push(anim2.renderer, () => {
+                        var anim6 = new V4.Animation(textBox2, {color: "yellow", backgroundColor: "green"});
+                       
+                        rq.push(anim6.renderer, () => {
                           
-                            backAndReturn()
+                            colorLoop()
                         })
                     })
                 }
 
+                
+                function fontSizeLoop() {
+                     var anim = new V4.Animation(textBox2, {fontSize: 72});
+
+                    rq.push(anim.renderer, () => {
+
+                        var anim2 = new V4.Animation(textBox2, {fontSize: 24});
+                       
+                        rq.push(anim2.renderer, () => {
+                          
+                            fontSizeLoop()
+                        })
+                    })
+                }
+                    
+                function positionLoop() {
+
+                     var anim3 = new V4.Animation(textBox2, {position: {x: 300, y: 450}}, 6, "easeInOutCubic")
+
+                    rq.push(anim3.renderer, () => {
+
+                        var anim4 = new V4.Animation(textBox2, {position: {x: 0, y: 250}}, 2, "easeInOutQuart")
+                        rq.push(anim4.renderer, () => {
+                          
+                            positionLoop()
+                        })
+                    })
+                }
+                    
+                    // rq.push(anim3.renderer, () => {
+                    //     var anim4 = new V4.Animation(textBox2, {position: {x: 0, y: 250}});
+                    //     rq.push(anim4.renderer, () => {
+
+                    //     })
+                    // })
+                
+
                 loop.addToLoop(rq);
 
-                backAndReturn()
+                fontSizeLoop();
+                positionLoop();
+                colorLoop();
 
                 // rq.push(anim.renderer, () => {
                 //     rq.push(anim2.renderer, () => {

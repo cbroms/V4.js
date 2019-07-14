@@ -1,5 +1,14 @@
 import { RendererPayload } from "./RendererPayload";
 import { TextBox, IOptions } from "./TextBox";
+export interface IAnimState {
+    backgroundColorLerp: (a: number) => string;
+    colorLerp: (a: number) => string;
+    duration: number;
+    easingFunc: (t: number, b: number, end: number, d: number) => number;
+    elapsed: number;
+    ogOpts: IOptions;
+    destOpts: IOptions;
+}
 export declare class Animation {
     opts: IOptions;
     private _ogOpts;

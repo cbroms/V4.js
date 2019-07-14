@@ -21,7 +21,7 @@ export declare class RenderQueue {
      * @param renderer - a renderer function to be excecuted in the loop
      * @param onDone - a function that will be called when the renderer function returns false
      */
-    push(renderer: Renderer, onDone?: OnDone): void;
+    push(renderer: Renderer | Renderer[], onDone?: OnDone): void;
     /**
      * Remove the last renderer and done function packet from the queue
      * @returns - a packet containing the the renderer and done functions
