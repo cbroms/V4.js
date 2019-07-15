@@ -1,0 +1,3 @@
+-   Getting Started
+    -   [Renderers](guide/renderers.md)
+    -   [Text Boxes](guide/text-box.md)

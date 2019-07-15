@@ -4,68 +4,45 @@ V4.js is a lightweight 2D animation wrapper for the HTML canvas element with an 
 
 ## Install
 
-```
+```shell
 npm i v4
 ```
 
-## A Simple Example
+## Hello, world!
 
 You'll need a `<canvas>` element:
 
 ```html
-<canvas id="myCanvas"></canvas>
+<canvas id="myCanvas" height="250px" width="400px"></canvas>
 ```
 
-Import V4.js and create a new animator from your canvas:
+This script will draw to the canvas using V4's `TextBox`.
 
 ```javascript
 const V4 = require("v4");
 
+// grab the canvas from the DOM
 const canvas = document.getElementById("myCanvas");
-const animator = new V4.animator(canvas);
+
+// create a V4 Loop from the canvas
+const loop = new V4.Loop(canvas);
+
+// load a font
+const font = new V4.FontGroup();
+font.loadFont("assets/CrimsonText-Regular.ttf", "Crimson Text", "Regular");
+
+// create a V4 TextBox
+const box = new V4.TextBox({
+    font: font,
+    position: { x: 0, y: 250 },
+    verticalAlign: "CENTER",
+    horizontalAlign: "CENTER",
+    fontSize: 24
+});
+box.text("Hello, world!");
+
+// add the TextBox's renderer to the loop
+loop.addToLoop(box.renderer);
 ```
 
-Your canvas can now be accessed through the animator object's `canvas` property:
 
-```javascript
-animator.canvas.height = 500;
-animator.canvas.width = 800;
-```
-
-V4 uses functions called 'renderers' to draw to the canvas. Let's create a simple one now:
-
-```javascript
-function rectangleRenderer(state) {
-    state.context.rect(20, 20, 100, 200);
-    state.context.stroke();
-}
-```
-
-Renderers are called on each animation frame to draw to the canvas. They take an argument called the `state`-- an object containing information about the current animation cycle and canvas. In the code snippet above, we're making use of the `context` property from `state` to draw to the canvas. You'll find that the `state` contains lots of useful information for animating objects.
-
-Next, we need to add the rectangle renderer function to the animation:
-
-```javascript
-animator.addToAnimation(rectangleRenderer);
-```
-
-Now, each time the canvas is updated (30 times per second by default), our renderer will be called and the code inside will draw a rectangle to the canvas. Let's start the animation:
-
-```javascript
-animator.startAnimationLoop();
-```
-
-There's no movement because the renderer we provided does not change the position of the rectange over time. To move it across the screen, we can keep track of its `x` position and increment `x` by the distance we want it to move, found by multiplying the speed by the deltaTime (the time passed since the last frame):
-
-```javascript
-let x = 20;
-let speed = 5;
-
-function rectangleRenderer(state) {
-    x += speed * state.deltaTime;
-    state.context.rect(x, 20, 100, 200);
-    state.context.stroke();
-}
-```
-
-Now, the rectangle moves across the screen.
