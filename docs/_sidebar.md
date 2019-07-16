@@ -1,3 +1,4 @@
--   Getting Started
-    -   [Renderers](guide/renderers.md)
-    -   [Text Boxes](guide/text-box.md)
+- Getting Started
+  - [The Loop](guide/loop.md)
+  - [Renderers](guide/renderers.md)
+  - [Text](guide/text.md)
