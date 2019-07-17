@@ -1,7 +1,5 @@
 # Text
 
-To create text with V4, we use the `TextBox` object. It functions much like a text box in any graphics editor that you might be familiar with. It has properties such as a position, size, font, and font size. Before creating one, we'll need a font.
-
 ### Fonts
 
 The `FontGroup` class holds a font and its variants, such as _Italic_, **Bold**, Regular, and so on. V4 reads these variants from individual `.ttf` font files.
@@ -28,9 +26,9 @@ To access a particular font, we can grab it from the `FontGroup` like this:
 const font = fontObj.getFontVariant("Regular");
 ```
 
-Font in hand, we are ready to make a new text box.
-
 ### The Text Box
+
+To create text with V4, we use the `TextBox` object. It functions much like a text box in any graphics editor that you might be familiar with. It has properties such as a position, size, font, and font size.
 
 We can instantiate a `TextBox` like this:
 
@@ -42,6 +40,8 @@ const tb = new V4.TextBox({
   size: { h: 250, w: 400 },
 });
 ```
+
+The options that can be passed to the `TextBox` are inspired by css. You can find all possible options in the [TextBox reference](/reference/text-box.md).
 
 Adding text is just as easy:
 

@@ -17,4 +17,4 @@ The loop is started with:
 loop.startLoop();
 ```
 
-In the example above, nothing will appear on screen, as we have not provided the loop with anything to render. For this, we'll need _renderers_, which will be introduced in the next seciton.
+In the example above, nothing will appear on screen, as we have not provided the loop with anything to render. For this, we'll need _renderers_, which will be introduced in the next section.
