@@ -3,6 +3,6 @@
   - [Renderers](guide/renderers.md)
   - [Text](guide/text.md)
 - Reference
-- [Renderer](reference/renderer.md)
-- [Loop](reference/loop.md)
-- [TextBox](reference/text-box.md)
+  - [Renderer](reference/renderer.md)
+  - [Loop](reference/loop.md)
+  - [TextBox](reference/text-box.md)

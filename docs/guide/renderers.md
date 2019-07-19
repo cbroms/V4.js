@@ -22,7 +22,7 @@ loop.addToLoop(rectRenderer);
 
 ### State
 
-Notice that the renderer is passed an argument called `state`. This is an object that contains a number of useful properties for animating and drawing to the canvas. Possibly the two most important are `context` and `deltaTime`.
+Notice that the renderer is passed an argument called `state` by the loop. This is an object that contains a number of useful properties for animating and drawing to the canvas. Possibly the two most important are `context` and `deltaTime`.
 
 - The `context` is the interface provided by the canvas API to draw; it is how all shapes are drawn to the canvas.
 
