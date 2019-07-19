@@ -23,10 +23,9 @@ export declare class FontGroup {
     /**
      * Load a font from a url or path
      * @param loc - the url/path containing the font .ttf/.otf file
-     * @param name - the name of the font
      * @param variant - the variant of the font (Italic, Regular, Bold Italic, etc.)
      */
-    loadFont(loc?: string, name?: string, variant?: string): Promise<void>;
+    loadFont(loc?: string, variant?: string): Promise<void>;
     /**
      * Wrapper for opentype.js' load function to provide async/await functionality
      * @param url - the path/url to load the font

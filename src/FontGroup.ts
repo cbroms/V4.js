@@ -1,4 +1,5 @@
 import { Font, load } from "opentype.js";
+import { Error } from "./utils/Error";
 
 /**
  * @exports V4.FontWrapper
@@ -25,14 +26,15 @@ export class FontGroup {
    * @param name - the name of the font, case and space sensitive
    * @param variants - a list of font variants (strings), case and space sensitive (Italic, Regular, Bold Italic, etc.)
    */
-  public async loadGFonts(variants = this._variants, name = this.name) {
+  public async loadGFonts(name = this.name, variants = this._variants) {
     const urls = this._makeGFontUrls(name, variants);
     this._fonts = {};
 
-    for (const i in variants) {
-      if (variants.hasOwnProperty(i)) {
-        const font = await this._load(urls[i]);
-        this._fonts[variants[i]] = font;
+    for (const variant in variants) {
+      if (variants.hasOwnProperty(variant)) {
+        const font = await this._load(urls[variant]);
+        this._variants.push(variants[variant]);
+        this._fonts[variants[variant]] = font;
       }
     }
   }
@@ -43,6 +45,7 @@ export class FontGroup {
    * @param variant - the variant of the font (Italic, Regular, Bold Italic, etc.)
    */
   public async loadFont(loc = "", variant = "Regular") {
+    this._variants.push(variant);
     const font = await this._load(loc);
     this._fonts[variant] = font;
   }
@@ -55,7 +58,8 @@ export class FontGroup {
     return new Promise(resolve => {
       load(url, (err, font) => {
         if (err) {
-          Promise.reject("Font could not be loaded: " + err);
+          Error("Font could not be loaded.", true);
+          resolve(undefined);
         } else {
           resolve(font);
         }
@@ -69,7 +73,14 @@ export class FontGroup {
    * @returns - the opentype.js font object
    */
   public getFontVariant(variant: string): Font {
-    return this._fonts[variant];
+    const font = this._fonts[variant];
+    if (font === undefined)
+      Error(
+        'Could not get font "' +
+          variant +
+          '". Did you forget to load it from a file with loadFont()?',
+      );
+    else return font;
   }
 
   /**

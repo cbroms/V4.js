@@ -74,8 +74,9 @@
                     var renderFn = _a[_i];
                     var renderPacket = { r: renderFn, d: first ? done : function () { } };
                     this._rendererBuffer.push(renderPacket);
-                    if (first)
+                    if (first) {
                         first = false;
+                    }
                 }
             }
             else {
@@ -116,11 +117,15 @@
     /**
      * Create a new error and print it to the console
      * @param newError - error string to print
+     * @param loud - throw an error?
      * @returns - false
      */
-    var Error = function (newError) {
-        var errorString = "V4.js Error => ";
-        console.error(errorString + newError);
+    var Error = function (newError, loud) {
+        if (loud === void 0) { loud = false; }
+        if (loud)
+            throw "V4.js Exception: " + newError;
+        else
+            console.error("V4.js Error: " + newError);
         return false;
     };
     //# sourceMappingURL=Error.js.map
@@ -389,7 +394,7 @@
             if (name === void 0) { name = this.name; }
             if (variants === void 0) { variants = this._variants; }
             return __awaiter(this, void 0, void 0, function () {
-                var urls, _a, _b, _i, i, font;
+                var urls, _a, _b, _i, variant, font;
                 return __generator(this, function (_c) {
                     switch (_c.label) {
                         case 0:
@@ -402,12 +407,13 @@
                             _c.label = 1;
                         case 1:
                             if (!(_i < _a.length)) return [3 /*break*/, 4];
-                            i = _a[_i];
-                            if (!variants.hasOwnProperty(i)) return [3 /*break*/, 3];
-                            return [4 /*yield*/, this._load(urls[i])];
+                            variant = _a[_i];
+                            if (!variants.hasOwnProperty(variant)) return [3 /*break*/, 3];
+                            return [4 /*yield*/, this._load(urls[variant])];
                         case 2:
                             font = _c.sent();
-                            this._fonts[variants[i]] = font;
+                            this._variants.push(variants[variant]);
+                            this._fonts[variants[variant]] = font;
                             _c.label = 3;
                         case 3:
                             _i++;
@@ -420,19 +426,17 @@
         /**
          * Load a font from a url or path
          * @param loc - the url/path containing the font .ttf/.otf file
-         * @param name - the name of the font
          * @param variant - the variant of the font (Italic, Regular, Bold Italic, etc.)
          */
-        FontGroup.prototype.loadFont = function (loc, name, variant) {
+        FontGroup.prototype.loadFont = function (loc, variant) {
             if (loc === void 0) { loc = ""; }
-            if (name === void 0) { name = this.name; }
             if (variant === void 0) { variant = "Regular"; }
             return __awaiter(this, void 0, void 0, function () {
                 var font;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
-                            this.name = name;
+                            this._variants.push(variant);
                             return [4 /*yield*/, this._load(loc)];
                         case 1:
                             font = _a.sent();
@@ -450,7 +454,8 @@
             return new Promise(function (resolve) {
                 opentype_js.load(url, function (err, font) {
                     if (err) {
-                        Promise.reject("Font could not be loaded: " + err);
+                        Error("Font could not be loaded.", true);
+                        resolve(undefined);
                     }
                     else {
                         resolve(font);
@@ -464,7 +469,13 @@
          * @returns - the opentype.js font object
          */
         FontGroup.prototype.getFontVariant = function (variant) {
-            return this._fonts[variant];
+            var font = this._fonts[variant];
+            if (font === undefined)
+                Error('Could not get font "' +
+                    variant +
+                    '". Did you forget to load it from a file with loadFont()?');
+            else
+                return font;
         };
         /**
          * Create the urls to retrieve a font and its variants from Google Fonts
@@ -478,12 +489,13 @@
             var baseUrl = "https://raw.githubusercontent.com/google/fonts/master/ofl/";
             var nameNoSpace = name.replace(" ", "");
             var nameCleaned = nameNoSpace.toLowerCase();
-            var varsCleaned = variants.map(function (val) { return val.replace(" ", "").replace("-", ""); });
+            var varsCleaned = variants.map(function (val) {
+                return val.replace(" ", "").replace("-", "");
+            });
             return varsCleaned.map(function (val) { return baseUrl + nameCleaned + "/" + nameNoSpace + "-" + val + ".ttf"; });
         };
         return FontGroup;
     }());
-    //# sourceMappingURL=FontGroup.js.map
 
     var unwrapOptions = function (opts, target, animState) {
         var anim = animState !== undefined;
@@ -555,6 +567,7 @@
             }
         }
     };
+    //# sourceMappingURL=UnwrapOptions.js.map
 
     /**
      * @exports V4.TextBox
@@ -577,7 +590,7 @@
                 y1: 0,
                 y2: 0,
                 y3: 0,
-                y4: 0
+                y4: 0,
             };
             // set defaults
             this.opts = {
@@ -592,7 +605,7 @@
                 stroke: false,
                 strokeColor: "white",
                 strokeWidth: 0,
-                verticalAlign: "BOTTOM"
+                verticalAlign: "BOTTOM",
             };
             this._modified = true;
             this._text = "";
@@ -602,7 +615,7 @@
                 textHeight: 0,
                 textOffsetBottom: this.opts.lineHeight,
                 textWidth: 0,
-                totalTextHeight: 0
+                totalTextHeight: 0,
             };
             this.renderer = this.renderer.bind(this);
             // if given options, set them
@@ -618,40 +631,11 @@
             }
             return this.opts;
         };
-        // /**
-        //  * Get/set the textbox's boundaries
-        //  * @param x - the x coordinate of the text box's bottom left corner, or an object containing specific bounds for the textbox
-        //  * @param y - the y coordinate of the text box's bottom left corner
-        //  * @param h - the height, in pixels, of the text box
-        //  * @param w - the width, in pixels, of the text box
-        //  * @returns - an object containing the boundary points of the textbox
-        //  */
-        // public bounds(x?: number | IBounds, y?: number, h?: number, w?: number): IBounds {
         //     // Corner points are assigned clockwise from bottom left:
         //      *   (x2, y2) *--------------* (x3, y3)
         //      *            |              |
         //      *            |              |
         //      *   (x1, y1) *______________* (x4, y4)
-        //     if (x !== undefined && y !== undefined && h !== undefined && w !== undefined) {
-        //         this.opts.bounds = {
-        //             h,
-        //             w,
-        //             x1: x as number,
-        //             x2: x as number,
-        //             x3: (x as number) + w,
-        //             x4: (x as number) + w,
-        //             y1: y,
-        //             y2: y - h,
-        //             y3: y - h,
-        //             y4: y
-        //         };
-        //         this._modified = true;
-        //     } else if (x !== undefined) {
-        //         this.opts.bounds = x as IBounds;
-        //         this._modified = true;
-        //     }
-        //     return this.opts.bounds;
-        // }
         /**
          * Get/set the content of the text box
          * @param newText - the text
@@ -729,13 +713,21 @@
             }
             ctx.restore();
         };
+        /**
+         * Calculate the text width, height, and offset from bottom
+         */
         TextBox.prototype._calcStats = function () {
-            var absPath = this.opts.font.getPath(this._text, 0, 0, this.opts.fontSize);
-            var bb = absPath.getBoundingBox();
-            this._textStats.textHeight = bb.y2 - bb.y1;
-            this._textStats.textOffsetBottom = bb.y2 + this.opts.lineHeight;
-            this._textStats.textWidth = this.opts.font.getAdvanceWidth(this._text, this.opts.fontSize);
-            this._createChunks();
+            if (this.opts.font === undefined) {
+                Error("A font is required to draw TextBox.", true);
+            }
+            else {
+                var absPath = this.opts.font.getPath(this._text, 0, 0, this.opts.fontSize);
+                var bb = absPath.getBoundingBox();
+                this._textStats.textHeight = bb.y2 - bb.y1;
+                this._textStats.textOffsetBottom = bb.y2 + this.opts.lineHeight;
+                this._textStats.textWidth = this.opts.font.getAdvanceWidth(this._text, this.opts.fontSize);
+                this._createChunks();
+            }
         };
         /**
          * Create chunks of text such that each is less than the width of the
@@ -760,7 +752,7 @@
                         num: computedChunks.length + 1,
                         pos: { x: 0, y: 0 },
                         text: currentChunk,
-                        width: currentWidth
+                        width: currentWidth,
                     });
                     currentChunk = word;
                     currentWidth = 0;
@@ -775,9 +767,10 @@
                 num: computedChunks.length + 1,
                 pos: { x: 0, y: 0 },
                 text: currentChunk,
-                width: currentWidth
+                width: currentWidth,
             });
-            this._textStats.totalTextHeight = computedChunks.length * this._textStats.textHeight;
+            this._textStats.totalTextHeight =
+                computedChunks.length * this._textStats.textHeight;
             this._chunks = computedChunks;
         };
         /**
@@ -798,13 +791,15 @@
                         this._chunks.length;
                     y =
                         this.opts.bounds.y1 -
-                            ((totalHeight / this._chunks.length) * (this._chunks.length - chunk.num) +
+                            ((totalHeight / this._chunks.length) *
+                                (this._chunks.length - chunk.num) +
                                 this._textStats.textOffsetBottom);
                 }
                 else if (this.opts.verticalAlign === "CENTER") {
                     var totalHeight = (this._textStats.textHeight + this._textStats.textOffsetBottom) *
                         this._chunks.length;
-                    var rowPosRelative = (totalHeight / this._chunks.length) * (this._chunks.length - chunk.num) +
+                    var rowPosRelative = (totalHeight / this._chunks.length) *
+                        (this._chunks.length - chunk.num) +
                         this._textStats.textOffsetBottom;
                     y =
                         this.opts.bounds.y1 -
@@ -814,9 +809,13 @@
                 else if (this.opts.verticalAlign === "TOP") {
                     var totalHeight = (this._textStats.textHeight + this._textStats.textOffsetBottom) *
                         this._chunks.length;
-                    var rowPosRelative = (totalHeight / this._chunks.length) * (this._chunks.length - chunk.num) +
+                    var rowPosRelative = (totalHeight / this._chunks.length) *
+                        (this._chunks.length - chunk.num) +
                         this._textStats.textOffsetBottom;
-                    y = this.opts.bounds.y1 - (this.opts.bounds.h - totalHeight) - rowPosRelative;
+                    y =
+                        this.opts.bounds.y1 -
+                            (this.opts.bounds.h - totalHeight) -
+                            rowPosRelative;
                 }
                 // calc x
                 if (this.opts.horizontalAlign === "LEFT") {
@@ -1605,20 +1604,20 @@
             // console.log(this._duration);
             if (this._elapsed < this._duration) {
                 var animationState = {
-                    duration: this._duration,
-                    easingFunc: this._easingFunc,
-                    elapsed: this._elapsed,
-                    ogOpts: this._ogOpts,
-                    destOpts: this._destOpts,
-                    colorLerp: this._destOpts.color !== undefined
-                        ? colorInterpolate([this._ogOpts.color, this._destOpts.color])
-                        : function () { return ""; },
                     backgroundColorLerp: this._destOpts.backgroundColor !== undefined
                         ? colorInterpolate([
                             this._ogOpts.backgroundColor,
                             this._destOpts.backgroundColor
                         ])
-                        : function () { return ""; }
+                        : function () { return ""; },
+                    colorLerp: this._destOpts.color !== undefined
+                        ? colorInterpolate([this._ogOpts.color, this._destOpts.color])
+                        : function () { return ""; },
+                    destOpts: this._destOpts,
+                    duration: this._duration,
+                    easingFunc: this._easingFunc,
+                    elapsed: this._elapsed,
+                    ogOpts: this._ogOpts
                 };
                 // update this.opts to reflect new positions
                 unwrapOptions(this.opts, this, animationState);
@@ -1634,6 +1633,7 @@
         };
         return Animation;
     }());
+    //# sourceMappingURL=Animation.js.map
 
     exports.Animation = Animation;
     exports.FontGroup = FontGroup;

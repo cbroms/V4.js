@@ -1,5 +1,5 @@
 import { RendererPayload } from "./RendererPayload";
-import { TextBox, IOptions } from "./TextBox";
+import { IOptions, TextBox } from "./TextBox";
 export interface IAnimState {
     backgroundColorLerp: (a: number) => string;
     colorLerp: (a: number) => string;

@@ -18,11 +18,12 @@
                 loop.backgroundColor("#fff");
 
                 var fontObj = new V4.FontGroup();
-                await fontObj.loadFont(
-                    "assets/CrimsonText-Regular.ttf",
-                    "Crimson Text",
-                    "Regular"
-                );
+                // await fontObj.loadFont(
+                //     "assets/CrimsonText-Regular.ttf",
+                //     "Regular"
+                // );
+
+                await fontObj.loadGFonts("Reas", ["Regular"]);
 
                 // var res = await fontObj.loadGFonts("Crimson Text", [
                 //     "Regular",
@@ -30,6 +31,7 @@
                 // ]);
 
                 var font = fontObj.getFontVariant("Regular");
+             
 
                 // var textBox = new V4.TextBox(font, 10, 300, 200, 150);
                 // textBox.text("Hello, World!", 72);

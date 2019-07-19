@@ -68,6 +68,9 @@ export declare class TextBox {
      * @param state - the state object
      */
     renderer(state: RendererPayload): void;
+    /**
+     * Calculate the text width, height, and offset from bottom
+     */
     private _calcStats;
     /**
      * Create chunks of text such that each is less than the width of the
