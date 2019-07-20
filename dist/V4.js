@@ -27,7 +27,6 @@
         }
         return RendererPayload;
     }());
-    //# sourceMappingURL=RendererPayload.js.map
 
     /**
      * The default background renderer function
@@ -44,7 +43,6 @@
     var clearPrevRenderer = function (state) {
         state.context.clearRect(0, 0, state.canvas.width, state.canvas.height);
     };
-    //# sourceMappingURL=Renderers.js.map
 
     /**
      * @exports V4.RenderQueue
@@ -112,7 +110,6 @@
         };
         return RenderQueue;
     }());
-    //# sourceMappingURL=RenderQueue.js.map
 
     /**
      * Create a new error and print it to the console
@@ -128,7 +125,6 @@
             console.error("V4.js Error: " + newError);
         return false;
     };
-    //# sourceMappingURL=Error.js.map
 
     /**
      * @exports V4.Loop
@@ -313,7 +309,6 @@
         };
         return Loop;
     }());
-    //# sourceMappingURL=Loop.js.map
 
     /*! *****************************************************************************
     Copyright (c) Microsoft Corporation. All rights reserved.
@@ -496,7 +491,6 @@
         };
         return FontGroup;
     }());
-    //# sourceMappingURL=FontGroup.js.map
 
     var unwrapOptions = function (opts, target, animState) {
         var anim = animState !== undefined;
@@ -592,6 +586,12 @@
                             var ogB = animState.ogOpts[opt];
                             var destB = animState.destOpts[opt];
                             var dur = animState.duration;
+                            //     Bounds points are assigned clockwise from bottom left:
+                            //      x2, y2) *--------------* (x3, y3)
+                            //              |              |
+                            //              |              |
+                            //     (x1, y1) *______________* (x4, y4)
+                            //
                             target.opts.bounds.x1 = ease(el, ogB.x1, destB.x1, dur);
                             target.opts.bounds.x2 = ease(el, ogB.x2, destB.x2, dur);
                             target.opts.bounds.x3 = ease(el, ogB.x3, destB.x3, dur);
@@ -614,6 +614,7 @@
                         }
                         break;
                     // interpolate the colors with an alpha from the easing function
+                    // The color interpolation function is given by the Animation to avoid recreating it
                     case "color":
                         target.opts.color = opts[opt];
                         if (anim && animState.destOpts[opt] !== undefined) {
@@ -630,6 +631,9 @@
                             var col = animState.backgroundColorLerp(alpha);
                             target.opts.backgroundColor = col;
                         }
+                        break;
+                    case "wrap":
+                        target.opts.wrap = opts[opt];
                         break;
                 }
             }
@@ -675,6 +679,7 @@
                 strokeWidth: 0,
                 verticalAlign: "BOTTOM",
                 textBox: this,
+                wrap: true,
             };
             this._modified = true;
             this._text = "";
@@ -700,11 +705,6 @@
             }
             return this.opts;
         };
-        //     // Corner points are assigned clockwise from bottom left:
-        //      *   (x2, y2) *--------------* (x3, y3)
-        //      *            |              |
-        //      *            |              |
-        //      *   (x1, y1) *______________* (x4, y4)
         /**
          * Get/set the content of the text box
          * @param newText - the text
@@ -748,6 +748,7 @@
             ctx.lineTo(this.opts.bounds.x2, this.opts.bounds.y2);
             ctx.closePath();
             ctx.clip();
+            // draw an outline around the TextBox
             if (this._debug) {
                 ctx.lineWidth = 1;
                 ctx.strokeStyle = "red";
@@ -763,19 +764,19 @@
                 ctx.closePath();
                 ctx.stroke();
             }
+            // create the background and fill
             ctx.fillStyle = this.opts.backgroundColor;
             ctx.fillRect(this.opts.bounds.x2, this.opts.bounds.y2, this.opts.bounds.w, this.opts.bounds.h);
-            // const drawPos = this._animating
-            //     ? this._calculateTextRenderXY()
-            //     : this._drawPos;
+            // calculate the draw position only if TextBox options have changed, as it can get expensive
             if (this._modified) {
                 this._calculateTextRenderXY();
                 this._modified = false;
             }
+            // text fill color
             ctx.fillStyle = this.opts.color;
+            // render text
             for (var _i = 0, _a = this._chunks; _i < _a.length; _i++) {
                 var chunk = _a[_i];
-                // render font
                 var absPath = this.opts.font.getPath(chunk.text, chunk.pos.x, chunk.pos.y, this.opts.fontSize);
                 var drawPath = new Path2D(absPath.toPathData(2));
                 ctx.fill(drawPath);
@@ -803,44 +804,60 @@
          * textbox plus the vertical margins
          */
         TextBox.prototype._createChunks = function () {
-            var words = this._text.split(" ");
-            var computedChunks = [];
-            var currentWidth = 0;
-            var currentChunk = "";
-            for (var _i = 0, words_1 = words; _i < words_1.length; _i++) {
-                var word = words_1[_i];
-                var curPlusWord = currentChunk !== "" ? currentChunk + " " + word : word;
-                var p = this.opts.font.getPath(curPlusWord, 0, 0, this.opts.fontSize);
-                var bb = p.getBoundingBox();
-                if (bb.x2 - bb.x1 < this.opts.bounds.w) {
-                    currentChunk = curPlusWord;
+            if (this.opts.wrap) {
+                // we're wrapping the text, so split it into chunks of words
+                var words = this._text.split(" ");
+                var computedChunks = [];
+                var currentWidth = 0;
+                var currentChunk = "";
+                for (var _i = 0, words_1 = words; _i < words_1.length; _i++) {
+                    var word = words_1[_i];
+                    var curPlusWord = currentChunk !== "" ? currentChunk + " " + word : word;
+                    var p = this.opts.font.getPath(curPlusWord, 0, 0, this.opts.fontSize);
+                    var bb = p.getBoundingBox();
+                    if (bb.x2 - bb.x1 < this.opts.bounds.w) {
+                        currentChunk = curPlusWord;
+                        currentWidth = bb.x2 - bb.x1;
+                    }
+                    else {
+                        computedChunks.push({
+                            num: computedChunks.length + 1,
+                            pos: { x: 0, y: 0 },
+                            text: currentChunk,
+                            width: currentWidth,
+                        });
+                        currentChunk = word;
+                        currentWidth = 0;
+                    }
+                }
+                if (currentWidth === 0) {
+                    var p = this.opts.font.getPath(currentChunk, 0, 0, this.opts.fontSize);
+                    var bb = p.getBoundingBox();
                     currentWidth = bb.x2 - bb.x1;
                 }
-                else {
-                    computedChunks.push({
-                        num: computedChunks.length + 1,
-                        pos: { x: 0, y: 0 },
-                        text: currentChunk,
-                        width: currentWidth,
-                    });
-                    currentChunk = word;
-                    currentWidth = 0;
-                }
+                computedChunks.push({
+                    num: computedChunks.length + 1,
+                    pos: { x: 0, y: 0 },
+                    text: currentChunk,
+                    width: currentWidth,
+                });
+                this._textStats.totalTextHeight =
+                    computedChunks.length * this._textStats.textHeight;
+                this._chunks = computedChunks;
             }
-            if (currentWidth === 0) {
-                var p = this.opts.font.getPath(currentChunk, 0, 0, this.opts.fontSize);
+            else {
+                // no wrapping, so just save one chunk containing all the text
+                var p = this.opts.font.getPath(this._text, 0, 0, this.opts.fontSize);
                 var bb = p.getBoundingBox();
-                currentWidth = bb.x2 - bb.x1;
+                this._chunks = [
+                    {
+                        num: 1,
+                        pos: { x: 0, y: 0 },
+                        text: this._text,
+                        width: bb.x2 - bb.x1,
+                    },
+                ];
             }
-            computedChunks.push({
-                num: computedChunks.length + 1,
-                pos: { x: 0, y: 0 },
-                text: currentChunk,
-                width: currentWidth,
-            });
-            this._textStats.totalTextHeight =
-                computedChunks.length * this._textStats.textHeight;
-            this._chunks = computedChunks;
         };
         /**
          * Calculate the x and y coordinates to start drawing the text
@@ -903,7 +920,6 @@
         };
         return TextBox;
     }());
-    //# sourceMappingURL=TextBox.js.map
 
     var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 

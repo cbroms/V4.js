@@ -29,6 +29,7 @@ export interface IOptions {
     lineHeight: number;
     backgroundColor: string;
     textBox: TextBox;
+    wrap: boolean;
 }
 export interface IDrawPos {
     x: number;

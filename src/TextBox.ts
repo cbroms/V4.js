@@ -34,6 +34,7 @@ export interface IOptions {
   lineHeight: number;
   backgroundColor: string;
   textBox: TextBox;
+  wrap: boolean;
 }
 
 export interface IDrawPos {
@@ -106,6 +107,7 @@ export class TextBox {
       strokeWidth: 0,
       verticalAlign: "BOTTOM",
       textBox: this,
+      wrap: true,
     };
 
     this._modified = true;
@@ -135,12 +137,6 @@ export class TextBox {
     }
     return this.opts;
   }
-  //     // Corner points are assigned clockwise from bottom left:
-
-  //      *   (x2, y2) *--------------* (x3, y3)
-  //      *            |              |
-  //      *            |              |
-  //      *   (x1, y1) *______________* (x4, y4)
 
   /**
    * Get/set the content of the text box
@@ -192,6 +188,7 @@ export class TextBox {
     ctx.closePath();
     ctx.clip();
 
+    // draw an outline around the TextBox
     if (this._debug) {
       ctx.lineWidth = 1;
       ctx.strokeStyle = "red";
@@ -208,6 +205,7 @@ export class TextBox {
       ctx.stroke();
     }
 
+    // create the background and fill
     ctx.fillStyle = this.opts.backgroundColor;
     ctx.fillRect(
       this.opts.bounds.x2,
@@ -216,19 +214,17 @@ export class TextBox {
       this.opts.bounds.h,
     );
 
-    // const drawPos = this._animating
-    //     ? this._calculateTextRenderXY()
-    //     : this._drawPos;
-
+    // calculate the draw position only if TextBox options have changed, as it can get expensive
     if (this._modified) {
       this._calculateTextRenderXY();
       this._modified = false;
     }
 
+    // text fill color
     ctx.fillStyle = this.opts.color;
 
+    // render text
     for (const chunk of this._chunks) {
-      // render font
       const absPath = this.opts.font.getPath(
         chunk.text,
         chunk.pos.x,
@@ -274,47 +270,67 @@ export class TextBox {
    * textbox plus the vertical margins
    */
   private _createChunks(): void {
-    const words = this._text.split(" ");
-    const computedChunks = [];
-    let currentWidth = 0;
-    let currentChunk = "";
+    if (this.opts.wrap) {
+      // we're wrapping the text, so split it into chunks of words
+      const words = this._text.split(" ");
+      const computedChunks = [];
+      let currentWidth = 0;
+      let currentChunk = "";
 
-    for (const word of words) {
-      const curPlusWord =
-        currentChunk !== "" ? currentChunk + " " + word : word;
+      for (const word of words) {
+        const curPlusWord =
+          currentChunk !== "" ? currentChunk + " " + word : word;
 
-      const p = this.opts.font.getPath(curPlusWord, 0, 0, this.opts.fontSize);
-      const bb = p.getBoundingBox();
+        const p = this.opts.font.getPath(curPlusWord, 0, 0, this.opts.fontSize);
+        const bb = p.getBoundingBox();
 
-      if (bb.x2 - bb.x1 < this.opts.bounds.w) {
-        currentChunk = curPlusWord;
-        currentWidth = bb.x2 - bb.x1;
-      } else {
-        computedChunks.push({
-          num: computedChunks.length + 1,
-          pos: { x: 0, y: 0 },
-          text: currentChunk,
-          width: currentWidth,
-        });
-        currentChunk = word;
-        currentWidth = 0;
+        if (bb.x2 - bb.x1 < this.opts.bounds.w) {
+          currentChunk = curPlusWord;
+          currentWidth = bb.x2 - bb.x1;
+        } else {
+          computedChunks.push({
+            num: computedChunks.length + 1,
+            pos: { x: 0, y: 0 },
+            text: currentChunk,
+            width: currentWidth,
+          });
+          currentChunk = word;
+          currentWidth = 0;
+        }
       }
-    }
-    if (currentWidth === 0) {
-      const p = this.opts.font.getPath(currentChunk, 0, 0, this.opts.fontSize);
-      const bb = p.getBoundingBox();
-      currentWidth = bb.x2 - bb.x1;
-    }
-    computedChunks.push({
-      num: computedChunks.length + 1,
-      pos: { x: 0, y: 0 },
-      text: currentChunk,
-      width: currentWidth,
-    });
+      if (currentWidth === 0) {
+        const p = this.opts.font.getPath(
+          currentChunk,
+          0,
+          0,
+          this.opts.fontSize,
+        );
+        const bb = p.getBoundingBox();
+        currentWidth = bb.x2 - bb.x1;
+      }
+      computedChunks.push({
+        num: computedChunks.length + 1,
+        pos: { x: 0, y: 0 },
+        text: currentChunk,
+        width: currentWidth,
+      });
 
-    this._textStats.totalTextHeight =
-      computedChunks.length * this._textStats.textHeight;
-    this._chunks = computedChunks;
+      this._textStats.totalTextHeight =
+        computedChunks.length * this._textStats.textHeight;
+      this._chunks = computedChunks;
+    } else {
+      // no wrapping, so just save one chunk containing all the text
+      const p = this.opts.font.getPath(this._text, 0, 0, this.opts.fontSize);
+      const bb = p.getBoundingBox();
+      this._chunks = [
+        {
+          num: 1,
+          pos: { x: 0, y: 0 },
+          text: this._text,
+          width: bb.x2 - bb.x1,
+        },
+      ];
+    }
   }
 
   /**

@@ -148,6 +148,12 @@ export const unwrapOptions = (
             const destB = animState.destOpts[opt];
             const dur = animState.duration;
 
+            //     Bounds points are assigned clockwise from bottom left:
+            //      x2, y2) *--------------* (x3, y3)
+            //              |              |
+            //              |              |
+            //     (x1, y1) *______________* (x4, y4)
+            //
             target.opts.bounds.x1 = ease(el, ogB.x1, destB.x1, dur);
             target.opts.bounds.x2 = ease(el, ogB.x2, destB.x2, dur);
             target.opts.bounds.x3 = ease(el, ogB.x3, destB.x3, dur);
@@ -171,6 +177,7 @@ export const unwrapOptions = (
           break;
 
         // interpolate the colors with an alpha from the easing function
+        // The color interpolation function is given by the Animation to avoid recreating it
         case "color":
           target.opts.color = opts[opt] as string;
 
@@ -201,6 +208,10 @@ export const unwrapOptions = (
             const col = animState.backgroundColorLerp(alpha);
             target.opts.backgroundColor = col;
           }
+          break;
+
+        case "wrap":
+          target.opts.wrap = opts[opt];
           break;
       }
     }
