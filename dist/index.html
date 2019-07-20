@@ -18,12 +18,11 @@
                 loop.backgroundColor("#fff");
 
                 var fontObj = new V4.FontGroup();
-                // await fontObj.loadFont(
-                //     "assets/CrimsonText-Regular.ttf",
-                //     "Regular"
-                // );
+                await fontObj.loadFont(
+                    "assets/CrimsonText-Regular.ttf",
+                    "Regular"
+                );
 
-                await fontObj.loadGFonts("Reas", ["Regular"]);
 
                 // var res = await fontObj.loadGFonts("Crimson Text", [
                 //     "Regular",
@@ -39,21 +38,11 @@
                 // textBox.verticalAlign("CENTER");
                 // textBox.horizontalAlign("CENTER");
                 // animator.addToAnimation(textBox.renderer);
-                let bounds = {
-                    x1: 0,
-                    y1: 250,
-                    x2: 0,
-                    y2: 0,
-                    x3: 400,
-                    y3: 0,
-                    x4: 400,
-                    y4: 250,
-                    h: 250,
-                    w: 400
-                }
+
 
                 const options = {
-                    bounds: bounds,
+                    position: {x: 0, y: 300},
+                    size: {h: 300, w: 700},
                     verticalAlign: "top",
                     horizontalAlign: "left",
                     fontSize: 72, 
@@ -63,8 +52,9 @@
 
                 }
 
-                var textBox2 = new V4.TextBox({font: font, bounds: bounds, verticalAlign: "CENTER", horizontalAlign: "CENTER", fontSize: 72});
-                textBox2.text("Here's a text!");
+                var textBox2 = new V4.TextBox({font: font,position: {x: 0, y: 300},
+                    size: {h: 300, w: 700}, verticalAlign: "CENTER", horizontalAlign: "CENTER", fontSize: 72});
+                textBox2.text("Hello, world!");
                 textBox2.outlinePath(true);
                 // textBox2.verticalAlign("TOP");
                 // textBox2.horizontalAlign("LEFT");
@@ -78,7 +68,7 @@
 
                     rq.push(anim5.renderer, () => {
 
-                        var anim6 = new V4.Animation(textBox2, {color: "yellow", backgroundColor: "green"});
+                        var anim6 = new V4.Animation(textBox2, {color: "yellow", backgroundColor: "black"});
                        
                         rq.push(anim6.renderer, () => {
                           
@@ -104,11 +94,11 @@
                     
                 function positionLoop() {
 
-                     var anim3 = new V4.Animation(textBox2, {position: {x: 300, y: 450}}, 6, "easeInOutCubic")
+                     var anim3 = new V4.Animation(textBox2, {position: {x: 300, y: 450}, size: {h:250, w: 400}}, 6, "easeInOutCubic")
 
                     rq.push(anim3.renderer, () => {
 
-                        var anim4 = new V4.Animation(textBox2, {position: {x: 0, y: 250}}, 2, "easeInOutQuart")
+                        var anim4 = new V4.Animation(textBox2, {position: {x: 0, y: 300}, size: {h:300, w: 700}}, 2, "easeInOutQuart")
                         rq.push(anim4.renderer, () => {
                           
                             positionLoop()

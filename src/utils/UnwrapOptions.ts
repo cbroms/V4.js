@@ -40,7 +40,38 @@ export const unwrapOptions = (
           target.opts.verticalAlign = opts[opt] as VerticalAlignOpts;
           break;
 
-        // For position we interpolate both the x and y and contruct a new bounds object using resulting values
+        // interpolate h and w
+        case "size":
+          const h =
+            anim && animState.destOpts[opt] !== undefined
+              ? animState.easingFunc(
+                  animState.elapsed,
+                  animState.ogOpts[opt].h,
+                  animState.destOpts[opt].h,
+                  animState.duration,
+                )
+              : opts[opt].h;
+
+          const w =
+            anim && animState.destOpts[opt] !== undefined
+              ? animState.easingFunc(
+                  animState.elapsed,
+                  animState.ogOpts[opt].w,
+                  animState.destOpts[opt].w,
+                  animState.duration,
+                )
+              : opts[opt].w;
+
+          target.opts.size = { h, w };
+          target.opts.bounds.h = h;
+          target.opts.bounds.w = w;
+          target.opts.bounds.x3 = target.opts.position.x + w;
+          target.opts.bounds.x4 = target.opts.position.x + w;
+          target.opts.bounds.y2 = target.opts.position.y - h;
+          target.opts.bounds.y3 = target.opts.position.y - h;
+          break;
+
+        // interpolate x and y
         case "position":
           const x =
             anim && animState.destOpts[opt] !== undefined
@@ -64,22 +95,47 @@ export const unwrapOptions = (
 
           target.opts.position = { x, y };
           target.opts.bounds = {
-            h: target.opts.bounds.h,
-            w: target.opts.bounds.w,
+            h: target.opts.size.h,
+            w: target.opts.size.w,
             x1: x,
             x2: x,
-            x3: x + target.opts.bounds.w,
-            x4: x + target.opts.bounds.w,
+            x3: x + target.opts.size.w,
+            x4: x + target.opts.size.w,
             y1: y,
-            y2: y - target.opts.bounds.h,
-            y3: y - target.opts.bounds.h,
+            y2: y - target.opts.size.h,
+            y3: y - target.opts.size.h,
             y4: y,
           };
           break;
+
         case "bounds":
-          target.opts.bounds = opts[opt] as IBounds;
-          target.opts.position.x = opts[opt].x1;
-          target.opts.position.y = opts[opt].y1;
+          if (anim && animState.destOpts[opt] !== undefined) {
+            const ease = animState.easingFunc;
+            const el = animState.elapsed;
+            const ogB = animState.ogOpts[opt];
+            const destB = animState.destOpts[opt];
+            const dur = animState.duration;
+
+            target.opts.bounds.x1 = ease(el, ogB.x1, destB.x1, dur);
+            target.opts.bounds.x2 = ease(el, ogB.x2, destB.x2, dur);
+            target.opts.bounds.x3 = ease(el, ogB.x3, destB.x3, dur);
+            target.opts.bounds.x4 = ease(el, ogB.x4, destB.x4, dur);
+            target.opts.bounds.y1 = ease(el, ogB.y1, destB.y1, dur);
+            target.opts.bounds.y2 = ease(el, ogB.y2, destB.y2, dur);
+            target.opts.bounds.y3 = ease(el, ogB.y3, destB.y3, dur);
+            target.opts.bounds.y4 = ease(el, ogB.y4, destB.y4, dur);
+
+            target.opts.position.x = target.opts.bounds.x1;
+            target.opts.position.y = target.opts.bounds.y1;
+            target.opts.size.h = ease(el, ogB.h, destB.h, dur);
+            target.opts.size.w = ease(el, ogB.w, destB.w, dur);
+          } else {
+            target.opts.bounds = opts[opt] as IBounds;
+            target.opts.size.h = opts[opt].h;
+            target.opts.size.w = opts[opt].w;
+            target.opts.position.x = opts[opt].x1;
+            target.opts.position.y = opts[opt].y1;
+          }
           break;
 
         // interpolate the colors with an alpha from the easing function

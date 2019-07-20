@@ -496,6 +496,7 @@
         };
         return FontGroup;
     }());
+    //# sourceMappingURL=FontGroup.js.map
 
     var unwrapOptions = function (opts, target, animState) {
         var anim = animState !== undefined;
@@ -518,7 +519,23 @@
                     case "verticalAlign":
                         target.opts.verticalAlign = opts[opt];
                         break;
-                    // For position we interpolate both the x and y and contruct a new bounds object using resulting values
+                    // interpolate h and w
+                    case "size":
+                        var h = anim && animState.destOpts[opt] !== undefined
+                            ? animState.easingFunc(animState.elapsed, animState.ogOpts[opt].h, animState.destOpts[opt].h, animState.duration)
+                            : opts[opt].h;
+                        var w = anim && animState.destOpts[opt] !== undefined
+                            ? animState.easingFunc(animState.elapsed, animState.ogOpts[opt].w, animState.destOpts[opt].w, animState.duration)
+                            : opts[opt].w;
+                        target.opts.size = { h: h, w: w };
+                        target.opts.bounds.h = h;
+                        target.opts.bounds.w = w;
+                        target.opts.bounds.x3 = target.opts.position.x + w;
+                        target.opts.bounds.x4 = target.opts.position.x + w;
+                        target.opts.bounds.y2 = target.opts.position.y - h;
+                        target.opts.bounds.y3 = target.opts.position.y - h;
+                        break;
+                    // interpolate x and y
                     case "position":
                         var x = anim && animState.destOpts[opt] !== undefined
                             ? animState.easingFunc(animState.elapsed, animState.ogOpts[opt].x, animState.destOpts[opt].x, animState.duration)
@@ -528,22 +545,45 @@
                             : opts[opt].y;
                         target.opts.position = { x: x, y: y };
                         target.opts.bounds = {
-                            h: target.opts.bounds.h,
-                            w: target.opts.bounds.w,
+                            h: target.opts.size.h,
+                            w: target.opts.size.w,
                             x1: x,
                             x2: x,
-                            x3: x + target.opts.bounds.w,
-                            x4: x + target.opts.bounds.w,
+                            x3: x + target.opts.size.w,
+                            x4: x + target.opts.size.w,
                             y1: y,
-                            y2: y - target.opts.bounds.h,
-                            y3: y - target.opts.bounds.h,
+                            y2: y - target.opts.size.h,
+                            y3: y - target.opts.size.h,
                             y4: y,
                         };
                         break;
                     case "bounds":
-                        target.opts.bounds = opts[opt];
-                        target.opts.position.x = opts[opt].x1;
-                        target.opts.position.y = opts[opt].y1;
+                        if (anim && animState.destOpts[opt] !== undefined) {
+                            var ease = animState.easingFunc;
+                            var el = animState.elapsed;
+                            var ogB = animState.ogOpts[opt];
+                            var destB = animState.destOpts[opt];
+                            var dur = animState.duration;
+                            target.opts.bounds.x1 = ease(el, ogB.x1, destB.x1, dur);
+                            target.opts.bounds.x2 = ease(el, ogB.x2, destB.x2, dur);
+                            target.opts.bounds.x3 = ease(el, ogB.x3, destB.x3, dur);
+                            target.opts.bounds.x4 = ease(el, ogB.x4, destB.x4, dur);
+                            target.opts.bounds.y1 = ease(el, ogB.y1, destB.y1, dur);
+                            target.opts.bounds.y2 = ease(el, ogB.y2, destB.y2, dur);
+                            target.opts.bounds.y3 = ease(el, ogB.y3, destB.y3, dur);
+                            target.opts.bounds.y4 = ease(el, ogB.y4, destB.y4, dur);
+                            target.opts.position.x = target.opts.bounds.x1;
+                            target.opts.position.y = target.opts.bounds.y1;
+                            target.opts.size.h = ease(el, ogB.h, destB.h, dur);
+                            target.opts.size.w = ease(el, ogB.w, destB.w, dur);
+                        }
+                        else {
+                            target.opts.bounds = opts[opt];
+                            target.opts.size.h = opts[opt].h;
+                            target.opts.size.w = opts[opt].w;
+                            target.opts.position.x = opts[opt].x1;
+                            target.opts.position.y = opts[opt].y1;
+                        }
                         break;
                     // interpolate the colors with an alpha from the easing function
                     case "color":
@@ -567,7 +607,6 @@
             }
         }
     };
-    //# sourceMappingURL=UnwrapOptions.js.map
 
     /**
      * @exports V4.TextBox
@@ -602,6 +641,7 @@
                 horizontalAlign: "RIGHT",
                 lineHeight: 8,
                 position: { x: 0, y: 0 },
+                size: { h: 0, w: 0 },
                 stroke: false,
                 strokeColor: "white",
                 strokeWidth: 0,
@@ -834,7 +874,6 @@
         };
         return TextBox;
     }());
-    //# sourceMappingURL=TextBox.js.map
 
     var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -1633,7 +1672,6 @@
         };
         return Animation;
     }());
-    //# sourceMappingURL=Animation.js.map
 
     exports.Animation = Animation;
     exports.FontGroup = FontGroup;

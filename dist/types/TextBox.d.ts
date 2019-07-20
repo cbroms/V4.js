@@ -22,6 +22,7 @@ export interface IOptions {
     position: IDrawPos;
     bounds: IBounds;
     color: string;
+    size: ISize;
     stroke: boolean;
     strokeWidth: number;
     strokeColor: string;
@@ -31,6 +32,10 @@ export interface IOptions {
 export interface IDrawPos {
     x: number;
     y: number;
+}
+export interface ISize {
+    h: number;
+    w: number;
 }
 /**
  * @exports V4.TextBox
