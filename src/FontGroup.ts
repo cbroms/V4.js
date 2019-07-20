@@ -94,7 +94,7 @@ export class FontGroup {
     // https://raw.githubusercontent.com/google/fonts/master/ofl/crimsontext/CrimsonText-Regular.ttf
     const baseUrl =
       "https://raw.githubusercontent.com/google/fonts/master/ofl/";
-    const nameNoSpace = name.replace(" ", "");
+    const nameNoSpace = name.replace(/ /g, "");
     const nameCleaned = nameNoSpace.toLowerCase();
     const varsCleaned = variants.map(val =>
       val.replace(" ", "").replace("-", ""),

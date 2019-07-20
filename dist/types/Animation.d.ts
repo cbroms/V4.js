@@ -17,6 +17,8 @@ export declare class Animation {
     private _duration;
     private _box;
     private _easingFunc;
+    private _backgroundColorLerp;
+    private _colorLerp;
     constructor(box: TextBox, opts: IOptions, duration?: number, easing?: string);
     renderer(state: RendererPayload): boolean;
 }

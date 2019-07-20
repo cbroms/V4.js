@@ -33,6 +33,7 @@ export interface IOptions {
   strokeColor: string;
   lineHeight: number;
   backgroundColor: string;
+  textBox: TextBox;
 }
 
 export interface IDrawPos {
@@ -104,6 +105,7 @@ export class TextBox {
       strokeColor: "white",
       strokeWidth: 0,
       verticalAlign: "BOTTOM",
+      textBox: this,
     };
 
     this._modified = true;
@@ -223,6 +225,8 @@ export class TextBox {
       this._modified = false;
     }
 
+    ctx.fillStyle = this.opts.color;
+
     for (const chunk of this._chunks) {
       // render font
       const absPath = this.opts.font.getPath(
@@ -234,7 +238,6 @@ export class TextBox {
 
       const drawPath = new Path2D(absPath.toPathData(2));
 
-      ctx.fillStyle = this.opts.color;
       ctx.fill(drawPath);
     }
 

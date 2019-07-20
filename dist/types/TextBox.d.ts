@@ -28,6 +28,7 @@ export interface IOptions {
     strokeColor: string;
     lineHeight: number;
     backgroundColor: string;
+    textBox: TextBox;
 }
 export interface IDrawPos {
     x: number;

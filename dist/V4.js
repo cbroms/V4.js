@@ -487,7 +487,7 @@
             // make a url like this:
             // https://raw.githubusercontent.com/google/fonts/master/ofl/crimsontext/CrimsonText-Regular.ttf
             var baseUrl = "https://raw.githubusercontent.com/google/fonts/master/ofl/";
-            var nameNoSpace = name.replace(" ", "");
+            var nameNoSpace = name.replace(/ /g, "");
             var nameCleaned = nameNoSpace.toLowerCase();
             var varsCleaned = variants.map(function (val) {
                 return val.replace(" ", "").replace("-", "");
@@ -504,6 +504,34 @@
             if (opts.hasOwnProperty(opt)) {
                 switch (opt) {
                     case "font":
+                        // Interpolating between font paths doesn't work very well with both flubber and polymorph
+                        // if this gets implemented, it will require writing a custom SVG interpolation system
+                        // if (anim && animState.destOpts[opt] !== undefined) {
+                        //   const size = target.opts.textBox.opts.fontSize;
+                        //   const alpha = animState.easingFunc(
+                        //     animState.elapsed,
+                        //     0,
+                        //     1,
+                        //     animState.duration,
+                        //   );
+                        //   target.opts.paths = [];
+                        //   for (const chunk of target.opts.textBox.chunks()) {
+                        //     const fontInterp = flubber.default.interpolate(
+                        //       animState.ogOpts[opt]
+                        //         .getPath(chunk.text, chunk.pos.x, chunk.pos.y, size)
+                        //         .toPathData(2),
+                        //       animState.destOpts[opt]
+                        //         .getPath(chunk.text, chunk.pos.x, chunk.pos.y, size)
+                        //         .toPathData(2),
+                        //     );
+                        //     const path = fontInterp(alpha);
+                        //     // override TextBox's drawing of the font with a custom path
+                        //     target.opts.paths.push(path);
+                        //   }
+                        //   // since the TextBox requires a font to position the text, set the closest font variant
+                        //   if (alpha < 0.5) target.opts.font = animState.ogOpts[opt];
+                        //   else target.opts.font = animState.destOpts[opt];
+                        // } else target.opts.font = opts[opt];
                         target.opts.font = opts[opt];
                         break;
                     // For font size, we can just interpolate between two numbers using the easing function
@@ -646,6 +674,7 @@
                 strokeColor: "white",
                 strokeWidth: 0,
                 verticalAlign: "BOTTOM",
+                textBox: this,
             };
             this._modified = true;
             this._text = "";
@@ -743,12 +772,12 @@
                 this._calculateTextRenderXY();
                 this._modified = false;
             }
+            ctx.fillStyle = this.opts.color;
             for (var _i = 0, _a = this._chunks; _i < _a.length; _i++) {
                 var chunk = _a[_i];
                 // render font
                 var absPath = this.opts.font.getPath(chunk.text, chunk.pos.x, chunk.pos.y, this.opts.fontSize);
                 var drawPath = new Path2D(absPath.toPathData(2));
-                ctx.fillStyle = this.opts.color;
                 ctx.fill(drawPath);
             }
             ctx.restore();
@@ -874,6 +903,7 @@
         };
         return TextBox;
     }());
+    //# sourceMappingURL=TextBox.js.map
 
     var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -1632,8 +1662,20 @@
                 this.opts = box.opts;
                 this._destOpts = opts;
                 this._duration = duration !== undefined ? duration : 1.5;
-                this._easingFunc = easing !== undefined ? Easing[easing] : Easing.easeInQuad;
-                // unwrapOptions(opts, this);
+                this._easingFunc =
+                    easing !== undefined ? Easing[easing] : Easing.easeInQuad;
+                // create background color and text color lerp functions
+                this._backgroundColorLerp =
+                    this._destOpts.backgroundColor !== undefined
+                        ? colorInterpolate([
+                            this._ogOpts.backgroundColor,
+                            this._destOpts.backgroundColor,
+                        ])
+                        : function () { return ""; };
+                this._colorLerp =
+                    this._destOpts.color !== undefined
+                        ? colorInterpolate([this._ogOpts.color, this._destOpts.color])
+                        : function () { return ""; };
             }
             this._elapsed = 0;
             this.renderer = this.renderer.bind(this);
@@ -1643,20 +1685,13 @@
             // console.log(this._duration);
             if (this._elapsed < this._duration) {
                 var animationState = {
-                    backgroundColorLerp: this._destOpts.backgroundColor !== undefined
-                        ? colorInterpolate([
-                            this._ogOpts.backgroundColor,
-                            this._destOpts.backgroundColor
-                        ])
-                        : function () { return ""; },
-                    colorLerp: this._destOpts.color !== undefined
-                        ? colorInterpolate([this._ogOpts.color, this._destOpts.color])
-                        : function () { return ""; },
+                    backgroundColorLerp: this._backgroundColorLerp,
+                    colorLerp: this._colorLerp,
                     destOpts: this._destOpts,
                     duration: this._duration,
                     easingFunc: this._easingFunc,
                     elapsed: this._elapsed,
-                    ogOpts: this._ogOpts
+                    ogOpts: this._ogOpts,
                 };
                 // update this.opts to reflect new positions
                 unwrapOptions(this.opts, this, animationState);

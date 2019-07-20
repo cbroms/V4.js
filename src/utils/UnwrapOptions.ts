@@ -18,6 +18,38 @@ export const unwrapOptions = (
     if (opts.hasOwnProperty(opt)) {
       switch (opt) {
         case "font":
+          // Interpolating between font paths doesn't work very well with both flubber and polymorph
+          // if this gets implemented, it will require writing a custom SVG interpolation system
+
+          // if (anim && animState.destOpts[opt] !== undefined) {
+          //   const size = target.opts.textBox.opts.fontSize;
+
+          //   const alpha = animState.easingFunc(
+          //     animState.elapsed,
+          //     0,
+          //     1,
+          //     animState.duration,
+          //   );
+          //   target.opts.paths = [];
+
+          //   for (const chunk of target.opts.textBox.chunks()) {
+          //     const fontInterp = flubber.default.interpolate(
+          //       animState.ogOpts[opt]
+          //         .getPath(chunk.text, chunk.pos.x, chunk.pos.y, size)
+          //         .toPathData(2),
+          //       animState.destOpts[opt]
+          //         .getPath(chunk.text, chunk.pos.x, chunk.pos.y, size)
+          //         .toPathData(2),
+          //     );
+          //     const path = fontInterp(alpha);
+          //     // override TextBox's drawing of the font with a custom path
+
+          //     target.opts.paths.push(path);
+          //   }
+          //   // since the TextBox requires a font to position the text, set the closest font variant
+          //   if (alpha < 0.5) target.opts.font = animState.ogOpts[opt];
+          //   else target.opts.font = animState.destOpts[opt];
+          // } else target.opts.font = opts[opt];
           target.opts.font = opts[opt];
           break;
 
