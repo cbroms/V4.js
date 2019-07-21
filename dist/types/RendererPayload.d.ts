@@ -1,9 +1,10 @@
 import { Loop } from "./Loop";
 export declare class RendererPayload {
-    canvas: HTMLCanvasElement | null;
-    context: CanvasRenderingContext2D | null;
-    hasContext: () => boolean | Error;
-    hasCanvas: () => boolean | Error;
+    canvas: HTMLCanvasElement;
+    context: CanvasRenderingContext2D;
+    glCanvas: HTMLCanvasElement;
+    glContext: WebGLRenderingContext;
+    webgl: boolean;
     backgroundColor: string;
     deltaTime: number;
     frameCount: number;

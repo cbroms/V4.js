@@ -5,8 +5,11 @@ declare type Renderer = (rendererPayload: object) => void;
  * @class
  */
 export declare class Loop {
-    canvas: HTMLCanvasElement | null;
+    canvas: HTMLCanvasElement;
+    glCanvas: HTMLCanvasElement;
     context: CanvasRenderingContext2D | null;
+    glContext: WebGLRenderingContext | null;
+    webgl: boolean;
     private _loop;
     private _frameCount;
     private _rendererBuffer;
@@ -16,19 +19,7 @@ export declare class Loop {
     private _fpsInterval;
     private _startTime;
     private _then;
-    constructor(canvas: HTMLCanvasElement | null);
-    /**
-     * Check the status of the canvas
-     * @param quietly - don't throw error if canvas DNE?
-     * @returns - if the canvas exists
-     */
-    hasCanvas(quietly?: boolean): boolean | Error;
-    /**
-     * Check the status of the canvas' context
-     * @param quietly - don't throw error if context DNE?
-     * @returns - if the context exists
-     */
-    hasContext(quietly?: boolean): boolean | Error;
+    constructor(canvas: HTMLCanvasElement, webgl?: boolean);
     /**
      * Get/set the background color of the canvas
      * @param color - the color to fill, in hex

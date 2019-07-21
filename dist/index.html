@@ -14,8 +14,21 @@
         canvas.height = 500;
         canvas.width = 700;
 
-        var loop = new V4.Loop(canvas, false);
+        var loop = new V4.Loop(canvas, true);
         loop.backgroundColor("#fff");
+
+        var shader = new V4.Shader(loop.glCanvas);
+
+        shader.setShader(`
+                precision mediump float;
+                uniform vec2 u_resolution;
+                void main() {
+                    vec2 uv = gl_FragCoord.xy / u_resolution;
+                    gl_FragColor = vec4(uv, 1.0, 0.3);
+                }
+            `)
+
+        loop.addToLoop(shader.renderer);
 
         var fontObj = new V4.FontGroup();
        //  var fontObj2 = new V4.FontGroup();
@@ -121,6 +134,7 @@
         // })
 
         loop.addToLoop(rq);
+
 
         // fontSizeLoop();
         positionLoop();

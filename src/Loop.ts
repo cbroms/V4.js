@@ -10,8 +10,11 @@ type Renderer = (rendererPayload: object) => void;
  * @class
  */
 export class Loop {
-  public canvas: HTMLCanvasElement | null;
+  public canvas: HTMLCanvasElement;
+  public glCanvas: HTMLCanvasElement;
   public context: CanvasRenderingContext2D | null;
+  public glContext: WebGLRenderingContext | null;
+  public webgl: boolean;
   private _loop: boolean;
   private _frameCount: number;
   private _rendererBuffer: Renderer[];
@@ -22,10 +25,39 @@ export class Loop {
   private _startTime: number;
   private _then: number;
 
-  constructor(canvas: HTMLCanvasElement | null) {
-    // set default values
+  constructor(canvas: HTMLCanvasElement, webgl = false) {
+    // check canvas and context are OK before continuing
+    if (!(canvas instanceof HTMLCanvasElement))
+      Error("Loop requires an HTML Canvas Element", true);
+
+    const td = canvas.getContext("2d");
+    if (td === null)
+      Error(
+        "Unable to get canvas context. Did you already get a WebGL or 3D context from this canvas?",
+        true,
+      );
     this.canvas = canvas;
-    this.context = canvas ? canvas.getContext("2d") : null;
+    this.context = td;
+
+    // create a new canvas for WebGL stuff
+    this.glCanvas = webgl ? document.createElement("canvas") : null;
+    this.glContext = webgl ? this.glCanvas.getContext("webgl") : null;
+    this.webgl = webgl;
+
+    if (webgl) {
+      const wrapper = document.createElement("div");
+      wrapper.id = "v4-wrapper";
+      this.glCanvas.id = "v4-webgl-canvas";
+
+      const canvasParent = this.canvas.parentElement;
+      canvasParent.appendChild(wrapper);
+      wrapper.appendChild(this.canvas);
+      wrapper.appendChild(this.glCanvas);
+
+      this.glCanvas.style.position = "absolute";
+      this.canvas.style.position = "absolute";
+    }
+
     this._loop = false;
     this._frameCount = 0;
     this._backgroundColor = "#000";
@@ -52,39 +84,14 @@ export class Loop {
       this.canvas.style.width = width + "px";
       this.canvas.style.height = height + "px";
       this.context.scale(ratio, ratio);
-    }
-  }
 
-  /**
-   * Check the status of the canvas
-   * @param quietly - don't throw error if canvas DNE?
-   * @returns - if the canvas exists
-   */
-  public hasCanvas(quietly = true): boolean | Error {
-    if (!this.canvas) {
-      if (quietly) {
-        return false;
-      } else {
-        Error("Trying to access null canvas");
+      if (this.webgl) {
+        this.glCanvas.width = width * ratio;
+        this.glCanvas.height = height * ratio;
+        this.glCanvas.style.width = width + "px";
+        this.glCanvas.style.height = height + "px";
       }
     }
-    return true;
-  }
-
-  /**
-   * Check the status of the canvas' context
-   * @param quietly - don't throw error if context DNE?
-   * @returns - if the context exists
-   */
-  public hasContext(quietly = true): boolean | Error {
-    if (!this.context) {
-      if (quietly) {
-        return false;
-      } else {
-        Error("Trying to access null canvas context");
-      }
-    }
-    return true;
   }
 
   /**
@@ -146,7 +153,7 @@ export class Loop {
    * @param self - TextCanvas class reference
    */
   public _renderLoop(self: this) {
-    if (self._loop && self.hasCanvas() && self.hasContext()) {
+    if (self._loop) {
       // calculate the deltaTime
       const now = window.performance.now();
       let elapsed = now - self._then;
@@ -166,14 +173,13 @@ export class Loop {
         const sinceStart = now - self._startTime;
         const fps = Math.round(1000 / (sinceStart / self._frameCount));
 
-        // console.log(fps);
-
         // create the rendererPayload object to be sent to each render function
         const payload = new RendererPayload();
         payload.canvas = self.canvas;
         payload.context = self.context;
-        payload.hasContext = self.hasContext;
-        payload.hasCanvas = self.hasCanvas;
+        payload.glCanvas = self.glCanvas;
+        payload.glContext = self.glContext;
+        payload.webgl = self.webgl;
         payload.backgroundColor = self._backgroundColor;
         payload.deltaTime = elapsed / 1000;
         payload.frameCount = self._frameCount;
