@@ -32,11 +32,10 @@ export declare class Shader {
      * @param name - the texture's name, starting with u_ by convention
      * @param image - the texture, as an image
      */
-    setTexture(name: string, image: HTMLImageElement): void;
+    setTexture(name: string, image: ImageBitmap): void;
     /**
-     * Pass a texture to the shader as a uniform value
-     * @param name - the texture's name, starting with u_ by convention
-     * @param image - the texture, as an image
+     * Shader's render function
+     * @param state - the renderer payload object
      */
     renderer(state: RendererPayload): void;
     private _compileShader;

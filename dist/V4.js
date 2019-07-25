@@ -27,6 +27,7 @@
       }
       return RendererPayload;
   }());
+  //# sourceMappingURL=RendererPayload.js.map
 
   /**
    * The default background renderer function
@@ -305,6 +306,7 @@
       };
       return Loop;
   }());
+  //# sourceMappingURL=Loop.js.map
 
   /*! *****************************************************************************
   Copyright (c) Microsoft Corporation. All rights reserved.
@@ -1787,7 +1789,7 @@
           gl.linkProgram(this._shaderProgram);
           if (!gl.getProgramParameter(this._shaderProgram, gl.LINK_STATUS)) {
               console.error(gl.getProgramInfoLog(this._shaderProgram));
-              Error("Failed to link program");
+              Error("Failed to link program", true);
           }
       };
       /**
@@ -1828,7 +1830,7 @@
           if (!t) {
               var glTexture = gl.createTexture();
               if (!glTexture) {
-                  Error("unable to create glTexture");
+                  Error("Unable to create glTexture");
               }
               t = {
                   glTexture: glTexture,
@@ -1846,24 +1848,28 @@
           gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
           var location = gl.getUniformLocation(this._shaderProgram, name);
           if (location === null) {
-              Error("uniform location for texture " + name + " not found");
+              Error("Uniform location for texture " + name + " not found");
           }
           gl.uniform1i(location, t.unit);
       };
       /**
-       * Pass a texture to the shader as a uniform value
-       * @param name - the texture's name, starting with u_ by convention
-       * @param image - the texture, as an image
+       * Shader's render function
+       * @param state - the renderer payload object
        */
       Shader.prototype.renderer = function (state) {
+          var _this = this;
           if (this._gl === undefined) {
               this.buildShaders(state.glCanvas);
           }
+          createImageBitmap(state.canvas).then(function (bit) {
+              _this.setTexture("u_texture", bit);
+          });
           // pass the uniforms
           this.setUniform("u_resolution", [
               state.glCanvas.width,
               state.glCanvas.height,
           ]);
+          //  this.setTexture("u_texture", el);
           this._gl.clear(this._gl.COLOR_BUFFER_BIT);
           this._gl.drawArrays(this._gl.TRIANGLE_STRIP, 0, 4);
       };
@@ -1875,9 +1881,10 @@
           }
           var info = gl.getShaderInfoLog(shader);
           if (!info) {
-              Error("failed to compile, but found no error log");
+              Error("Failed to compile, but found no error log");
           }
           console.error(info);
+          Error("Failed to compile shader program.", true);
           return this._parseErrorMessages(info);
       };
       Shader.prototype._createShaderProgram = function (gl, vs, fs) {
@@ -1941,7 +1948,6 @@
       };
       return Shader;
   }());
-  //# sourceMappingURL=Shader.js.map
 
   exports.Animation = Animation;
   exports.FontGroup = FontGroup;
