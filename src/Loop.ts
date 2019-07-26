@@ -1,9 +1,10 @@
 import { RendererPayload } from "./RendererPayload";
 import { backgroundRenderer, clearPrevRenderer } from "./Renderers";
 import { RenderQueue } from "./RenderQueue";
+import { Shader } from "./Shader";
 import { Error } from "./utils/Error";
 
-type Renderer = (rendererPayload: object) => void;
+type Renderer = (rendererPayload: RendererPayload) => void;
 
 /**
  * @exports V4.Loop
@@ -19,6 +20,7 @@ export class Loop {
   private _frameCount: number;
   private _rendererBuffer: Renderer[];
   private _renderQueueBuffer: RenderQueue[];
+  private _shaderBuffer: Shader[];
   private _backgroundColor: string;
   private _fps: number;
   private _fpsInterval: number;
@@ -71,6 +73,7 @@ export class Loop {
     // add default renderers to animation buffer
     this._rendererBuffer = [clearPrevRenderer, backgroundRenderer];
     this._renderQueueBuffer = [];
+    this._shaderBuffer = [];
 
     // set HDPI canvas scale for retina displays
     const ratio = window.devicePixelRatio;
@@ -91,6 +94,13 @@ export class Loop {
         this.glCanvas.style.width = width + "px";
         this.glCanvas.style.height = height + "px";
       }
+    } else if (this.webgl) {
+      const width = this.canvas.width;
+      const height = this.canvas.height;
+      this.glCanvas.width = width;
+      this.glCanvas.height = height;
+      this.glCanvas.style.width = width + "px";
+      this.glCanvas.style.height = height + "px";
     }
   }
 
@@ -123,9 +133,11 @@ export class Loop {
    * Add a renderer function or RenderQueue to the animation
    * @param renderer - the render function or RenderQueue object to be executed
    */
-  public addToLoop(renderer: Renderer | RenderQueue): void {
+  public addToLoop(renderer: Renderer | RenderQueue | Shader): void {
     if (renderer instanceof RenderQueue) {
       this._renderQueueBuffer.push(renderer as RenderQueue);
+    } else if (renderer instanceof Shader) {
+      this._shaderBuffer.push(renderer as Shader);
     } else {
       this._rendererBuffer.push(renderer as Renderer);
     }
@@ -195,11 +207,10 @@ export class Loop {
             renderer(payload);
           } catch (e) {
             Error(
-              'Renderer function "' +
-                renderer.name +
-                '" threw an uncaught exception: "' +
-                e +
-                '" ',
+              `Renderer function "${
+                renderer.name
+              }" threw an uncaught exception: "${e}"`,
+              true,
             );
             self._loop = false;
           }
@@ -208,7 +219,13 @@ export class Loop {
         // loop through the list of RenderQueues and call the render functions
         // within each
         for (const rq of self._renderQueueBuffer) {
-          rq.render(payload);
+          rq.renderer(payload);
+        }
+
+        // render shaders last so that the 2D context is finalized before being
+        // passed as a uniform to the shaders
+        for (const sd of self._shaderBuffer) {
+          sd.renderer(payload);
         }
 
         self.context.restore();

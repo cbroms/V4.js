@@ -31,6 +31,6 @@ export declare class RenderQueue {
      * The renderer for the queue- calls all render functions in the queue
      * @param state - the current state of the render loop
      */
-    render(state: RendererPayload): void;
+    renderer(state: RendererPayload): void;
 }
 export {};

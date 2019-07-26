@@ -11,6 +11,35 @@
   (global = global || self, factory(global.V4 = {}, global.opentype));
 }(this, function (exports, opentype_js) { 'use strict';
 
+  /* Safari and Edge polyfill for createImageBitmap
+   * https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/createImageBitmap
+   */
+  if (!("createImageBitmap" in window)) {
+    window.createImageBitmap = function(data) {
+      return new Promise((resolve, reject) => {
+        data.toBlob(blob => {
+          const newImg = document.createElement("img");
+          const url = URL.createObjectURL(blob);
+
+          newImg.onload = () => {
+            // no longer need to read the blob so it's revoked
+            URL.revokeObjectURL(url);
+            resolve(this);
+          };
+          newImg.src = url;
+        });
+      });
+    };
+  }
+
+  //   const image = new Image();
+  //   image.src = data.toDataURL("image/png");
+  //   image.addEventListener("load", function() {
+  //     resolve(this);
+  //   });
+  // });
+  // };
+
   var RendererPayload = /** @class */ (function () {
       function RendererPayload() {
           this.canvas = null;
@@ -95,7 +124,7 @@
        * The renderer for the queue- calls all render functions in the queue
        * @param state - the current state of the render loop
        */
-      RenderQueue.prototype.render = function (state) {
+      RenderQueue.prototype.renderer = function (state) {
           var ogLen = this._rendererBuffer.length;
           for (var i = 0; i < ogLen; i++) {
               var packet = this.pop();
@@ -129,6 +158,230 @@
       return false;
   };
   //# sourceMappingURL=Error.js.map
+
+  var defaultVertexShader = "\n  #ifdef GL_ES\n  precision mediump float;\n  #endif\n  attribute vec2 position;\n  void main() {\n    gl_Position = vec4(position, 0.0, 1.0);\n  }\n";
+  var defaultFragmentShader = "\n  #ifdef GL_ES\n  precision mediump float;\n  #endif\n  void main() {\n    gl_FragColor = vec4(0.0);\n  }\n";
+  /**
+   * @exports V4.Shader
+   * @class
+   */
+  // Much of this comes from https://github.com/fordhurley/shader-canvas
+  var Shader = /** @class */ (function () {
+      function Shader(canvas) {
+          this._textures = {};
+          if (canvas !== undefined)
+              this.buildShaders(canvas);
+          this.renderer = this.renderer.bind(this);
+      }
+      Shader.prototype.buildShaders = function (canvas) {
+          if (!(canvas instanceof HTMLCanvasElement))
+              Error("Shader requires an HTML canvas element", true);
+          var gl = canvas.getContext("webgl");
+          if (this._gl === null)
+              Error("Unable to get canvas context. Did you already get a 2D or 3D context from this canvas?", true);
+          this._gl = gl;
+          // create a vertex shader
+          var vs = this._gl.createShader(this._gl.VERTEX_SHADER);
+          if (vs === undefined)
+              Error("Failed to create vertex shader");
+          this._vertexShader = vs;
+          var vsErrs = this._compileShader(this._gl, this._vertexShader, defaultVertexShader);
+          if (vsErrs)
+              Error("Failed to compile vertex shader");
+          // create a fragment shader
+          var fs = this._gl.createShader(this._gl.FRAGMENT_SHADER);
+          if (fs === undefined)
+              Error("Failed to create fragment shader");
+          this._fragmentShader = fs;
+          var fsErrs = this._compileShader(this._gl, this._fragmentShader, defaultFragmentShader);
+          if (fsErrs)
+              Error("failed to compile vertex shader");
+          // create a shader program from vertex and fragment shaders
+          this._shaderProgram = this._createShaderProgram(this._gl, this._vertexShader, this._fragmentShader);
+          this._bindPositionAttribute(this._gl, this._shaderProgram);
+          this._gl.clearColor(0.0, 0.0, 0.0, 1.0);
+          this._gl.useProgram(this._shaderProgram);
+          this._gl.viewport(0, 0, canvas.width, canvas.height);
+      };
+      /**
+       * Add a new fragment shader to the shader program
+       * @param source - The shader's source code, as a string
+       */
+      Shader.prototype.setShader = function (source, canvas) {
+          if (this._gl === undefined) {
+              if (canvas === undefined)
+                  Error("Need a canvas to add a shader", true);
+              else
+                  this.buildShaders(canvas);
+          }
+          var gl = this._gl;
+          var errs = this._compileShader(gl, this._fragmentShader, source);
+          if (errs) {
+              return errs;
+          }
+          gl.linkProgram(this._shaderProgram);
+          if (!gl.getProgramParameter(this._shaderProgram, gl.LINK_STATUS)) {
+              console.error(gl.getProgramInfoLog(this._shaderProgram));
+              Error("Failed to link program", true);
+          }
+      };
+      /**
+       * Pass a uniform value to the shader progam
+       * @param name - the variable's name, starting with u_ by convention
+       * @param value - the value to pass
+       */
+      Shader.prototype.setUniform = function (name, value) {
+          var location = this._gl.getUniformLocation(this._shaderProgram, name);
+          if (location === null) {
+              Error("Uniform location for " + name + " not found");
+          }
+          if (typeof value === "number") {
+              this._gl.uniform1f(location, value);
+              return;
+          }
+          switch (value.length) {
+              case 2:
+                  this._gl.uniform2fv(location, value);
+                  break;
+              case 3:
+                  this._gl.uniform3fv(location, value);
+                  break;
+              case 4:
+                  this._gl.uniform4fv(location, value);
+                  break;
+          }
+      };
+      /**
+       * Pass a texture to the shader as a uniform value
+       * @param name - the texture's name, starting with u_ by convention
+       * @param image - the texture, as an image
+       */
+      Shader.prototype.setTexture = function (name, image) {
+          var _this = this;
+          var gl = this._gl;
+          var t = this._textures[name];
+          if (!t) {
+              var glTexture = gl.createTexture();
+              if (!glTexture) {
+                  Error("Unable to create glTexture");
+              }
+              t = {
+                  glTexture: glTexture,
+                  unit: this._lowestUnused(Object.keys(this._textures).map(function (k) { return _this._textures[k].unit; })),
+              };
+              this._textures[name] = t;
+          }
+          gl.activeTexture(gl.TEXTURE0 + t.unit);
+          gl.bindTexture(gl.TEXTURE_2D, t.glTexture);
+          gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+          var location = gl.getUniformLocation(this._shaderProgram, name);
+          if (location === null) {
+              Error("Uniform location for texture " + name + " not found");
+          }
+          gl.uniform1i(location, t.unit);
+      };
+      /**
+       * Shader's render function
+       * @param state - the renderer payload object
+       */
+      Shader.prototype.renderer = function (state) {
+          var _this = this;
+          if (this._gl === undefined) {
+              this.buildShaders(state.glCanvas);
+          }
+          createImageBitmap(state.canvas).then(function (bit) {
+              _this.setTexture("u_texture", bit);
+          });
+          // pass the uniforms
+          this.setUniform("u_resolution", [
+              state.glCanvas.width,
+              state.glCanvas.height,
+          ]);
+          //  this.setTexture("u_texture", el);
+          this._gl.clear(this._gl.COLOR_BUFFER_BIT);
+          this._gl.drawArrays(this._gl.TRIANGLE_STRIP, 0, 4);
+      };
+      Shader.prototype._compileShader = function (gl, shader, source) {
+          gl.shaderSource(shader, source);
+          gl.compileShader(shader);
+          if (gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+              return;
+          }
+          var info = gl.getShaderInfoLog(shader);
+          if (!info) {
+              Error("Failed to compile, but found no error log");
+          }
+          console.error(info);
+          Error("Failed to compile shader program.", true);
+          return this._parseErrorMessages(info);
+      };
+      Shader.prototype._createShaderProgram = function (gl, vs, fs) {
+          var program = gl.createProgram();
+          if (program === null) {
+              Error("failed to create shader program");
+          }
+          gl.attachShader(program, vs);
+          gl.attachShader(program, fs);
+          gl.linkProgram(program);
+          if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+              var info = gl.getProgramInfoLog(program);
+              console.error(info);
+              Error("failed to link program");
+          }
+          return program;
+      };
+      Shader.prototype._bindPositionAttribute = function (gl, program) {
+          var buffer = gl.createBuffer();
+          gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+          var positions = new Float32Array([
+              -1.0,
+              -1.0,
+              -1.0,
+              1.0,
+              1.0,
+              -1.0,
+              1.0,
+              1.0,
+          ]);
+          gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+          var positionLocation = gl.getAttribLocation(program, "position");
+          gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+          gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+          gl.enableVertexAttribArray(positionLocation);
+      };
+      Shader.prototype._parseErrorMessages = function (msg) {
+          var errorRegex = /^ERROR: \d+:(\d+).*$/gm;
+          var messages = [];
+          var match = errorRegex.exec(msg);
+          while (match) {
+              messages.push({
+                  text: match[0],
+                  lineNumber: parseInt(match[1], 10),
+              });
+              // Look for another error:
+              match = errorRegex.exec(msg);
+          }
+          return messages;
+      };
+      // http://wiki.c2.com/?ShlemielThePainter
+      Shader.prototype._lowestUnused = function (xs) {
+          var unused = 0;
+          for (var i = 0; i < xs.length; i++) {
+              if (xs[i] === unused) {
+                  unused++;
+                  i = -1; // go back to the beginning
+              }
+          }
+          return unused;
+      };
+      return Shader;
+  }());
+  //# sourceMappingURL=Shader.js.map
 
   /**
    * @exports V4.Loop
@@ -171,6 +424,7 @@
           // add default renderers to animation buffer
           this._rendererBuffer = [clearPrevRenderer, backgroundRenderer];
           this._renderQueueBuffer = [];
+          this._shaderBuffer = [];
           // set HDPI canvas scale for retina displays
           var ratio = window.devicePixelRatio;
           if (ratio !== 1) {
@@ -187,6 +441,14 @@
                   this.glCanvas.style.width = width + "px";
                   this.glCanvas.style.height = height + "px";
               }
+          }
+          else if (this.webgl) {
+              var width = this.canvas.width;
+              var height = this.canvas.height;
+              this.glCanvas.width = width;
+              this.glCanvas.height = height;
+              this.glCanvas.style.width = width + "px";
+              this.glCanvas.style.height = height + "px";
           }
       }
       /**
@@ -219,6 +481,9 @@
       Loop.prototype.addToLoop = function (renderer) {
           if (renderer instanceof RenderQueue) {
               this._renderQueueBuffer.push(renderer);
+          }
+          else if (renderer instanceof Shader) {
+              this._shaderBuffer.push(renderer);
           }
           else {
               this._rendererBuffer.push(renderer);
@@ -281,11 +546,7 @@
                           renderer(payload);
                       }
                       catch (e) {
-                          Error('Renderer function "' +
-                              renderer.name +
-                              '" threw an uncaught exception: "' +
-                              e +
-                              '" ');
+                          Error("Renderer function \"" + renderer.name + "\" threw an uncaught exception: \"" + e + "\"", true);
                           self._loop = false;
                       }
                   }
@@ -293,7 +554,13 @@
                   // within each
                   for (var _b = 0, _c = self._renderQueueBuffer; _b < _c.length; _b++) {
                       var rq = _c[_b];
-                      rq.render(payload);
+                      rq.renderer(payload);
+                  }
+                  // render shaders last so that the 2D context is finalized before being
+                  // passed as a uniform to the shaders
+                  for (var _d = 0, _e = self._shaderBuffer; _d < _e.length; _d++) {
+                      var sd = _e[_d];
+                      sd.renderer(payload);
                   }
                   self.context.restore();
               }
@@ -1725,229 +1992,6 @@
       return Animation;
   }());
   //# sourceMappingURL=Animation.js.map
-
-  var defaultVertexShader = "\n  #ifdef GL_ES\n  precision mediump float;\n  #endif\n  attribute vec2 position;\n  void main() {\n    gl_Position = vec4(position, 0.0, 1.0);\n  }\n";
-  var defaultFragmentShader = "\n  #ifdef GL_ES\n  precision mediump float;\n  #endif\n  void main() {\n    gl_FragColor = vec4(0.0);\n  }\n";
-  /**
-   * @exports V4.Shader
-   * @class
-   */
-  // Much of this comes from https://github.com/fordhurley/shader-canvas
-  var Shader = /** @class */ (function () {
-      function Shader(canvas) {
-          this._textures = {};
-          if (canvas !== undefined)
-              this.buildShaders(canvas);
-          this.renderer = this.renderer.bind(this);
-      }
-      Shader.prototype.buildShaders = function (canvas) {
-          if (!(canvas instanceof HTMLCanvasElement))
-              Error("Shader requires an HTML canvas element", true);
-          var gl = canvas.getContext("webgl");
-          if (this._gl === null)
-              Error("Unable to get canvas context. Did you already get a 2D or 3D context from this canvas?", true);
-          this._gl = gl;
-          // create a vertex shader
-          var vs = this._gl.createShader(this._gl.VERTEX_SHADER);
-          if (vs === undefined)
-              Error("Failed to create vertex shader");
-          this._vertexShader = vs;
-          var vsErrs = this._compileShader(this._gl, this._vertexShader, defaultVertexShader);
-          if (vsErrs)
-              Error("Failed to compile vertex shader");
-          // create a fragment shader
-          var fs = this._gl.createShader(this._gl.FRAGMENT_SHADER);
-          if (fs === undefined)
-              Error("Failed to create fragment shader");
-          this._fragmentShader = fs;
-          var fsErrs = this._compileShader(this._gl, this._fragmentShader, defaultFragmentShader);
-          if (fsErrs)
-              Error("failed to compile vertex shader");
-          // create a shader program from vertex and fragment shaders
-          this._shaderProgram = this._createShaderProgram(this._gl, this._vertexShader, this._fragmentShader);
-          this._bindPositionAttribute(this._gl, this._shaderProgram);
-          this._gl.clearColor(0.0, 0.0, 0.0, 1.0);
-          this._gl.useProgram(this._shaderProgram);
-          this._gl.viewport(0, 0, canvas.width, canvas.height);
-      };
-      /**
-       * Add a new fragment shader to the shader program
-       * @param source - The shader's source code, as a string
-       */
-      Shader.prototype.setShader = function (source, canvas) {
-          if (this._gl === undefined) {
-              if (canvas === undefined)
-                  Error("Need a canvas to add a shader", true);
-              else
-                  this.buildShaders(canvas);
-          }
-          var gl = this._gl;
-          var errs = this._compileShader(gl, this._fragmentShader, source);
-          if (errs) {
-              return errs;
-          }
-          gl.linkProgram(this._shaderProgram);
-          if (!gl.getProgramParameter(this._shaderProgram, gl.LINK_STATUS)) {
-              console.error(gl.getProgramInfoLog(this._shaderProgram));
-              Error("Failed to link program", true);
-          }
-      };
-      /**
-       * Pass a uniform value to the shader progam
-       * @param name - the variable's name, starting with u_ by convention
-       * @param value - the value to pass
-       */
-      Shader.prototype.setUniform = function (name, value) {
-          var location = this._gl.getUniformLocation(this._shaderProgram, name);
-          if (location === null) {
-              Error("Uniform location for " + name + " not found");
-          }
-          if (typeof value === "number") {
-              this._gl.uniform1f(location, value);
-              return;
-          }
-          switch (value.length) {
-              case 2:
-                  this._gl.uniform2fv(location, value);
-                  break;
-              case 3:
-                  this._gl.uniform3fv(location, value);
-                  break;
-              case 4:
-                  this._gl.uniform4fv(location, value);
-                  break;
-          }
-      };
-      /**
-       * Pass a texture to the shader as a uniform value
-       * @param name - the texture's name, starting with u_ by convention
-       * @param image - the texture, as an image
-       */
-      Shader.prototype.setTexture = function (name, image) {
-          var _this = this;
-          var gl = this._gl;
-          var t = this._textures[name];
-          if (!t) {
-              var glTexture = gl.createTexture();
-              if (!glTexture) {
-                  Error("Unable to create glTexture");
-              }
-              t = {
-                  glTexture: glTexture,
-                  unit: this._lowestUnused(Object.keys(this._textures).map(function (k) { return _this._textures[k].unit; })),
-              };
-              this._textures[name] = t;
-          }
-          gl.activeTexture(gl.TEXTURE0 + t.unit);
-          gl.bindTexture(gl.TEXTURE_2D, t.glTexture);
-          gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-          var location = gl.getUniformLocation(this._shaderProgram, name);
-          if (location === null) {
-              Error("Uniform location for texture " + name + " not found");
-          }
-          gl.uniform1i(location, t.unit);
-      };
-      /**
-       * Shader's render function
-       * @param state - the renderer payload object
-       */
-      Shader.prototype.renderer = function (state) {
-          var _this = this;
-          if (this._gl === undefined) {
-              this.buildShaders(state.glCanvas);
-          }
-          createImageBitmap(state.canvas).then(function (bit) {
-              _this.setTexture("u_texture", bit);
-          });
-          // pass the uniforms
-          this.setUniform("u_resolution", [
-              state.glCanvas.width,
-              state.glCanvas.height,
-          ]);
-          //  this.setTexture("u_texture", el);
-          this._gl.clear(this._gl.COLOR_BUFFER_BIT);
-          this._gl.drawArrays(this._gl.TRIANGLE_STRIP, 0, 4);
-      };
-      Shader.prototype._compileShader = function (gl, shader, source) {
-          gl.shaderSource(shader, source);
-          gl.compileShader(shader);
-          if (gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-              return;
-          }
-          var info = gl.getShaderInfoLog(shader);
-          if (!info) {
-              Error("Failed to compile, but found no error log");
-          }
-          console.error(info);
-          Error("Failed to compile shader program.", true);
-          return this._parseErrorMessages(info);
-      };
-      Shader.prototype._createShaderProgram = function (gl, vs, fs) {
-          var program = gl.createProgram();
-          if (program === null) {
-              Error("failed to create shader program");
-          }
-          gl.attachShader(program, vs);
-          gl.attachShader(program, fs);
-          gl.linkProgram(program);
-          if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-              var info = gl.getProgramInfoLog(program);
-              console.error(info);
-              Error("failed to link program");
-          }
-          return program;
-      };
-      Shader.prototype._bindPositionAttribute = function (gl, program) {
-          var buffer = gl.createBuffer();
-          gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-          var positions = new Float32Array([
-              -1.0,
-              -1.0,
-              -1.0,
-              1.0,
-              1.0,
-              -1.0,
-              1.0,
-              1.0,
-          ]);
-          gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
-          var positionLocation = gl.getAttribLocation(program, "position");
-          gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-          gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
-          gl.enableVertexAttribArray(positionLocation);
-      };
-      Shader.prototype._parseErrorMessages = function (msg) {
-          var errorRegex = /^ERROR: \d+:(\d+).*$/gm;
-          var messages = [];
-          var match = errorRegex.exec(msg);
-          while (match) {
-              messages.push({
-                  text: match[0],
-                  lineNumber: parseInt(match[1], 10),
-              });
-              // Look for another error:
-              match = errorRegex.exec(msg);
-          }
-          return messages;
-      };
-      // http://wiki.c2.com/?ShlemielThePainter
-      Shader.prototype._lowestUnused = function (xs) {
-          var unused = 0;
-          for (var i = 0; i < xs.length; i++) {
-              if (xs[i] === unused) {
-                  unused++;
-                  i = -1; // go back to the beginning
-              }
-          }
-          return unused;
-      };
-      return Shader;
-  }());
 
   exports.Animation = Animation;
   exports.FontGroup = FontGroup;

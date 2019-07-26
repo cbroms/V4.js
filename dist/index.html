@@ -15,7 +15,7 @@
         canvas.width = 700;
 
         var loop = new V4.Loop(canvas, true);
-        loop.backgroundColor("#fff");
+        loop.backgroundColor("#000");
 
         var shader = new V4.Shader(loop.glCanvas);
 
@@ -27,19 +27,12 @@
                 
                 void main() {
                     vec2 uv = gl_FragCoord.xy / u_resolution;
-                    float aspect = u_resolution.x / u_resolution.y;
-                    // Preserve aspect ratio of the image:
-                    uv.x *= aspect;
-                    // Center:
-                    uv.x += (1.0 - aspect) / 2.0;
-                    // Tile:
-                    uv = fract(uv);
                     vec3 tex = texture2D(u_texture, uv).rgb;
                     gl_FragColor = vec4(tex, 1.0);
                 }
             `)
 
-        loop.addToLoop(shader.renderer);
+       
 
         var fontObj = new V4.FontGroup();
        //  var fontObj2 = new V4.FontGroup();
@@ -145,7 +138,7 @@
         // })
 
         loop.addToLoop(rq);
-
+ loop.addToLoop(shader);
 
         // fontSizeLoop();
         positionLoop();
