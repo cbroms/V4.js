@@ -11,35 +11,6 @@
   (global = global || self, factory(global.V4 = {}, global.opentype));
 }(this, function (exports, opentype_js) { 'use strict';
 
-  /* Safari and Edge polyfill for createImageBitmap
-   * https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/createImageBitmap
-   */
-  if (!("createImageBitmap" in window)) {
-    window.createImageBitmap = function(data) {
-      return new Promise((resolve, reject) => {
-        data.toBlob(blob => {
-          const newImg = document.createElement("img");
-          const url = URL.createObjectURL(blob);
-
-          newImg.onload = () => {
-            // no longer need to read the blob so it's revoked
-            URL.revokeObjectURL(url);
-            resolve(this);
-          };
-          newImg.src = url;
-        });
-      });
-    };
-  }
-
-  //   const image = new Image();
-  //   image.src = data.toDataURL("image/png");
-  //   image.addEventListener("load", function() {
-  //     resolve(this);
-  //   });
-  // });
-  // };
-
   var RendererPayload = /** @class */ (function () {
       function RendererPayload() {
           this.canvas = null;
@@ -171,6 +142,7 @@
           this._textures = {};
           if (canvas !== undefined)
               this.buildShaders(canvas);
+          this._useState = false;
           this.renderer = this.renderer.bind(this);
       }
       Shader.prototype.buildShaders = function (canvas) {
@@ -251,6 +223,9 @@
                   break;
           }
       };
+      Shader.prototype.useCanvasState = function (useState) {
+          this._useState = useState;
+      };
       /**
        * Pass a texture to the shader as a uniform value
        * @param name - the texture's name, starting with u_ by convention
@@ -294,15 +269,23 @@
           if (this._gl === undefined) {
               this.buildShaders(state.glCanvas);
           }
-          createImageBitmap(state.canvas).then(function (bit) {
-              _this.setTexture("u_texture", bit);
-          });
+          if (this._useState) {
+              // fallback to ImageData if the browser does not support ImageBitmap
+              if (!("createImageBitmap" in window)) {
+                  var data = state.context.getImageData(0, 0, state.canvas.width, state.canvas.height);
+                  this.setTexture("u_texture", data);
+              }
+              else {
+                  createImageBitmap(state.canvas).then(function (bit) {
+                      _this.setTexture("u_texture", bit);
+                  });
+              }
+          }
           // pass the uniforms
           this.setUniform("u_resolution", [
               state.glCanvas.width,
               state.glCanvas.height,
           ]);
-          //  this.setTexture("u_texture", el);
           this._gl.clear(this._gl.COLOR_BUFFER_BIT);
           this._gl.drawArrays(this._gl.TRIANGLE_STRIP, 0, 4);
       };
@@ -374,14 +357,13 @@
           for (var i = 0; i < xs.length; i++) {
               if (xs[i] === unused) {
                   unused++;
-                  i = -1; // go back to the beginning
+                  i = -1;
               }
           }
           return unused;
       };
       return Shader;
   }());
-  //# sourceMappingURL=Shader.js.map
 
   /**
    * @exports V4.Loop
@@ -573,7 +555,6 @@
       };
       return Loop;
   }());
-  //# sourceMappingURL=Loop.js.map
 
   /*! *****************************************************************************
   Copyright (c) Microsoft Corporation. All rights reserved.

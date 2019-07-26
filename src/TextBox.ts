@@ -1,7 +1,7 @@
 import { Font } from "opentype.js";
 import { RendererPayload } from "./RendererPayload";
-import { unwrapOptions } from "./utils/UnwrapOptions";
 import { Error } from "./utils/Error";
+import { unwrapOptions } from "./utils/UnwrapOptions";
 
 export type VerticalAlignOpts = "BOTTOM" | "TOP" | "CENTER";
 export type HorizontalAlignOpts = "RIGHT" | "LEFT" | "CENTER";
@@ -105,8 +105,8 @@ export class TextBox {
       stroke: false,
       strokeColor: "white",
       strokeWidth: 0,
-      verticalAlign: "BOTTOM",
       textBox: this,
+      verticalAlign: "BOTTOM",
       wrap: true,
     };
 

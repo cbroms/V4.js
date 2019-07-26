@@ -5,7 +5,7 @@
  * @returns - false
  */
 export const Error = (newError: string, loud = false) => {
-  if (loud) throw "V4.js Exception: " + newError;
-  else console.error("V4.js Error: " + newError);
+  if (loud) { throw new Error("V4.js Exception: " + newError); }
+  else { console.error("V4.js Error: " + newError); }
   return false;
 };

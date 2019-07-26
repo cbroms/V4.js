@@ -29,15 +29,17 @@ export class Loop {
 
   constructor(canvas: HTMLCanvasElement, webgl = false) {
     // check canvas and context are OK before continuing
-    if (!(canvas instanceof HTMLCanvasElement))
+    if (!(canvas instanceof HTMLCanvasElement)) {
       Error("Loop requires an HTML Canvas Element", true);
+    }
 
     const td = canvas.getContext("2d");
-    if (td === null)
+    if (td === null) {
       Error(
         "Unable to get canvas context. Did you already get a WebGL or 3D context from this canvas?",
         true,
       );
+    }
     this.canvas = canvas;
     this.context = td;
 

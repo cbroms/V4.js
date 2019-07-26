@@ -13,6 +13,7 @@ export declare class Shader {
     private _vertexShader;
     private _fragmentShader;
     private _shaderProgram;
+    private _useState;
     private _textures;
     constructor(canvas?: HTMLCanvasElement);
     buildShaders(canvas: HTMLCanvasElement): void;
@@ -27,12 +28,13 @@ export declare class Shader {
      * @param value - the value to pass
      */
     setUniform(name: string, value: UniformValue): void;
+    useCanvasState(useState: boolean): void;
     /**
      * Pass a texture to the shader as a uniform value
      * @param name - the texture's name, starting with u_ by convention
      * @param image - the texture, as an image
      */
-    setTexture(name: string, image: ImageBitmap): void;
+    setTexture(name: string, image: ImageBitmap | ImageData): void;
     /**
      * Shader's render function
      * @param state - the renderer payload object

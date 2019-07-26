@@ -18,6 +18,7 @@
         loop.backgroundColor("#000");
 
         var shader = new V4.Shader(loop.glCanvas);
+        shader.useCanvasState(true);
 
         shader.setShader(`
                 precision mediump float;

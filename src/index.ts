@@ -1,5 +1,3 @@
-import "./utils/createImageBitmap";
-
 export { Loop } from "./Loop";
 export { FontGroup } from "./FontGroup";
 export { TextBox } from "./TextBox";

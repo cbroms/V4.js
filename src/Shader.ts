@@ -1,5 +1,5 @@
-import { Error } from "./utils/Error";
 import { RendererPayload } from "./RendererPayload";
+import { Error } from "./utils/Error";
 
 const defaultVertexShader = `
   #ifdef GL_ES
@@ -47,31 +47,37 @@ export class Shader {
   private _vertexShader: WebGLShader;
   private _fragmentShader: WebGLShader;
   private _shaderProgram: WebGLProgram;
-
+  private _useState: boolean;
   private _textures: { [name: string]: ITexture } = {};
 
   constructor(canvas?: HTMLCanvasElement) {
-    if (canvas !== undefined) this.buildShaders(canvas);
-
+    if (canvas !== undefined) {
+      this.buildShaders(canvas);
+    }
+    this._useState = false;
     this.renderer = this.renderer.bind(this);
   }
 
   public buildShaders(canvas: HTMLCanvasElement): void {
-    if (!(canvas instanceof HTMLCanvasElement))
+    if (!(canvas instanceof HTMLCanvasElement)) {
       Error("Shader requires an HTML canvas element", true);
+    }
 
     const gl = canvas.getContext("webgl");
-    if (this._gl === null)
+    if (this._gl === null) {
       Error(
         "Unable to get canvas context. Did you already get a 2D or 3D context from this canvas?",
         true,
       );
+    }
 
     this._gl = gl;
 
     // create a vertex shader
     const vs = this._gl.createShader(this._gl.VERTEX_SHADER);
-    if (vs === undefined) Error("Failed to create vertex shader");
+    if (vs === undefined) {
+      Error("Failed to create vertex shader");
+    }
     this._vertexShader = vs;
 
     const vsErrs = this._compileShader(
@@ -79,11 +85,15 @@ export class Shader {
       this._vertexShader,
       defaultVertexShader,
     );
-    if (vsErrs) Error("Failed to compile vertex shader");
+    if (vsErrs) {
+      Error("Failed to compile vertex shader");
+    }
 
     // create a fragment shader
     const fs = this._gl.createShader(this._gl.FRAGMENT_SHADER);
-    if (fs === undefined) Error("Failed to create fragment shader");
+    if (fs === undefined) {
+      Error("Failed to create fragment shader");
+    }
 
     this._fragmentShader = fs;
     const fsErrs = this._compileShader(
@@ -91,7 +101,9 @@ export class Shader {
       this._fragmentShader,
       defaultFragmentShader,
     );
-    if (fsErrs) Error("failed to compile vertex shader");
+    if (fsErrs) {
+      Error("failed to compile vertex shader");
+    }
 
     // create a shader program from vertex and fragment shaders
     this._shaderProgram = this._createShaderProgram(
@@ -112,8 +124,11 @@ export class Shader {
    */
   public setShader(source: string, canvas?: HTMLCanvasElement) {
     if (this._gl === undefined) {
-      if (canvas === undefined) Error("Need a canvas to add a shader", true);
-      else this.buildShaders(canvas);
+      if (canvas === undefined) {
+        Error("Need a canvas to add a shader", true);
+      } else {
+        this.buildShaders(canvas);
+      }
     }
 
     const gl = this._gl;
@@ -159,12 +174,16 @@ export class Shader {
     }
   }
 
+  public useCanvasState(useState: boolean) {
+    this._useState = useState;
+  }
+
   /**
    * Pass a texture to the shader as a uniform value
    * @param name - the texture's name, starting with u_ by convention
    * @param image - the texture, as an image
    */
-  public setTexture(name: string, image: ImageBitmap) {
+  public setTexture(name: string, image: ImageBitmap | ImageData) {
     const gl = this._gl;
 
     let t = this._textures[name];
@@ -207,17 +226,28 @@ export class Shader {
       this.buildShaders(state.glCanvas);
     }
 
-    createImageBitmap(state.canvas).then(bit => {
-      this.setTexture("u_texture", bit);
-    });
+    if (this._useState) {
+      // fallback to ImageData if the browser does not support ImageBitmap
+      if (!("createImageBitmap" in window)) {
+        const data = state.context.getImageData(
+          0,
+          0,
+          state.canvas.width,
+          state.canvas.height,
+        );
+        this.setTexture("u_texture", data);
+      } else {
+        createImageBitmap(state.canvas).then(bit => {
+          this.setTexture("u_texture", bit);
+        });
+      }
+    }
 
     // pass the uniforms
     this.setUniform("u_resolution", [
       state.glCanvas.width,
       state.glCanvas.height,
     ]);
-
-    //  this.setTexture("u_texture", el);
 
     this._gl.clear(this._gl.COLOR_BUFFER_BIT);
     this._gl.drawArrays(this._gl.TRIANGLE_STRIP, 0, 4);
@@ -296,8 +326,8 @@ export class Shader {
     let match = errorRegex.exec(msg);
     while (match) {
       messages.push({
-        text: match[0],
         lineNumber: parseInt(match[1], 10),
+        text: match[0],
       });
 
       // Look for another error:
@@ -313,7 +343,7 @@ export class Shader {
     for (let i = 0; i < xs.length; i++) {
       if (xs[i] === unused) {
         unused++;
-        i = -1; // go back to the beginning
+        i = -1;
       }
     }
     return unused;

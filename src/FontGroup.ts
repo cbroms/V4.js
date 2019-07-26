@@ -74,13 +74,14 @@ export class FontGroup {
    */
   public getFontVariant(variant: string): Font {
     const font = this._fonts[variant];
-    if (font === undefined)
+    if (font === undefined) {
       Error(
         'Could not get font "' +
           variant +
           '". Did you forget to load it from a file with loadFont()?',
       );
-    else return font;
+    }
+    else { return font; }
   }
 
   /**
