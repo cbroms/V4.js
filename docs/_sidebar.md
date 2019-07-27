@@ -1,9 +1,11 @@
 - [Welcome](README.md)
 - Getting Started
-  - [The Loop](guide/loop.md)
-  - [Renderers](guide/renderers.md)
-  - [Text](guide/text.md)
+  - [The Loop](loop.md)
+  - [Renderers](renderers.md)
+  - [The Render Queue](render-queue.md)
+  - [Text](text.md)
 - Reference
   - [Renderer](reference/renderer.md)
   - [Loop](reference/loop.md)
   - [TextBox](reference/text-box.md)
+

@@ -14,7 +14,7 @@ Include V4.js in an `index.html` page:
 
 [](_media/intro/index.html ':include :type=code')
 
-In `intro.js`, we import V4, get a font, create a loop, textbox, and animation: 
+In `intro.js`, we load a font, create a loop, textbox, and animation: 
 
 [](_media/intro/intro.js ':include :type=code')
 
