@@ -6,7 +6,7 @@ canvas.width = canvasWidth;
 
 const start = async () => {
   const loop = new V4.Loop(canvas);
-  /// [demo]
+  /// [demo1]
   let x = 0;
   let speed = 60;
 
@@ -17,15 +17,17 @@ const start = async () => {
     // increment the x position
     x += speed * state.deltaTime;
 
-    const ctx = state.context;
-    ctx.fillStyle = "red";
-    ctx.fillRect(x, 20, 100, 200);
-    ctx.stroke();
+    // draw the rectangle
+    state.context.fillStyle = "red";
+    state.context.fillRect(x, 20, 100, 200);
   };
+  /// [demo1]
 
+  /// [demo2]
   loop.addToLoop(animRectRenderer);
-  /// [demo]
+
   loop.startLoop();
+  /// [demo2]
 };
 
 start();

@@ -1,5 +1,6 @@
 - [Welcome](README.md)
 - Getting Started
+  - [Install](installing.md)
   - [The Loop](loop.md)
   - [Renderers](renderers.md)
   - [The Render Queue](render-queue.md)

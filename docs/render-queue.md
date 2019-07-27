@@ -68,7 +68,3 @@ Here's what results:
 
 > The full source code for this example can be [found here](https://github.com/rainflame/V4.js/tree/master/docs/_media/guide/renderQueue)
 
-
-
-
-

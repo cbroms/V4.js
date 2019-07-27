@@ -38,12 +38,19 @@ Using just these two properties, we can begin to create animations. Let's take t
 
 We can keep track of the rectangle's `x` position and increment `x` by the distance we want it to move, found by multiplying the `speed` (distance in pixels traveled per second) by the `deltaTime` (the time passed since the last frame):
 
-[](_media/guide/renderers/sketch.js ':include :type=code :fragment=demo')
+[](_media/guide/renderers/sketch.js ':include :type=code :fragment=demo1')
+
+
+Now all we have to do is add the renderer to the loop and start it:
+
+[](_media/guide/renderers/sketch.js ':include :type=code :fragment=demo2')
 
 Here's what results: 
 
+
 [](https://V4.rainflame.com/_media/guide/renderers ':include :type=iframe width=100% height=250px')
 
-> The full source code for this example can be [found here](https://github.com/rainflame/V4.js/tree/master/docs/_media/guide/renderers)
+
+> The full source code for this example can be [found here](https://github.com/rainflame/V4.js/tree/master/docs/_media/guide/renderQueue)
 
 
