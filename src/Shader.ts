@@ -249,6 +249,8 @@ export class Shader {
       state.glCanvas.height,
     ]);
 
+    this.setUniform("u_deltaTime", state.deltaTime);
+
     this._gl.clear(this._gl.COLOR_BUFFER_BIT);
     this._gl.drawArrays(this._gl.TRIANGLE_STRIP, 0, 4);
   }
