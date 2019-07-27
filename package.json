@@ -1,6 +1,6 @@
 {
   "name": "V4",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "",
   "main": "V4.js",
   "scripts": {
@@ -16,7 +16,7 @@
     "url": "git+https://github.com/rainflame/V4.js.git"
   },
   "author": "Christian Broms <cb@rainfla.me>",
-  "license": "LGPL-3.0-only",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/rainflame/V4.js/issues"
   },

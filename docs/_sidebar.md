@@ -1,3 +1,4 @@
+- [Welcome](README.md)
 - Getting Started
   - [The Loop](guide/loop.md)
   - [Renderers](guide/renderers.md)
