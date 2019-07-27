@@ -1,13 +1,13 @@
 {
-  "name": "V4",
+  "name": "v4js",
   "version": "0.1.0",
-  "description": "",
+  "description": "A lightweight animation wrapper for the HTML canvas element.",
   "main": "V4.js",
   "scripts": {
     "docs": "docsify serve docs",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "./node_modules/.bin/rollup -c -w",
-    "build": "./node_modules/.bin/rollup -c",
+    "watch": "rollup -c -w",
+    "build": "rollup -c",
     "check": "tslint -c tslint.json 'src/**/*.ts'",
     "fix": "tslint -c tslint.json 'src/**/*.ts' --fix"
   },
@@ -46,5 +46,8 @@
     "@types/opentype.js": "^0.7.2",
     "color-interpolate": "^1.0.4",
     "opentype.js": "^1.1.0"
+  },
+  "directories": {
+    "doc": "docs"
   }
 }

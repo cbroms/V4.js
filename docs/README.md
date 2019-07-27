@@ -20,4 +20,4 @@ In `intro.js`, we import V4, get a font, create a loop, textbox, and animation:
 
 Here's what results:
 
-[](https://V4.rainflame.com/_media/intro ':include :type=iframe width=100% height=400px')
+[](https://V4.rainflame.com/_media/intro ':include :type=iframe width=100% height=250px')

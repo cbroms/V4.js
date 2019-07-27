@@ -5,7 +5,7 @@
   </head>
   <body>
     <script src="https://cdn.jsdelivr.net/npm/opentype.js@latest/dist/opentype.min.js"></script>
-    <script src="./V4.js"></script>
+    <script src="./V4.min.js"></script>
     <canvas id="testCanvas"></canvas>
 
     <script>
@@ -31,12 +31,10 @@
                     vec3 tex = texture2D(u_texture, uv).rgb;
                     gl_FragColor = vec4(tex, 1.0);
                 }
-            `)
-
-       
+            `);
 
         var fontObj = new V4.FontGroup();
-       //  var fontObj2 = new V4.FontGroup();
+        //  var fontObj2 = new V4.FontGroup();
         // await fontObj.loadFont(
         //     "assets/CrimsonText-Regular.ttf",
         //     "Regular"
@@ -47,7 +45,7 @@
         // await fontObj2.loadGFonts("Source Sans Pro", ["Regular"]);
 
         var font = fontObj.getFontVariant("Italic");
-       // var font = fontObj2.getFontVariant("Regular");
+        // var font = fontObj2.getFontVariant("Regular");
 
         // var textBox = new V4.TextBox(font, 10, 300, 200, 150);
         // textBox.text("Hello, World!", 72);
@@ -63,12 +61,11 @@
           verticalAlign: "CENTER",
           horizontalAlign: "CENTER",
           fontSize: 72,
-          wrap: false
+          wrap: false,
         });
 
         textBox2.text("Hello, world!");
         textBox2.outlinePath(true);
-
 
         var rq = new V4.RenderQueue();
 
@@ -108,7 +105,6 @@
             {
               position: { x: 300, y: 450 },
               size: { h: 250, w: 300 },
-            
             },
             6,
             "easeInOutCubic",
@@ -120,7 +116,6 @@
               {
                 position: { x: 0, y: 300 },
                 size: { h: 300, w: 700 },
-          
               },
               2,
               "easeInOutQuart",
@@ -139,7 +134,7 @@
         // })
 
         loop.addToLoop(rq);
- loop.addToLoop(shader);
+        loop.addToLoop(shader);
 
         // fontSizeLoop();
         positionLoop();
@@ -165,41 +160,31 @@
         // );
         //   interps.push(interp);
         //    }
-          
-            
 
         // }
-      
-        
-//         var duration = 2;
-//         var percentDone = 0;
-//         function textTestRenderer(state) {
-//           const ctx = state.context;
-//            ctx.fillStyle = "#000";
-//           if (percentDone < 1) {
 
-//             for (const interp of interps) {
+        //         var duration = 2;
+        //         var percentDone = 0;
+        //         function textTestRenderer(state) {
+        //           const ctx = state.context;
+        //            ctx.fillStyle = "#000";
+        //           if (percentDone < 1) {
 
-// const drawPath = new Path2D(interp(percentDone));
-         
-//           ctx.fill(drawPath);
-//             }
+        //             for (const interp of interps) {
 
+        // const drawPath = new Path2D(interp(percentDone));
 
+        //           ctx.fill(drawPath);
+        //             }
 
+        //         } else {
+        //           percentDone = 0;
+        //         }
 
+        //           percentDone += state.deltaTime / duration
+        //         }
 
-
-            
-//         } else {
-//           percentDone = 0;
-//         }
-          
-
-//           percentDone += state.deltaTime / duration
-//         }
-
-//         loop.addToLoop(textTestRenderer);
+        //         loop.addToLoop(textTestRenderer);
 
         // function customRenderer(state) {
 
@@ -246,7 +231,7 @@
         // animator.addToAnimation(backgroundRenderer);
 
         loop.startLoop();
-      };
+      }
 
       start();
     </script>

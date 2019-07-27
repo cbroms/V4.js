@@ -93,9 +93,9 @@ export class TextBox {
     };
     // set defaults
     this.opts = {
-      backgroundColor: "black",
+      backgroundColor: "white",
       bounds,
-      color: "white",
+      color: "black",
       font: null,
       fontSize: 24,
       horizontalAlign: "RIGHT",

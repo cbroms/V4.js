@@ -2,7 +2,7 @@ import resolve from "rollup-plugin-node-resolve";
 import serve from "rollup-plugin-serve";
 import typescript from "rollup-plugin-typescript2";
 import commonjs from "rollup-plugin-commonjs";
-//import { uglify } from "rollup-plugin-uglify";
+import { uglify } from "rollup-plugin-uglify";
 
 const pkg = require("./package.json");
 
@@ -17,15 +17,16 @@ const banner = `/*
 export default [
   {
     external: ["opentype.js"],
+    input: "src/index.ts",
     output: {
       globals: {
-        "opentype.js": "opentype" // this doesn't seem to work right now, rollup defaults to opentype_js
+        "opentype.js": "opentype", // this doesn't seem to work right now, rollup defaults to opentype_js
       },
       exports: "named",
       file: "dist/V4.js",
       format: "umd",
       name: "V4",
-      banner
+      banner,
     },
     plugins: [
       typescript({ useTsconfigDeclarationDir: true }),
@@ -33,31 +34,33 @@ export default [
       commonjs(),
       // babel(),
       // uglify(),
-      serve({ contentBase: "dist", port: 8080 })
+      serve({ contentBase: "dist", port: 8080 }),
     ],
     watch: {
-      include: "src/**"
+      include: "src/**",
     },
-    input: "src/index.ts"
-  }
-  // {
-  //   input: "src/index.js",
-  //   output: {
-  //     exports: "named",
-  //     file: "dist/V4.min.js",
-  //     format: "umd",
-  //     name: "V4"
-  //   },
-  //   plugins: [
-  //     butternut(),
-  //     resolve(),
-  //     commonjs(),
-  //     babel({
-  //       exclude: "node_modules/**"
-  //     })
-  //   ],
-  //   watch: {
-  //     include: "src/**"
-  //   }
-  // }
+  },
+  {
+    external: ["opentype.js"],
+    input: "src/index.ts",
+    output: {
+      globals: {
+        "opentype.js": "opentype", // this doesn't seem to work right now, rollup defaults to opentype_js
+      },
+      exports: "named",
+      file: "dist/V4.min.js",
+      format: "umd",
+      name: "V4",
+      banner,
+    },
+    plugins: [
+      typescript({ useTsconfigDeclarationDir: true }),
+      resolve(),
+      commonjs(),
+      uglify(),
+    ],
+    watch: {
+      include: "src/**",
+    },
+  },
 ];

@@ -1,5 +1,5 @@
 /*
- * V4.js 1.0.0 <https://V4.rainflame.com>
+ * V4.js 0.1.0 <https://V4.rainflame.com>
  * Copyright (c) 2019 Christian Broms <cb@rainfla.me>
  * Released under Lesser GPL v3.0
  */
@@ -27,7 +27,6 @@
       }
       return RendererPayload;
   }());
-  //# sourceMappingURL=RendererPayload.js.map
 
   /**
    * The default background renderer function
@@ -44,7 +43,6 @@
   var clearPrevRenderer = function (state) {
       state.context.clearRect(0, 0, state.canvas.width, state.canvas.height);
   };
-  //# sourceMappingURL=Renderers.js.map
 
   /**
    * @exports V4.RenderQueue
@@ -112,7 +110,6 @@
       };
       return RenderQueue;
   }());
-  //# sourceMappingURL=RenderQueue.js.map
 
   /**
    * Create a new error and print it to the console
@@ -122,13 +119,14 @@
    */
   var Error = function (newError, loud) {
       if (loud === void 0) { loud = false; }
-      if (loud)
-          throw "V4.js Exception: " + newError;
-      else
+      if (loud) {
+          throw Error("V4.js Exception: " + newError);
+      }
+      else {
           console.error("V4.js Error: " + newError);
+      }
       return false;
   };
-  //# sourceMappingURL=Error.js.map
 
   var defaultVertexShader = "\n  #ifdef GL_ES\n  precision mediump float;\n  #endif\n  attribute vec2 position;\n  void main() {\n    gl_Position = vec4(position, 0.0, 1.0);\n  }\n";
   var defaultFragmentShader = "\n  #ifdef GL_ES\n  precision mediump float;\n  #endif\n  void main() {\n    gl_FragColor = vec4(0.0);\n  }\n";
@@ -140,34 +138,41 @@
   var Shader = /** @class */ (function () {
       function Shader(canvas) {
           this._textures = {};
-          if (canvas !== undefined)
+          if (canvas !== undefined) {
               this.buildShaders(canvas);
+          }
           this._useState = false;
           this.renderer = this.renderer.bind(this);
       }
       Shader.prototype.buildShaders = function (canvas) {
-          if (!(canvas instanceof HTMLCanvasElement))
+          if (!(canvas instanceof HTMLCanvasElement)) {
               Error("Shader requires an HTML canvas element", true);
+          }
           var gl = canvas.getContext("webgl");
-          if (this._gl === null)
+          if (this._gl === null) {
               Error("Unable to get canvas context. Did you already get a 2D or 3D context from this canvas?", true);
+          }
           this._gl = gl;
           // create a vertex shader
           var vs = this._gl.createShader(this._gl.VERTEX_SHADER);
-          if (vs === undefined)
+          if (vs === undefined) {
               Error("Failed to create vertex shader");
+          }
           this._vertexShader = vs;
           var vsErrs = this._compileShader(this._gl, this._vertexShader, defaultVertexShader);
-          if (vsErrs)
+          if (vsErrs) {
               Error("Failed to compile vertex shader");
+          }
           // create a fragment shader
           var fs = this._gl.createShader(this._gl.FRAGMENT_SHADER);
-          if (fs === undefined)
+          if (fs === undefined) {
               Error("Failed to create fragment shader");
+          }
           this._fragmentShader = fs;
           var fsErrs = this._compileShader(this._gl, this._fragmentShader, defaultFragmentShader);
-          if (fsErrs)
+          if (fsErrs) {
               Error("failed to compile vertex shader");
+          }
           // create a shader program from vertex and fragment shaders
           this._shaderProgram = this._createShaderProgram(this._gl, this._vertexShader, this._fragmentShader);
           this._bindPositionAttribute(this._gl, this._shaderProgram);
@@ -181,10 +186,12 @@
        */
       Shader.prototype.setShader = function (source, canvas) {
           if (this._gl === undefined) {
-              if (canvas === undefined)
+              if (canvas === undefined) {
                   Error("Need a canvas to add a shader", true);
-              else
+              }
+              else {
                   this.buildShaders(canvas);
+              }
           }
           var gl = this._gl;
           var errs = this._compileShader(gl, this._fragmentShader, source);
@@ -343,8 +350,8 @@
           var match = errorRegex.exec(msg);
           while (match) {
               messages.push({
-                  text: match[0],
                   lineNumber: parseInt(match[1], 10),
+                  text: match[0],
               });
               // Look for another error:
               match = errorRegex.exec(msg);
@@ -373,11 +380,13 @@
       function Loop(canvas, webgl) {
           if (webgl === void 0) { webgl = false; }
           // check canvas and context are OK before continuing
-          if (!(canvas instanceof HTMLCanvasElement))
+          if (!(canvas instanceof HTMLCanvasElement)) {
               Error("Loop requires an HTML Canvas Element", true);
+          }
           var td = canvas.getContext("2d");
-          if (td === null)
+          if (td === null) {
               Error("Unable to get canvas context. Did you already get a WebGL or 3D context from this canvas?", true);
+          }
           this.canvas = canvas;
           this.context = td;
           // create a new canvas for WebGL stuff
@@ -711,12 +720,14 @@
        */
       FontGroup.prototype.getFontVariant = function (variant) {
           var font = this._fonts[variant];
-          if (font === undefined)
+          if (font === undefined) {
               Error('Could not get font "' +
                   variant +
                   '". Did you forget to load it from a file with loadFont()?');
-          else
+          }
+          else {
               return font;
+          }
       };
       /**
        * Create the urls to retrieve a font and its variants from Google Fonts
@@ -737,7 +748,6 @@
       };
       return FontGroup;
   }());
-  //# sourceMappingURL=FontGroup.js.map
 
   var unwrapOptions = function (opts, target, animState) {
       var anim = animState !== undefined;
@@ -886,7 +896,6 @@
           }
       }
   };
-  //# sourceMappingURL=UnwrapOptions.js.map
 
   /**
    * @exports V4.TextBox
@@ -925,8 +934,8 @@
               stroke: false,
               strokeColor: "white",
               strokeWidth: 0,
-              verticalAlign: "BOTTOM",
               textBox: this,
+              verticalAlign: "BOTTOM",
               wrap: true,
           };
           this._modified = true;
@@ -1168,7 +1177,6 @@
       };
       return TextBox;
   }());
-  //# sourceMappingURL=TextBox.js.map
 
   var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -1650,99 +1658,99 @@
 
   /**
    * Easing functions, originally from Rober Penner, javascript implementation from
-   * https://github.com/chenglou/tween-functions, typescript port unique to this lib
+   * https://github.com/chenglou/tween-functions
    */
-  const Easing = {
-    linear: (t, b, end, d) => {
-      const c = end - b;
+  var Easing = {
+    linear: function(t, b, end, d) {
+      var c = end - b;
       return (c * t) / d + b;
     },
-    easeInQuad: (t, b, end, d) => {
-      const c = end - b;
+    easeInQuad: function(t, b, end, d) {
+      var c = end - b;
       return c * (t /= d) * t + b;
     },
-    easeOutQuad: (t, b, end, d) => {
-      const c = end - b;
+    easeOutQuad: function(t, b, end, d) {
+      var c = end - b;
       return -c * (t /= d) * (t - 2) + b;
     },
-    easeInOutQuad: (t, b, end, d) => {
-      const c = end - b;
+    easeInOutQuad: function(t, b, end, d) {
+      var c = end - b;
       if ((t /= d / 2) < 1) {
         return (c / 2) * t * t + b;
       } else {
         return (-c / 2) * (--t * (t - 2) - 1) + b;
       }
     },
-    easeInCubic: (t, b, end, d) => {
-      const c = end - b;
+    easeInCubic: function(t, b, end, d) {
+      var c = end - b;
       return c * (t /= d) * t * t + b;
     },
-    easeOutCubic: (t, b, end, d) => {
-      const c = end - b;
+    easeOutCubic: function(t, b, end, d) {
+      var c = end - b;
       return c * ((t = t / d - 1) * t * t + 1) + b;
     },
-    easeInOutCubic: (t, b, end, d) => {
-      const c = end - b;
+    easeInOutCubic: function(t, b, end, d) {
+      var c = end - b;
       if ((t /= d / 2) < 1) {
         return (c / 2) * t * t * t + b;
       } else {
         return (c / 2) * ((t -= 2) * t * t + 2) + b;
       }
     },
-    easeInQuart: (t, b, end, d) => {
-      const c = end - b;
+    easeInQuart: function(t, b, end, d) {
+      var c = end - b;
       return c * (t /= d) * t * t * t + b;
     },
-    easeOutQuart: (t, b, end, d) => {
-      const c = end - b;
+    easeOutQuart: function(t, b, end, d) {
+      var c = end - b;
       return -c * ((t = t / d - 1) * t * t * t - 1) + b;
     },
-    easeInOutQuart: (t, b, end, d) => {
-      const c = end - b;
+    easeInOutQuart: function(t, b, end, d) {
+      var c = end - b;
       if ((t /= d / 2) < 1) {
         return (c / 2) * t * t * t * t + b;
       } else {
         return (-c / 2) * ((t -= 2) * t * t * t - 2) + b;
       }
     },
-    easeInQuint: (t, b, end, d) => {
-      const c = end - b;
+    easeInQuint: function(t, b, end, d) {
+      var c = end - b;
       return c * (t /= d) * t * t * t * t + b;
     },
-    easeOutQuint: (t, b, end, d) => {
-      const c = end - b;
+    easeOutQuint: function(t, b, end, d) {
+      var c = end - b;
       return c * ((t = t / d - 1) * t * t * t * t + 1) + b;
     },
-    easeInOutQuint: (t, b, end, d) => {
-      const c = end - b;
+    easeInOutQuint: function(t, b, end, d) {
+      var c = end - b;
       if ((t /= d / 2) < 1) {
         return (c / 2) * t * t * t * t * t + b;
       } else {
         return (c / 2) * ((t -= 2) * t * t * t * t + 2) + b;
       }
     },
-    easeInSine: (t, b, end, d) => {
-      const c = end - b;
+    easeInSine: function(t, b, end, d) {
+      var c = end - b;
       return -c * Math.cos((t / d) * (Math.PI / 2)) + c + b;
     },
-    easeOutSine: (t, b, end, d) => {
-      const c = end - b;
+    easeOutSine: function(t, b, end, d) {
+      var c = end - b;
       return c * Math.sin((t / d) * (Math.PI / 2)) + b;
     },
-    easeInOutSine: (t, b, end, d) => {
-      const c = end - b;
+    easeInOutSine: function(t, b, end, d) {
+      var c = end - b;
       return (-c / 2) * (Math.cos((Math.PI * t) / d) - 1) + b;
     },
-    easeInExpo: (t, b, end, d) => {
-      const c = end - b;
+    easeInExpo: function(t, b, end, d) {
+      var c = end - b;
       return t == 0 ? b : c * Math.pow(2, 10 * (t / d - 1)) + b;
     },
-    easeOutExpo: (t, b, end, d) => {
-      const c = end - b;
+    easeOutExpo: function(t, b, end, d) {
+      var c = end - b;
       return t == d ? b + c : c * (-Math.pow(2, (-10 * t) / d) + 1) + b;
     },
-    easeInOutExpo: (t, b, end, d) => {
-      const c = end - b;
+    easeInOutExpo: function(t, b, end, d) {
+      var c = end - b;
       if (t === 0) {
         return b;
       }
@@ -1755,25 +1763,25 @@
         return (c / 2) * (-Math.pow(2, -10 * --t) + 2) + b;
       }
     },
-    easeInCirc: (t, b, end, d) => {
-      const c = end - b;
+    easeInCirc: function(t, b, end, d) {
+      var c = end - b;
       return -c * (Math.sqrt(1 - (t /= d) * t) - 1) + b;
     },
-    easeOutCirc: (t, b, end, d) => {
-      const c = end - b;
+    easeOutCirc: function(t, b, end, d) {
+      var c = end - b;
       return c * Math.sqrt(1 - (t = t / d - 1) * t) + b;
     },
-    easeInOutCirc: (t, b, end, d) => {
-      const c = end - b;
+    easeInOutCirc: function(t, b, end, d) {
+      var c = end - b;
       if ((t /= d / 2) < 1) {
         return (-c / 2) * (Math.sqrt(1 - t * t) - 1) + b;
       } else {
         return (c / 2) * (Math.sqrt(1 - (t -= 2) * t) + 1) + b;
       }
     },
-    easeInElastic: (t, b, end, d) => {
-      const c = end - b;
-      let a, p, s;
+    easeInElastic: function(t, b, end, d) {
+      var c = end - b;
+      var a, p, s;
       s = 1.70158;
       p = 0;
       a = c;
@@ -1800,8 +1808,8 @@
       );
     },
     easeOutElastic: function(t, b, end, d) {
-      const c = end - b;
-      let a, p, s;
+      var c = end - b;
+      var a, p, s;
       s = 1.70158;
       p = 0;
       a = c;
@@ -1825,9 +1833,9 @@
         b
       );
     },
-    easeInOutElastic: (t, b, end, d) => {
-      const c = end - b;
-      let a, p, s;
+    easeInOutElastic: function(t, b, end, d) {
+      var c = end - b;
+      var a, p, s;
       s = 1.70158;
       p = 0;
       a = c;
@@ -1864,22 +1872,22 @@
         );
       }
     },
-    easeInBack: (t, b, end, d, s) => {
-      const c = end - b;
+    easeInBack: function(t, b, end, d, s) {
+      var c = end - b;
       if (s === void 0) {
         s = 1.70158;
       }
       return c * (t /= d) * t * ((s + 1) * t - s) + b;
     },
-    easeOutBack: (t, b, end, d, s) => {
-      const c = end - b;
+    easeOutBack: function(t, b, end, d, s) {
+      var c = end - b;
       if (s === void 0) {
         s = 1.70158;
       }
       return c * ((t = t / d - 1) * t * ((s + 1) * t + s) + 1) + b;
     },
-    easeInOutBack: (t, b, end, d, s) => {
-      const c = end - b;
+    easeInOutBack: function(t, b, end, d, s) {
+      var c = end - b;
       if (s === void 0) {
         s = 1.70158;
       }
@@ -1889,13 +1897,13 @@
         return (c / 2) * ((t -= 2) * t * (((s *= 1.525) + 1) * t + s) + 2) + b;
       }
     },
-    easeInBounce: (t, b, end, d) => {
-      const c = end - b;
-      const v = Easing.easeOutBounce(d - t, 0, c, d);
+    easeInBounce: function(t, b, end, d) {
+      var c = end - b;
+      var v = Easing.easeOutBounce(d - t, 0, c, d);
       return c - v + b;
     },
-    easeOutBounce: (t, b, end, d) => {
-      const c = end - b;
+    easeOutBounce: function(t, b, end, d) {
+      var c = end - b;
       if ((t /= d) < 1 / 2.75) {
         return c * (7.5625 * t * t) + b;
       } else if (t < 2 / 2.75) {
@@ -1906,9 +1914,9 @@
         return c * (7.5625 * (t -= 2.625 / 2.75) * t + 0.984375) + b;
       }
     },
-    easeInOutBounce: (t, b, end, d) => {
-      const c = end - b;
-      let v;
+    easeInOutBounce: function(t, b, end, d) {
+      var c = end - b;
+      var v;
       if (t < d / 2) {
         v = Easing.easeInBounce(t * 2, 0, c, d);
         return v * 0.5 + b;
@@ -1972,7 +1980,6 @@
       };
       return Animation;
   }());
-  //# sourceMappingURL=Animation.js.map
 
   exports.Animation = Animation;
   exports.FontGroup = FontGroup;
