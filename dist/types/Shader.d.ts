@@ -18,6 +18,11 @@ export declare class Shader {
     constructor(canvas?: HTMLCanvasElement);
     buildShaders(canvas: HTMLCanvasElement): void;
     /**
+     * Load a shader's source code from a file
+     * @param url - the file location
+     */
+    loadShader(url: string): Promise<unknown>;
+    /**
      * Add a new fragment shader to the shader program
      * @param source - The shader's source code, as a string
      */

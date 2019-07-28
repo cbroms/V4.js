@@ -1,6 +1,6 @@
 {
   "name": "v4js",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "A lightweight animation wrapper for the HTML canvas element.",
   "main": "V4.js",
   "scripts": {

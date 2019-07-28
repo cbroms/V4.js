@@ -1,71 +1,58 @@
+/// [demo]
 const canvas = document.getElementById("testCanvas");
+// canvas size
 const w = 600;
 const h = 400;
-
+// textbox size
 const bw = 90;
 const bh = 70;
-
+// positioning variables
 let x = 300;
 let y = bh + 4;
 let xMag = 150;
 let yMag = 150;
 
+const loop = new V4.Loop(canvas, true);
+
 const start = async () => {
-  const loop = new V4.Loop(canvas, true);
+  // load the font
   const fg = new V4.FontGroup();
   await fg.loadFont("assets/Orbitron-Black.ttf", "Black");
+
+  // background text
   const tbBack = new V4.TextBox({
     font: fg.getFontVariant("Black"),
     position: { x: 0, y: h },
     size: { h: h, w: w },
     fontSize: 72,
+    color: "white",
     backgroundColor: "transparent",
     horizontalAlign: "CENTER",
     verticalAlign: "CENTER",
   });
-
   tbBack.text("V4.js");
   loop.addToLoop(tbBack.renderer);
 
+  // bouncing text
   const tb = new V4.TextBox({
     font: fg.getFontVariant("Black"),
     position: { x: 300, y: 0 },
     size: { h: bh, w: bw },
     backgroundColor: "blue",
+    color: "white",
     horizontalAlign: "CENTER",
     verticalAlign: "CENTER",
   });
   tb.text("V4");
 
-  const vhs = new V4.Shader(loop.glCanvas);
-  vhs.useCanvasState(true);
+  // load and set the shader
+  const sr = new V4.Shader(loop.glCanvas);
+  sr.useCanvasState(true);
+  const shader = await sr.loadShader("vhsFilter.glsl");
+  sr.setShader(shader);
+  loop.addToLoop(sr);
 
-  vhs.setShader(`
-                precision mediump float;
-
-                uniform sampler2D u_texture;
-                uniform vec2 u_resolution;
-                uniform float u_deltaTime;
-                float rand(vec2 co){
-                  return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
-                }
-                void main() {
-                    vec4 col = vec4(0);
-                    vec2 uv = gl_FragCoord.xy / u_resolution;
-                      
-               
-                    uv.x = uv.x+(rand(vec2(u_deltaTime,gl_FragCoord.y))-0.5)/128.0;
- 
-                    uv.y = uv.y+(rand(vec2(u_deltaTime))-0.5)/128.0;
-
-                    col = col + (vec4(-0.5)+vec4(rand(vec2(gl_FragCoord.y,u_deltaTime)),rand(vec2(gl_FragCoord.y,u_deltaTime+1.0)),rand(vec2(gl_FragCoord.y,u_deltaTime+2.0)),0))*0.1;
-   
-
-                    vec3 tex = texture2D(u_texture, uv).rgb;
-                    gl_FragColor = col + vec4(tex, 1.0);
-                }
-            `);
-
+  // set the textbox and canvas colors to be a random blue shade
   const randomBlue = () => {
     const blue = Math.floor(Math.random() * 180) + 75;
     const blueInv = 255 - blue;
@@ -73,17 +60,17 @@ const start = async () => {
     loop.backgroundColor(`rgb(0, 0, ${blueInv})`);
   };
 
+  // the renderer to bounce the textbox around the canvas
   const bounceRenderer = state => {
     if (x + bw >= w || x <= 0) {
       xMag *= -1;
-      x += xMag * state.deltaTime;
+      x += 5 * Math.sign(xMag); // give it a little boost to prevent sticking to side
       randomBlue();
     } else if (y >= h || y <= bh) {
       yMag *= -1;
-      y += yMag * state.deltaTime;
+      y += 5 * Math.sign(yMag);
       randomBlue();
     }
-
     x += xMag * state.deltaTime;
     y += yMag * state.deltaTime;
 
@@ -91,13 +78,14 @@ const start = async () => {
     tb.renderer(state);
   };
 
+  // add the renderer to the loop and start it
   loop.addToLoop(bounceRenderer);
-  loop.addToLoop(vhs);
   loop.framesPerSecond(60);
   loop.startLoop();
 };
 
 start();
+/// [demo]
 
 // let hd = true; // true -> right, false -> left
 //  let vd = true; // true -> bottom, false -> top

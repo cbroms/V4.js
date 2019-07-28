@@ -119,6 +119,33 @@ export class Shader {
   }
 
   /**
+   * Load a shader's source code from a file
+   * @param url - the file location
+   */
+  public loadShader(url: string) {
+    return new Promise(resolve => {
+      const request = new XMLHttpRequest();
+      request.open("get", url, true);
+      request.responseType = "text";
+      request.onload = () => {
+        if (request.response) {
+          resolve(request.response);
+        } else {
+          Error("Shader could not be loaded: " + request.statusText, true);
+          resolve(undefined);
+        }
+      };
+
+      request.onerror = () => {
+        Error("Shader could not be loaded", true);
+        resolve(undefined);
+      };
+
+      request.send();
+    });
+  }
+
+  /**
    * Add a new fragment shader to the shader program
    * @param source - The shader's source code, as a string
    */
