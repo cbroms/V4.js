@@ -47,17 +47,16 @@ const start = async () => {
 
   // load and set the shader
   const sr = new V4.Shader(loop.glCanvas);
-  sr.useCanvasState(true);
   const shader = await sr.loadShader("vhsFilter.glsl");
+  sr.useCanvasState(true);
   sr.setShader(shader);
   loop.addToLoop(sr);
 
   // set the textbox and canvas colors to be a random blue shade
   const randomBlue = () => {
     const blue = Math.floor(Math.random() * 180) + 75;
-    const blueInv = 255 - blue;
     tb.options({ backgroundColor: `rgb(0, 0, ${blue})` });
-    loop.backgroundColor(`rgb(0, 0, ${blueInv})`);
+    loop.backgroundColor(`rgb(0, 0, ${255 - blue})`);
   };
 
   // the renderer to bounce the textbox around the canvas
@@ -86,36 +85,3 @@ const start = async () => {
 
 start();
 /// [demo]
-
-// let hd = true; // true -> right, false -> left
-//  let vd = true; // true -> bottom, false -> top
-
-//  let ogPos = { x: 300, y: 0 };
-//  let destPos;
-
-//  const setNextPos = () => {
-//    if (hd && vd) {
-//      hd = false;
-//      destPos = { x: w - bw, y: w - ogPos.x };
-//    } else if (!hd && vd) {
-//      vd = false;
-//      destPos = { x: h - ogPos.y, y: h };
-//    } else if (!hd && !vd) {
-//      hd = true;
-//      destPos = { x: 0, y: h - ogPos.x };
-//    } else if (hd && !vd) {
-//      vd = true;
-//      destPos = { x: ogPos.y, y: bh };
-//    }
-//    return new V4.Animation(tb, { position: destPos }, 2, "easeInSine");
-//  };
-
-//  function positionLoop() {
-//    const anim = setNextPos();
-//    rq.push(anim.renderer, () => {
-//      ogPos = destPos;
-//      positionLoop();
-//    });
-//  }
-
-//  positionLoop();

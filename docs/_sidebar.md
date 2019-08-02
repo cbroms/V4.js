@@ -9,5 +9,6 @@
   - [Renderer](reference/renderer.md)
   - [Loop](reference/loop.md)
   - [TextBox](reference/text-box.md)
+  - [Shader](reference/shader.md)
 - Examples
  - [Text and Shaders](ex1.md)
