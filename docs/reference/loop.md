@@ -6,39 +6,85 @@ For an overview and use cases, see [the guide](/guide/loop.md).
 
 Create a new Loop.
 
-```javascript
+```js
 const canvas = document.getElementById("testCanvas");
 const loop = new V4.Loop(canvas);
 ```
 
-**Arguments**
+#### Syntax 
 
-- `HTMLCanvasElement` canvas: an HTML canvas.
+> `Loop(canvas)`
 
-**Returns**
+#### Parameters
 
-- `Loop` The new Loop object
+| Param | Type  | Required?  | Description  |  
+|-------|-------|------------|--------------|
+| `canvas`  |  `HTMLCanvasElement` | Yes  | An HTML canvas.  | 
+
+
+#### Returns
+
+| Type  | Description  |  
+|-------|------------|
+|  `V4.Loop` | The new loop object.  | 
 
 `V4.Loop()` is defined in [src/Loop.ts](https://github.com/rainflame/V4.js/blob/master/src/Loop.ts)
+<hr>
 
 ## addToLoop()
 
 Add a [renderer](/reference/renderer.md) or [RenderQueue](/reference/render-qeue.md) to the Loop.
 
-```javascript
+```js
 const basicRenderer = state => {
   state.context.fillRect(0, 0, 25, 25);
 };
 
 loop.addToLoop(basicRenderer);
 ```
+#### Syntax 
 
-**Arguments**
+> `Loop.addToLoop(renderer)`
 
-- `func` renderer: A [renderer function](/reference/renderer.md).
+#### Parameters
 
-**Returns**
+| Param | Type  | Required?  | Description  |  
+|-------|-------|------------|--------------|
+| `renderer`  |  `RendererPayload->void` or `V4.RenderQueue`| Yes  | A [renderer function](/reference/renderer.md) or [RenderQueue](/reference/render-qeue.md). | 
 
-- `void`
+#### Returns
+
+| Type  |
+|-------|
+|  `void` |
 
 `V4.Loop.addToLoop()` is defined in [src/Loop.ts](https://github.com/rainflame/V4.js/blob/master/src/Loop.ts)
+<hr>
+
+
+## framesPerSecond()
+
+Set the loop's target FPS.
+
+```js
+const fps = loop.framesPerSecond(60);
+
+console.log(fps); // > 60
+```
+#### Syntax 
+
+> `Loop.framesPerSecond(fps)`
+
+#### Parameters
+
+| Param | Type  | Required?  | Description  |  
+|-------|-------|------------|--------------|
+| `fps`  |  `Number`| No  | The loop's target FPS. | 
+
+#### Returns
+
+| Type  | Description  |  
+|-------|------------|
+|  `Number` | The loop's target FPS. | 
+
+`V4.Loop.framesPerSecond()` is defined in [src/Loop.ts](https://github.com/rainflame/V4.js/blob/master/src/Loop.ts)

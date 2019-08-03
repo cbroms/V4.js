@@ -54,9 +54,9 @@ sd.buildShaders(loop.glCanvas);
 
 #### Returns
 
-| Type  | Description  |  
-|-------|------------|
-|  `void` |   | 
+| Type  | 
+|-------|
+|  `void` |   
 
 `V4.TextBox.buildShaders()` defined in [src/Shader.ts](https://github.com/rainflame/V4.js/blob/master/src/Shader.ts)
 <hr>
@@ -110,9 +110,9 @@ sd.setShader(code);
 
 #### Returns
 
-| Type  | Description  |  
-|-------|------------|
-|  `void` |   | 
+| Type  |  
+|-------|
+|  `void` | 
 
 `V4.TextBox.setShader()` defined in [src/Shader.ts](https://github.com/rainflame/V4.js/blob/master/src/Shader.ts)
 <hr>
@@ -141,9 +141,9 @@ sd.setUniform("u_twoPi", Math.PI * 2);
 
 #### Returns
 
-| Type  | Description  |  
-|-------|------------|
-|  `void` |   | 
+| Type  | 
+|-------|
+|  `void` |  
 
 `V4.TextBox.setUniform()` defined in [src/Shader.ts](https://github.com/rainflame/V4.js/blob/master/src/Shader.ts)
 <hr>
@@ -176,9 +176,9 @@ sd.setUniform("u_someTexture", bit);
 
 #### Returns
 
-| Type  | Description  |  
-|-------|------------|
-|  `void` |   | 
+| Type  |  
+|-------|
+|  `void` | 
 
 `V4.TextBox.setTexture()` defined in [src/Shader.ts](https://github.com/rainflame/V4.js/blob/master/src/Shader.ts)
 <hr>
@@ -204,7 +204,7 @@ console.log(use); // > true
 
 | Param | Type  | Required?  | Description  |  
 |-------|-------|------------|--------------|
-| `useState`  |  `bool` | Yes | Activate or deactivate passing the canvas' state as texture.  | 
+| `useState`  |  `bool` | No | Activate or deactivate passing the canvas' state as texture.  | 
 
 
 #### Returns
@@ -237,9 +237,9 @@ loop.addToLoop(sd.rendrer);
 
 #### Returns
 
-| Type  | Description  |  
-|-------|------------|
-|  `void` |   | 
+| Type  |   
+|-------|
+|  `void` | 
 
 `V4.TextBox.renderer()` defined in [src/Shader.ts](https://github.com/rainflame/V4.js/blob/master/src/Shader.ts)
 
