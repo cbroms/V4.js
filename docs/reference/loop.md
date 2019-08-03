@@ -1,10 +1,11 @@
 # Loop
 
 For an overview and use cases, see [the guide](/guide/loop.md).
+<hr>
 
 ## constructor()
 
-Create a new Loop.
+Create a new Loop. If you are going to be using [WebGL shaders](/reference/shader.md), ensure that the `webGl` parameter is `true`, as it is not enabled by default. 
 
 ```js
 const canvas = document.getElementById("testCanvas");
@@ -13,13 +14,14 @@ const loop = new V4.Loop(canvas);
 
 #### Syntax 
 
-> `Loop(canvas)`
+> `Loop(canvas, webGl)`
 
 #### Parameters
 
 | Param | Type  | Required?  | Description  |  
 |-------|-------|------------|--------------|
 | `canvas`  |  `HTMLCanvasElement` | Yes  | An HTML canvas.  | 
+| `webGl`  |  `bool` | No  | Create a WebGL canvas instance?  | 
 
 
 #### Returns
@@ -50,7 +52,7 @@ loop.addToLoop(basicRenderer);
 
 | Param | Type  | Required?  | Description  |  
 |-------|-------|------------|--------------|
-| `renderer`  |  `RendererPayload->void` or `V4.RenderQueue`| Yes  | A [renderer function](/reference/renderer.md) or [RenderQueue](/reference/render-qeue.md). | 
+| `renderer`  |  `RendererPayload->void` or `V4.RenderQueue` or `V4.Shader`| Yes  | A [renderer function](/reference/renderer.md) or [RenderQueue](/reference/render-qeue.md) or [Shader](/reference/shader.md). | 
 
 #### Returns
 

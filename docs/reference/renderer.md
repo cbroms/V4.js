@@ -1,6 +1,7 @@
 # Renderer
 
 For an overview and use cases, see [the guide](/guide/renderers.md).
+<hr>
 
 A renderer is any function that takes a state argument, and modifies the canvas' context.
 

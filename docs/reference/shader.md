@@ -1,6 +1,7 @@
 # Shader
 
 For an overview and use cases, see [the guide](/guide/shaders).
+<hr>
 
 ## constructor()
 
@@ -30,21 +31,21 @@ const sd = new V4.Shader();
 
 <hr>
 
-## buildShaders()
+## buildShader()
 
 Compile and link the shader to a canvas. Note that if you are using the shader as part of a [loop](reference/loop.md), the WebGL canvas created by the loop for shaders can be accessed through `loop.glCanvas` (see [the guide](loop.md) for more). Otherwise, you can provide your own canvas. 
 
 ```js
 const canvas = document.getElementById("myCanvas");
-sd.buildShaders(canvas)
+sd.buildShader(canvas)
 
 // or, as part of a loop
-sd.buildShaders(loop.glCanvas);
+sd.buildShader(loop.glCanvas);
 ```
 
 #### Syntax 
 
-> `Shader.buildShaders(canvas)`
+> `Shader.buildShader(canvas)`
 
 #### Parameters
 
@@ -58,7 +59,7 @@ sd.buildShaders(loop.glCanvas);
 |-------|
 |  `void` |   
 
-`V4.TextBox.buildShaders()` defined in [src/Shader.ts](https://github.com/rainflame/V4.js/blob/master/src/Shader.ts)
+`V4.TextBox.buildShader()` defined in [src/Shader.ts](https://github.com/rainflame/V4.js/blob/master/src/Shader.ts)
 <hr>
 
 ## loadShader()
@@ -93,6 +94,19 @@ const code = await sd.loadShader("assets/shader.glsl");
 Add a new fragment shader to the shader program. Overrides any existing fragment shader. 
 
 ```js
+// from a string
+const strCode = `
+precision mediump float;
+uniform vec2 u_resolution;
+uniform float u_deltaTime;
+
+void main() {
+ vec2 uv = gl_FragCoord.xy / u_resolution;
+ gl_FragColor = vec3(1.0, uv);
+}`;
+sd.setShader(code);
+
+// or from a file
 const code = await sd.loadShader("assets/shader.glsl");
 sd.setShader(code);
 ```
@@ -218,10 +232,17 @@ console.log(use); // > true
 
 ## renderer()
 
-Render the shader. The renderer will pass two uniform values to the shader program by default, `u_resolution`, a vec2 describing the canvas' height and width, and `u_deltaTime`, the deltaTime from the state. 
+Render the shader. The renderer will pass two uniform values to the shader program by default, `u_resolution`, a vec2 describing the canvas' height and width, and `u_deltaTime`, the deltaTime from the state. To use these two uniforms, ensure your fragment shader contains this boilerplate:
 
-```js
-loop.addToLoop(sd.rendrer);
+```glsl
+precision mediump float;
+
+uniform vec2 u_resolution;
+uniform float u_deltaTime;
+
+void main() {
+  // do something!
+}
 ```
 
 #### Syntax 

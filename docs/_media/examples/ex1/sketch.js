@@ -1,13 +1,21 @@
 /// [demo]
 const canvas = document.getElementById("testCanvas");
 // canvas size
-const w = 600;
-const h = 400;
+let w, h;
+
+const setSize = () => {
+  w = window.innerWidth;
+  h = window.innerHeight;
+  canvas.width = w;
+  canvas.height = h;
+};
+window.addEventListener("resize", setSize);
+setSize();
 // textbox size
 const bw = 90;
 const bh = 70;
 // positioning variables
-let x = 300;
+let x = 5;
 let y = bh + 4;
 let xMag = 150;
 let yMag = 150;

@@ -15,7 +15,9 @@
     <div id="app"></div>
     <script>
       window.$docsify = {
-        name: "V4",
+        name: "V4.js",
+        coverpage: true,
+        themeColor: "#3378b8",
         repo: "https://github.com/rainflame/V4.js",
         loadSidebar: true,
         onlyCover: false,
@@ -36,7 +38,27 @@
           ".*?/CONTRIBUTING":
             "https://raw.githubusercontent.com/Netflix/pollyjs/master/CONTRIBUTING",
         },
+        executeScript: true,
       };
+    </script>
+    <script>
+      // add a V4.js script to the coverpage background
+      function setBackground() {
+        const canvas = document.createElement("CANVAS");
+        canvas.id = "testCanvas";
+        document.getElementsByClassName("cover")[0].appendChild(canvas);
+      }
+
+      // check for docsify to finish loading 
+      document.addEventListener("DOMContentLoaded", function(event) {
+        var inter = setInterval(checkForDone, 50);
+        function checkForDone() {
+          if (document.getElementsByClassName("cover").length >= 1) {
+            setBackground();
+            clearInterval(inter);
+          } 
+        }
+      });
     </script>
 
     <script src="//unpkg.com/docsify/lib/docsify.min.js"></script>

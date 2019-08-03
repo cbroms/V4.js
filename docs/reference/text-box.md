@@ -1,26 +1,36 @@
 # TextBox
 
 For an overview and use cases, see [the guide](/guide/text.md?id=the-text-box).
+<hr>
 
 ## constructor()
 
 Create a new TextBox.
 
-```javascript
+```js
 const tb = new V4.TextBox({ fontSize: 24, position: { x: 0, y: 250 } });
 ```
 
-**Arguments**
+#### Syntax 
 
-- `dict` opts (optional): a dictionary containing style options. See below for fields.
+> `TextBox(opts)`
 
-**Returns**
+#### Parameters
 
-- `TextBox` The new TextBox object
+| Param | Type  | Required?  | Description  |  
+|-------|-------|------------|--------------|
+| `opts`  |  `dict`| No  | A dictionary containing style options. See below for fields. | 
+
+#### Returns
+
+| Type  | Description | 
+|-------| -------- |
+|  `V4.TextBox` | The TextBox object. |
+
 
 By default, the options are initialized with the following values:
 
-```javascript
+```js
 const opts = {
   backgroundColor: "black",
   bounds: { x1: 0, x2: 0, x3: 0, x4: 0, y1: 0, y2: 0, y3: 0, y4: 0 },
@@ -41,63 +51,90 @@ const opts = {
 > Note that all measurements are in pixels and all colors can be any valid css color value (hex, rgba, etc.)
 
 `V4.TextBox()` defined in [src/TextBox.ts](https://github.com/rainflame/V4.js/blob/master/src/TextBox.ts)
+<hr>
 
 ## options()
 
 Get/set the TextBox's options.
 
-```javascript
-const newOpts = tb.options();
+```js
+const opts = tb.options();
 
-newOpts.fontSize = 72;
+opts.fontSize = 72;
 
-tb.options(newOpts);
+tb.options(opts);
 ```
 
-**Arguments**
+#### Syntax 
 
-- `dict` opts (optional): a dictionary containing style options.
+> `TextBox.options(opts)`
 
-**Returns**
+#### Parameters
 
-- `dict` The TextBox's style options.
+| Param | Type  | Required?  | Description  |  
+|-------|-------|------------|--------------|
+| `opts`  |  `dict`| No  | A dictionary containing style options. See below for fields. | 
+
+#### Returns
+
+| Type  | Description | 
+|-------| -------- |
+|  `dict` | The TextBox's style options. |
+
 
 `V4.TextBox.options()` defined in [src/TextBox.ts](https://github.com/rainflame/V4.js/blob/master/src/TextBox.ts)
+<hr>
 
 ## text()
 
 Get/set the TextBox's text value.
 
-```javascript
+```js
 const content = tb.text("This is some text?!");
 
 console.log(content); // > This is some text?!
 ```
+#### Syntax 
 
-**Arguments**
+> `TextBox.text(newText)`
 
-- `string` newText (optional): the text to appear in the TextBox
+#### Parameters
 
-**Returns**
+| Param | Type  | Required?  | Description  |  
+|-------|-------|------------|--------------|
+| `newText`  |  `string`| No  | The text to appear in the TextBox. | 
 
-- `string` the TextBox's current text.
+#### Returns
+
+| Type  | Description | 
+|-------| -------- |
+|  `string` | The TextBox's current text. |
 
 `V4.TextBox.text()` defined in [src/TextBox.ts](https://github.com/rainflame/V4.js/blob/master/src/TextBox.ts)
+<hr>
 
 ## renderer()
 
 Draw the TextBox to the canvas. Add this function to a [Loop](/reference/loop.md) or [RenderQueue](/reference/render-queue.md)
 
-```javascript
+```js
 loop.addToLoop(tb.renderer);
 ```
 
-**Arguments**
+#### Syntax 
 
-- `dict` state: the current state of the loop, a RendererPayload.
+> `TextBox.renderer(state)`
 
-**Returns**
+#### Parameters
 
-- `void`
+| Param | Type  | Required?  | Description  |  
+|-------|-------|------------|--------------|
+| `state`  |  `V4.RendererPayload`| Yes  | The current animation state. | 
+
+#### Returns
+
+| Type  | 
+|-------|
+|  `void` | 
 
 `V4.TextBox.renderer()` defined in [src/TextBox.ts](https://github.com/rainflame/V4.js/blob/master/src/TextBox.ts)
