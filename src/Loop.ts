@@ -77,33 +77,38 @@ export class Loop {
     this._renderQueueBuffer = [];
     this._shaderBuffer = [];
 
-    // set HDPI canvas scale for retina displays
-    const ratio = window.devicePixelRatio;
+    const setSize = () => {
+      // set HDPI canvas scale for retina displays
+      const ratio = window.devicePixelRatio;
 
-    if (ratio !== 1) {
-      const width = this.canvas.width;
-      const height = this.canvas.height;
+      if (ratio !== 1) {
+        const width = this.canvas.width;
+        const height = this.canvas.height;
 
-      this.canvas.width = width * ratio;
-      this.canvas.height = height * ratio;
-      this.canvas.style.width = width + "px";
-      this.canvas.style.height = height + "px";
-      this.context.scale(ratio, ratio);
+        this.canvas.width = width * ratio;
+        this.canvas.height = height * ratio;
+        this.canvas.style.width = width + "px";
+        this.canvas.style.height = height + "px";
+        this.context.scale(ratio, ratio);
 
-      if (this.webgl) {
-        this.glCanvas.width = width * ratio;
-        this.glCanvas.height = height * ratio;
+        if (this.webgl) {
+          this.glCanvas.width = width * ratio;
+          this.glCanvas.height = height * ratio;
+          this.glCanvas.style.width = width + "px";
+          this.glCanvas.style.height = height + "px";
+        }
+      } else if (this.webgl) {
+        const width = this.canvas.width;
+        const height = this.canvas.height;
+        this.glCanvas.width = width;
+        this.glCanvas.height = height;
         this.glCanvas.style.width = width + "px";
         this.glCanvas.style.height = height + "px";
       }
-    } else if (this.webgl) {
-      const width = this.canvas.width;
-      const height = this.canvas.height;
-      this.glCanvas.width = width;
-      this.glCanvas.height = height;
-      this.glCanvas.style.width = width + "px";
-      this.glCanvas.style.height = height + "px";
-    }
+    };
+
+    setSize();
+    window.addEventListener("resize", setSize);
   }
 
   /**

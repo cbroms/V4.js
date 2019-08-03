@@ -1,5 +1,5 @@
 /*
- * V4.js 0.1.1 <https://V4.rainflame.com>
+ * V4.js 0.1.2 <https://V4.rainflame.com>
  *
  * Copyright 2019  Christian Broms <cb@rainfla.me>
  *
@@ -39,7 +39,6 @@
       }
       return RendererPayload;
   }());
-  //# sourceMappingURL=RendererPayload.js.map
 
   /**
    * The default background renderer function
@@ -56,7 +55,6 @@
   var clearPrevRenderer = function (state) {
       state.context.clearRect(0, 0, state.canvas.width, state.canvas.height);
   };
-  //# sourceMappingURL=Renderers.js.map
 
   /**
    * @exports V4.RenderQueue
@@ -124,7 +122,6 @@
       };
       return RenderQueue;
   }());
-  //# sourceMappingURL=RenderQueue.js.map
 
   /**
    * Create a new error and print it to the console
@@ -142,7 +139,6 @@
       }
       return false;
   };
-  //# sourceMappingURL=Error.js.map
 
   var defaultVertexShader = "\n  #ifdef GL_ES\n  precision mediump float;\n  #endif\n  attribute vec2 position;\n  void main() {\n    gl_Position = vec4(position, 0.0, 1.0);\n  }\n";
   var defaultFragmentShader = "\n  #ifdef GL_ES\n  precision mediump float;\n  #endif\n  void main() {\n    gl_FragColor = vec4(0.0);\n  }\n";
@@ -420,6 +416,7 @@
    */
   var Loop = /** @class */ (function () {
       function Loop(canvas, webgl) {
+          var _this = this;
           if (webgl === void 0) { webgl = false; }
           // check canvas and context are OK before continuing
           if (!(canvas instanceof HTMLCanvasElement)) {
@@ -458,31 +455,35 @@
           this._rendererBuffer = [clearPrevRenderer, backgroundRenderer];
           this._renderQueueBuffer = [];
           this._shaderBuffer = [];
-          // set HDPI canvas scale for retina displays
-          var ratio = window.devicePixelRatio;
-          if (ratio !== 1) {
-              var width = this.canvas.width;
-              var height = this.canvas.height;
-              this.canvas.width = width * ratio;
-              this.canvas.height = height * ratio;
-              this.canvas.style.width = width + "px";
-              this.canvas.style.height = height + "px";
-              this.context.scale(ratio, ratio);
-              if (this.webgl) {
-                  this.glCanvas.width = width * ratio;
-                  this.glCanvas.height = height * ratio;
-                  this.glCanvas.style.width = width + "px";
-                  this.glCanvas.style.height = height + "px";
+          var setSize = function () {
+              // set HDPI canvas scale for retina displays
+              var ratio = window.devicePixelRatio;
+              if (ratio !== 1) {
+                  var width = _this.canvas.width;
+                  var height = _this.canvas.height;
+                  _this.canvas.width = width * ratio;
+                  _this.canvas.height = height * ratio;
+                  _this.canvas.style.width = width + "px";
+                  _this.canvas.style.height = height + "px";
+                  _this.context.scale(ratio, ratio);
+                  if (_this.webgl) {
+                      _this.glCanvas.width = width * ratio;
+                      _this.glCanvas.height = height * ratio;
+                      _this.glCanvas.style.width = width + "px";
+                      _this.glCanvas.style.height = height + "px";
+                  }
               }
-          }
-          else if (this.webgl) {
-              var width = this.canvas.width;
-              var height = this.canvas.height;
-              this.glCanvas.width = width;
-              this.glCanvas.height = height;
-              this.glCanvas.style.width = width + "px";
-              this.glCanvas.style.height = height + "px";
-          }
+              else if (_this.webgl) {
+                  var width = _this.canvas.width;
+                  var height = _this.canvas.height;
+                  _this.glCanvas.width = width;
+                  _this.glCanvas.height = height;
+                  _this.glCanvas.style.width = width + "px";
+                  _this.glCanvas.style.height = height + "px";
+              }
+          };
+          setSize();
+          window.addEventListener("resize", setSize);
       }
       /**
        * Get/set the background color of the canvas
@@ -790,7 +791,6 @@
       };
       return FontGroup;
   }());
-  //# sourceMappingURL=FontGroup.js.map
 
   var unwrapOptions = function (opts, target, animState) {
       var anim = animState !== undefined;
@@ -939,7 +939,6 @@
           }
       }
   };
-  //# sourceMappingURL=UnwrapOptions.js.map
 
   /**
    * @exports V4.TextBox
@@ -1221,7 +1220,6 @@
       };
       return TextBox;
   }());
-  //# sourceMappingURL=TextBox.js.map
 
   var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -2025,7 +2023,6 @@
       };
       return Animation;
   }());
-  //# sourceMappingURL=Animation.js.map
 
   exports.Animation = Animation;
   exports.FontGroup = FontGroup;
