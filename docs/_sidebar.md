@@ -1,14 +1,14 @@
 - [Welcome](README.md)
-- Getting Started
+- **Getting Started Guide**
   - [Install](installing.md)
   - [The Loop](loop.md)
   - [Renderers](renderers.md)
   - [The Render Queue](render-queue.md)
   - [Text](text.md)
-- Reference
+- **API Reference**
   - [Renderer](reference/renderer.md)
   - [Loop](reference/loop.md)
   - [TextBox](reference/text-box.md)
   - [Shader](reference/shader.md)
-- Examples
+- **Examples**
  - [Text and Shaders](ex1.md)

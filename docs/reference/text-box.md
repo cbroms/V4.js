@@ -1,6 +1,8 @@
 # TextBox
 
-For an overview and use cases, see [the guide](/guide/text.md?id=the-text-box).
+For an overview and use cases, see [the guide](/text.md?id=the-text-box).
+
+!> Ensure you have installed opentype.js before working with text boxes. See the [installation instructions](/installing?id=opentype). 
 <hr>
 
 ## constructor()
@@ -48,7 +50,7 @@ const opts = {
 };
 ```
 
-> Note that all measurements are in pixels and all colors can be any valid css color value (hex, rgba, etc.)
+!> Note that all measurements are in pixels and all colors can be any valid css color value (hex, rgba, etc.)
 
 `V4.TextBox()` defined in [src/TextBox.ts](https://github.com/rainflame/V4.js/blob/master/src/TextBox.ts)
 <hr>

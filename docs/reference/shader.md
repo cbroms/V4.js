@@ -1,6 +1,6 @@
 # Shader
 
-For an overview and use cases, see [the guide](/guide/shaders).
+For an overview and use cases, see [the guide](/shaders).
 <hr>
 
 ## constructor()

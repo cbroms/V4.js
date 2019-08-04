@@ -6,13 +6,12 @@ A good way to think about renderers is as functions for creating a single image 
 
 ```js
 const rectRenderer = state => {
-  const ctx = state.context;
-  ctx.fillStyle = "red";
-  ctx.fillRect(20, 20, 100, 200);
+  state.context.fillStyle = "red";
+  state.context.fillRect(20, 20, 100, 200);
 };
 ```
 
-We're using the canvas' `context` to draw a red rectangle, in this case with `fillRect`, a built in function from the canvas API. You can use [any function natively supported](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D#Reference) by the browser here.
+We're using the canvas' `context` to draw a red rectangle, in this case with `fillRect`, a built-in function from the canvas API. You can use [any function natively supported](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D#Reference) by the browser here.
 
 Renderers are more useful than just drawing with the canvas API because they can be passed to V4's loop to create animations. We add the renderer to the loop to excecute it:
 
@@ -20,7 +19,7 @@ Renderers are more useful than just drawing with the canvas API because they can
 loop.addToLoop(rectRenderer);
 ```
 
-> When adding a renderer to the loop, keep in mind it can never be removed. For animations it is often best to use the [render queue](render-queue.md), introduced in the next section. 
+!> When adding a renderer to the loop, keep in mind it can never be removed. For animations it is often best to use the [render queue](render-queue.md), introduced in the next section. 
 
 ### State
 

@@ -2,7 +2,7 @@
 
 V4 provides a rich text rendering system built on [opentype.js](https://github.com/opentypejs/opentype.js). There are two main classes: `FontGroup` for loading fonts and `TextBox` for rendering text. 
 
-> Be sure to include opentype.js in your project if you plan to use text. See [the installation instructions](installing.md?id=as-a-script).
+!> Be sure to include opentype.js in your project if you plan to use text. See [the installation instructions](installing.md?id=opentype).
 
 ### Fonts
 
@@ -18,7 +18,7 @@ await fontObj.loadFont(
 );
 ```
 
-> Note that loading a font with `loadFont` is asyncronous, so be sure to wrap the function call in an async function. 
+!> Note that loading a font with `loadFont` is asyncronous, so be sure to wrap the function call in an async function. 
 
 More variants can be added to the same object:
 

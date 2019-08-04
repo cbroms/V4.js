@@ -1,27 +1,29 @@
 # Loop
 
-For an overview and use cases, see [the guide](/guide/loop.md).
+For an overview and use cases, see [the guide](/loop.md).
 <hr>
 
 ## constructor()
 
-Create a new Loop. If you are going to be using [WebGL shaders](/reference/shader.md), ensure that the `webGl` parameter is `true`, as it is not enabled by default. 
+Create a new Loop. 
+
+!> If you are going to be using [WebGL shaders](/reference/shader.md), ensure that the `webGl` field in the options is `true`, as it is not enabled by default. 
 
 ```js
 const canvas = document.getElementById("testCanvas");
-const loop = new V4.Loop(canvas);
+const loop = new V4.Loop(canvas, { backgroundColor: "#fff", webGl: true });
 ```
 
 #### Syntax 
 
-> `Loop(canvas, webGl)`
+> `Loop(canvas, opts)`
 
 #### Parameters
 
 | Param | Type  | Required?  | Description  |  
 |-------|-------|------------|--------------|
 | `canvas`  |  `HTMLCanvasElement` | Yes  | An HTML canvas.  | 
-| `webGl`  |  `bool` | No  | Create a WebGL canvas instance?  | 
+| `opts`  |  `dict` | No  | Loop options. See below for fields. | 
 
 
 #### Returns
@@ -29,6 +31,15 @@ const loop = new V4.Loop(canvas);
 | Type  | Description  |  
 |-------|------------|
 |  `V4.Loop` | The new loop object.  | 
+
+By default, the options are initialized with the following values:
+
+```js
+const opts = {
+    backgroundColor: "#000",
+    webGl: false 
+};
+```
 
 `V4.Loop()` is defined in [src/Loop.ts](https://github.com/rainflame/V4.js/blob/master/src/Loop.ts)
 <hr>
@@ -52,7 +63,7 @@ loop.addToLoop(basicRenderer);
 
 | Param | Type  | Required?  | Description  |  
 |-------|-------|------------|--------------|
-| `renderer`  |  `RendererPayload->void` or `V4.RenderQueue` or `V4.Shader`| Yes  | A [renderer function](/reference/renderer.md) or [RenderQueue](/reference/render-qeue.md) or [Shader](/reference/shader.md). | 
+| `renderer`  |  `RendererPayload->void` or `V4.RenderQueue` or `V4.Shader` or `V4.TextBox`| Yes  | A [renderer function](/reference/renderer.md) or [RenderQueue](/reference/render-qeue.md) or [Shader](/reference/shader.md) or [TextBox](/reference/text-box). | 
 
 #### Returns
 

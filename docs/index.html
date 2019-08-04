@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -9,7 +8,36 @@
       name="viewport"
       content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
     />
-    <link rel="stylesheet" href="//unpkg.com/docsify/lib/themes/vue.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple.css"
+    />
+    <style>
+      @font-face {
+        font-family: 'orbitron';
+        src: url('_assets/Orbitron-Black.ttf') format('truetype'); 
+      } 
+      canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+      :root {
+        --border-radius-m: 0px;
+        --border-radius-s: 0px;
+        --sidebar-name-font-family: 'orbitron';
+         --sidebar-name-font-size: var(--font-size-xxl);
+        --cover-blockquote-color: white;
+        --cover-button-primary-background: white;
+        --cover-button-primary-border: 1px solid white;
+        --cover-button-primary-color: var(--theme-color);
+        --cover-button-border: 1px solid white;
+        --cover-button-color: white;
+
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/opentype.js@latest/dist/opentype.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/v4js@latest/dist/V4.min.js"></script>
   </head>
   <body>
     <div id="app"></div>
@@ -17,8 +45,7 @@
       window.$docsify = {
         name: "V4.js",
         coverpage: true,
-        themeColor: "#3378b8",
-        repo: "https://github.com/rainflame/V4.js",
+        themeColor: "#0000ff",
         loadSidebar: true,
         onlyCover: false,
         auto2top: true,
@@ -30,14 +57,6 @@
           placeholder: "Search",
           noData: "No Results.",
         },
-        alias: {
-          "/.*/_media": "/_media",
-          "/.*/_sidebar.md": "/_sidebar.md",
-          ".*?/CHANGELOG":
-            "https://raw.githubusercontent.com/Netflix/pollyjs/master/CHANGELOG",
-          ".*?/CONTRIBUTING":
-            "https://raw.githubusercontent.com/Netflix/pollyjs/master/CONTRIBUTING",
-        },
         executeScript: true,
       };
     </script>
@@ -47,21 +66,27 @@
         const canvas = document.createElement("CANVAS");
         canvas.id = "testCanvas";
         document.getElementsByClassName("cover")[0].appendChild(canvas);
+
+        const script = document.createElement("SCRIPT");
+        script.src = "_assets/sketch.js";
+        script.type = "text/javascript";
+        document.body.appendChild(script);
       }
 
-      // check for docsify to finish loading 
+      // check for docsify to finish loading
       document.addEventListener("DOMContentLoaded", function(event) {
         var inter = setInterval(checkForDone, 50);
         function checkForDone() {
           if (document.getElementsByClassName("cover").length >= 1) {
             setBackground();
             clearInterval(inter);
-          } 
+          }
         }
       });
     </script>
 
     <script src="//unpkg.com/docsify/lib/docsify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docsify-themeable@0"></script>
     <script src="//unpkg.com/docsify/lib/plugins/search.min.js"></script>
     <script src="//unpkg.com/docsify-copy-code"></script>
     <script src="//unpkg.com/docsify-pagination/dist/docsify-pagination.min.js"></script>

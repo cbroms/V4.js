@@ -5,7 +5,7 @@ For an overview and use cases, see [the guide](/guide/renderers.md).
 
 A renderer is any function that takes a state argument, and modifies the canvas' context.
 
-```javascript
+```js
 const basicRenderer = state => {
   state.context.fillRect(0, 0, 25, 25);
 };
