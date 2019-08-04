@@ -1,5 +1,5 @@
 /*
- * V4.js 0.1.2 <https://V4.rainflame.com>
+ * V4.js 0.1.3 <https://V4.rainflame.com>
  *
  * Copyright 2019  Christian Broms <cb@rainfla.me>
  *
@@ -55,6 +55,7 @@
   var clearPrevRenderer = function (state) {
       state.context.clearRect(0, 0, state.canvas.width, state.canvas.height);
   };
+  //# sourceMappingURL=Renderers.js.map
 
   /**
    * @exports V4.RenderQueue
@@ -122,6 +123,7 @@
       };
       return RenderQueue;
   }());
+  //# sourceMappingURL=RenderQueue.js.map
 
   /**
    * Create a new error and print it to the console
@@ -139,6 +141,7 @@
       }
       return false;
   };
+  //# sourceMappingURL=Error.js.map
 
   var defaultVertexShader = "\n  #ifdef GL_ES\n  precision mediump float;\n  #endif\n  attribute vec2 position;\n  void main() {\n    gl_Position = vec4(position, 0.0, 1.0);\n  }\n";
   var defaultFragmentShader = "\n  #ifdef GL_ES\n  precision mediump float;\n  #endif\n  void main() {\n    gl_FragColor = vec4(0.0);\n  }\n";
@@ -409,388 +412,7 @@
       };
       return Shader;
   }());
-
-  /**
-   * @exports V4.Loop
-   * @class
-   */
-  var Loop = /** @class */ (function () {
-      function Loop(canvas, webgl) {
-          var _this = this;
-          if (webgl === void 0) { webgl = false; }
-          // check canvas and context are OK before continuing
-          if (!(canvas instanceof HTMLCanvasElement)) {
-              Error("Loop requires an HTML Canvas Element", true);
-          }
-          var td = canvas.getContext("2d");
-          if (td === null) {
-              Error("Unable to get canvas context. Did you already get a WebGL or 3D context from this canvas?", true);
-          }
-          this.canvas = canvas;
-          this.context = td;
-          // create a new canvas for WebGL stuff
-          this.glCanvas = webgl ? document.createElement("canvas") : null;
-          this.glContext = webgl ? this.glCanvas.getContext("webgl") : null;
-          this.webgl = webgl;
-          if (webgl) {
-              var wrapper = document.createElement("div");
-              wrapper.id = "v4-wrapper";
-              this.glCanvas.id = "v4-webgl-canvas";
-              var canvasParent = this.canvas.parentElement;
-              canvasParent.appendChild(wrapper);
-              wrapper.appendChild(this.canvas);
-              wrapper.appendChild(this.glCanvas);
-              this.glCanvas.style.position = "absolute";
-              this.canvas.style.position = "absolute";
-          }
-          this._loop = false;
-          this._frameCount = 0;
-          this._backgroundColor = "#000";
-          this._fps = 30;
-          this._fpsInterval = 30 / 1000;
-          this._startTime = Date.now();
-          this._then = Date.now();
-          this.framesPerSecond(30);
-          // add default renderers to animation buffer
-          this._rendererBuffer = [clearPrevRenderer, backgroundRenderer];
-          this._renderQueueBuffer = [];
-          this._shaderBuffer = [];
-          var setSize = function () {
-              // set HDPI canvas scale for retina displays
-              var ratio = window.devicePixelRatio;
-              if (ratio !== 1) {
-                  var width = _this.canvas.width;
-                  var height = _this.canvas.height;
-                  _this.canvas.width = width * ratio;
-                  _this.canvas.height = height * ratio;
-                  _this.canvas.style.width = width + "px";
-                  _this.canvas.style.height = height + "px";
-                  _this.context.scale(ratio, ratio);
-                  if (_this.webgl) {
-                      _this.glCanvas.width = width * ratio;
-                      _this.glCanvas.height = height * ratio;
-                      _this.glCanvas.style.width = width + "px";
-                      _this.glCanvas.style.height = height + "px";
-                  }
-              }
-              else if (_this.webgl) {
-                  var width = _this.canvas.width;
-                  var height = _this.canvas.height;
-                  _this.glCanvas.width = width;
-                  _this.glCanvas.height = height;
-                  _this.glCanvas.style.width = width + "px";
-                  _this.glCanvas.style.height = height + "px";
-              }
-          };
-          setSize();
-          window.addEventListener("resize", setSize);
-      }
-      /**
-       * Get/set the background color of the canvas
-       * @param color - the color to fill, in hex
-       * @returns - the background color, in hex
-       */
-      Loop.prototype.backgroundColor = function (color) {
-          if (color) {
-              this._backgroundColor = color;
-          }
-          return this._backgroundColor;
-      };
-      /**
-       * Get/set the target frames per second of canvas animations
-       * @param num - target FPS
-       * @param - target FPS
-       */
-      Loop.prototype.framesPerSecond = function (num) {
-          if (num) {
-              this._fps = num;
-              this._fpsInterval = 1000 / num;
-          }
-          return this._fps;
-      };
-      /**
-       * Add a renderer function or RenderQueue to the animation
-       * @param renderer - the render function or RenderQueue object to be executed
-       */
-      Loop.prototype.addToLoop = function (renderer) {
-          if (renderer instanceof RenderQueue) {
-              this._renderQueueBuffer.push(renderer);
-          }
-          else if (renderer instanceof Shader) {
-              this._shaderBuffer.push(renderer);
-          }
-          else {
-              this._rendererBuffer.push(renderer);
-          }
-      };
-      /**
-       * Start the canvas animation
-       */
-      Loop.prototype.startLoop = function () {
-          this._loop = true;
-          this._then = window.performance.now();
-          this._startTime = this._then;
-          this._renderLoop(this);
-      };
-      /**
-       * Stop/pause the canvas animation
-       */
-      Loop.prototype.stopLoop = function () {
-          this._loop = false;
-      };
-      /**
-       * The animation loop running at the target frames per second
-       * @param self - TextCanvas class reference
-       */
-      Loop.prototype._renderLoop = function (self) {
-          if (self._loop) {
-              // calculate the deltaTime
-              var now = window.performance.now();
-              var elapsed = now - self._then;
-              // window has likely been inactive; reset frame and time counters
-              if (elapsed > 300) {
-                  self._startTime = now;
-                  self._frameCount = 0;
-                  self._then = now;
-                  elapsed = 0;
-              }
-              if (elapsed > self._fpsInterval) {
-                  self._then = now - (elapsed % self._fpsInterval);
-                  self._frameCount += 1;
-                  var sinceStart = now - self._startTime;
-                  var fps = Math.round(1000 / (sinceStart / self._frameCount));
-                  // create the rendererPayload object to be sent to each render function
-                  var payload = new RendererPayload();
-                  payload.canvas = self.canvas;
-                  payload.context = self.context;
-                  payload.glCanvas = self.glCanvas;
-                  payload.glContext = self.glContext;
-                  payload.webgl = self.webgl;
-                  payload.backgroundColor = self._backgroundColor;
-                  payload.deltaTime = elapsed / 1000;
-                  payload.frameCount = self._frameCount;
-                  payload.startTime = self._startTime;
-                  payload.fps = fps;
-                  payload.loop = self;
-                  self.context.save();
-                  // call each render function and pass rendererPayload
-                  for (var _i = 0, _a = self._rendererBuffer; _i < _a.length; _i++) {
-                      var renderer = _a[_i];
-                      try {
-                          renderer(payload);
-                      }
-                      catch (e) {
-                          Error("Renderer function \"" + renderer.name + "\" threw an uncaught exception: \"" + e + "\"", true);
-                          self._loop = false;
-                      }
-                  }
-                  // loop through the list of RenderQueues and call the render functions
-                  // within each
-                  for (var _b = 0, _c = self._renderQueueBuffer; _b < _c.length; _b++) {
-                      var rq = _c[_b];
-                      rq.renderer(payload);
-                  }
-                  // render shaders last so that the 2D context is finalized before being
-                  // passed as a uniform to the shaders
-                  for (var _d = 0, _e = self._shaderBuffer; _d < _e.length; _d++) {
-                      var sd = _e[_d];
-                      sd.renderer(payload);
-                  }
-                  self.context.restore();
-              }
-              var callback = function () {
-                  self._renderLoop(self);
-              };
-              // request next frame
-              requestAnimationFrame(callback);
-          }
-      };
-      return Loop;
-  }());
-
-  /*! *****************************************************************************
-  Copyright (c) Microsoft Corporation. All rights reserved.
-  Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-  this file except in compliance with the License. You may obtain a copy of the
-  License at http://www.apache.org/licenses/LICENSE-2.0
-
-  THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-  KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
-  WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
-  MERCHANTABLITY OR NON-INFRINGEMENT.
-
-  See the Apache Version 2.0 License for specific language governing permissions
-  and limitations under the License.
-  ***************************************************************************** */
-
-  function __awaiter(thisArg, _arguments, P, generator) {
-      return new (P || (P = Promise))(function (resolve, reject) {
-          function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-          function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-          function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-          step((generator = generator.apply(thisArg, _arguments || [])).next());
-      });
-  }
-
-  function __generator(thisArg, body) {
-      var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-      return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-      function verb(n) { return function (v) { return step([n, v]); }; }
-      function step(op) {
-          if (f) throw new TypeError("Generator is already executing.");
-          while (_) try {
-              if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-              if (y = 0, t) op = [op[0] & 2, t.value];
-              switch (op[0]) {
-                  case 0: case 1: t = op; break;
-                  case 4: _.label++; return { value: op[1], done: false };
-                  case 5: _.label++; y = op[1]; op = [0]; continue;
-                  case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                  default:
-                      if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                      if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                      if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                      if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                      if (t[2]) _.ops.pop();
-                      _.trys.pop(); continue;
-              }
-              op = body.call(thisArg, _);
-          } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-          if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-      }
-  }
-
-  /**
-   * @exports V4.FontWrapper
-   * @class
-   */
-  var FontGroup = /** @class */ (function () {
-      /**
-       * Create a new Font object
-       * @param name - the font's name
-       * @param variants - the font's variants (Italic, Regular, etc.)
-       * @returns - the new Font object
-       */
-      function FontGroup(name, variants) {
-          if (name === void 0) { name = ""; }
-          if (variants === void 0) { variants = ["Regular"]; }
-          this.name = name;
-          this._fonts = {};
-          this._variants = variants;
-      }
-      /**
-       * Load a font and its styles from Google Fonts
-       * @param name - the name of the font, case and space sensitive
-       * @param variants - a list of font variants (strings), case and space sensitive (Italic, Regular, Bold Italic, etc.)
-       */
-      FontGroup.prototype.loadGFonts = function (name, variants) {
-          if (name === void 0) { name = this.name; }
-          if (variants === void 0) { variants = this._variants; }
-          return __awaiter(this, void 0, void 0, function () {
-              var urls, _a, _b, _i, variant, font;
-              return __generator(this, function (_c) {
-                  switch (_c.label) {
-                      case 0:
-                          urls = this._makeGFontUrls(name, variants);
-                          this._fonts = {};
-                          _a = [];
-                          for (_b in variants)
-                              _a.push(_b);
-                          _i = 0;
-                          _c.label = 1;
-                      case 1:
-                          if (!(_i < _a.length)) return [3 /*break*/, 4];
-                          variant = _a[_i];
-                          if (!variants.hasOwnProperty(variant)) return [3 /*break*/, 3];
-                          return [4 /*yield*/, this._load(urls[variant])];
-                      case 2:
-                          font = _c.sent();
-                          this._variants.push(variants[variant]);
-                          this._fonts[variants[variant]] = font;
-                          _c.label = 3;
-                      case 3:
-                          _i++;
-                          return [3 /*break*/, 1];
-                      case 4: return [2 /*return*/];
-                  }
-              });
-          });
-      };
-      /**
-       * Load a font from a url or path
-       * @param loc - the url/path containing the font .ttf/.otf file
-       * @param variant - the variant of the font (Italic, Regular, Bold Italic, etc.)
-       */
-      FontGroup.prototype.loadFont = function (loc, variant) {
-          if (loc === void 0) { loc = ""; }
-          if (variant === void 0) { variant = "Regular"; }
-          return __awaiter(this, void 0, void 0, function () {
-              var font;
-              return __generator(this, function (_a) {
-                  switch (_a.label) {
-                      case 0:
-                          this._variants.push(variant);
-                          return [4 /*yield*/, this._load(loc)];
-                      case 1:
-                          font = _a.sent();
-                          this._fonts[variant] = font;
-                          return [2 /*return*/];
-                  }
-              });
-          });
-      };
-      /**
-       * Wrapper for opentype.js' load function to provide async/await functionality
-       * @param url - the path/url to load the font
-       */
-      FontGroup.prototype._load = function (url) {
-          return new Promise(function (resolve) {
-              opentype_js.load(url, function (err, font) {
-                  if (err) {
-                      Error("Font could not be loaded.", true);
-                      resolve(undefined);
-                  }
-                  else {
-                      resolve(font);
-                  }
-              });
-          });
-      };
-      /**
-       * Get a specific font variant
-       * @param variant - the variant to get, case and space sensitive (Italic, Bold Italic, etc.)
-       * @returns - the opentype.js font object
-       */
-      FontGroup.prototype.getFontVariant = function (variant) {
-          var font = this._fonts[variant];
-          if (font === undefined) {
-              Error('Could not get font "' +
-                  variant +
-                  '". Did you forget to load it from a file with loadFont()?');
-          }
-          else {
-              return font;
-          }
-      };
-      /**
-       * Create the urls to retrieve a font and its variants from Google Fonts
-       * @param name - the name of the font, case and space sensitive
-       * @param variants - a list of font variants (strings), case and space sensitive (Italic, Regular, Bold Italic, etc.)
-       * @returns - a list of urls containing .ttf files for each of the font's variants
-       */
-      FontGroup.prototype._makeGFontUrls = function (name, variants) {
-          // make a url like this:
-          // https://raw.githubusercontent.com/google/fonts/master/ofl/crimsontext/CrimsonText-Regular.ttf
-          var baseUrl = "https://raw.githubusercontent.com/google/fonts/master/ofl/";
-          var nameNoSpace = name.replace(/ /g, "");
-          var nameCleaned = nameNoSpace.toLowerCase();
-          var varsCleaned = variants.map(function (val) {
-              return val.replace(" ", "").replace("-", "");
-          });
-          return varsCleaned.map(function (val) { return baseUrl + nameCleaned + "/" + nameNoSpace + "-" + val + ".ttf"; });
-      };
-      return FontGroup;
-  }());
+  //# sourceMappingURL=Shader.js.map
 
   var unwrapOptions = function (opts, target, animState) {
       var anim = animState !== undefined;
@@ -939,6 +561,7 @@
           }
       }
   };
+  //# sourceMappingURL=UnwrapOptions.js.map
 
   /**
    * @exports V4.TextBox
@@ -1220,6 +843,382 @@
       };
       return TextBox;
   }());
+  //# sourceMappingURL=TextBox.js.map
+
+  /**
+   * @exports V4.Loop
+   * @class
+   */
+  var Loop = /** @class */ (function () {
+      function Loop(canvas, opts) {
+          var _this = this;
+          // check canvas and context are OK before continuing
+          if (!(canvas instanceof HTMLCanvasElement)) {
+              Error("Loop requires an HTML Canvas Element", true);
+          }
+          var td = canvas.getContext("2d");
+          if (td === null) {
+              Error("Unable to get canvas context. Did you already get a WebGL or 3D context from this canvas?", true);
+          }
+          this.canvas = canvas;
+          this.context = td;
+          // set options
+          this.opts = {
+              backgroundColor: "#000",
+              webGl: false,
+          };
+          if (opts !== undefined) {
+              for (var opt in opts) {
+                  if (this.opts[opt] !== undefined)
+                      this.opts[opt] = opts[opt];
+              }
+          }
+          // create a new canvas for WebGL stuff
+          this.glCanvas = this.opts.webGl ? document.createElement("canvas") : null;
+          this.glContext = this.opts.webGl ? this.glCanvas.getContext("webgl") : null;
+          if (this.opts.webGl) {
+              var wrapper = document.createElement("div");
+              wrapper.id = "v4-wrapper";
+              this.glCanvas.id = "v4-webgl-canvas";
+              var canvasParent = this.canvas.parentElement;
+              canvasParent.appendChild(wrapper);
+              wrapper.appendChild(this.canvas);
+              wrapper.appendChild(this.glCanvas);
+              this.glCanvas.style.position = "absolute";
+              this.canvas.style.position = "absolute";
+          }
+          this._loop = false;
+          this._frameCount = 0;
+          this._startTime = Date.now();
+          this._then = Date.now();
+          this.framesPerSecond(30);
+          // add default renderers to animation buffer
+          this._rendererBuffer = [clearPrevRenderer, backgroundRenderer];
+          this._renderQueueBuffer = [];
+          this._shaderBuffer = [];
+          this._sizeAdjusted = false;
+          // set the size of the canvases
+          var setSize = function () {
+              // set HDPI canvas scale for retina displays
+              var ratio = _this._sizeAdjusted ? 1 : window.devicePixelRatio;
+              var width = _this.canvas.width;
+              var height = _this.canvas.height;
+              _this.canvas.width = width * ratio;
+              _this.canvas.height = height * ratio;
+              _this.canvas.style.width = width + "px";
+              _this.canvas.style.height = height + "px";
+              _this.context.scale(ratio, ratio);
+              if (_this.opts.webGl) {
+                  _this.glCanvas.width = width * ratio;
+                  _this.glCanvas.height = height * ratio;
+                  _this.glCanvas.style.width = width + "px";
+                  _this.glCanvas.style.height = height + "px";
+                  _this.glContext.viewport(0, 0, width, height);
+              }
+              _this._sizeAdjusted = true;
+          };
+          setSize();
+          window.addEventListener("resize", setSize);
+      }
+      /**
+       * Get/set the target frames per second of canvas animations
+       * @param num - target FPS
+       * @param - target FPS
+       */
+      Loop.prototype.framesPerSecond = function (num) {
+          if (num) {
+              this._fps = num;
+              this._fpsInterval = 1000 / num;
+          }
+          return this._fps;
+      };
+      /**
+       * Add a renderer function, RenderQueue, Shader, or TextBox to the animation
+       * @param renderer - the renderer to be executed
+       */
+      Loop.prototype.addToLoop = function (renderer) {
+          if (renderer instanceof RenderQueue) {
+              this._renderQueueBuffer.push(renderer);
+          }
+          else if (renderer instanceof TextBox) {
+              this._rendererBuffer.push(renderer.renderer);
+          }
+          else if (renderer instanceof Shader) {
+              this._shaderBuffer.push(renderer);
+          }
+          else {
+              this._rendererBuffer.push(renderer);
+          }
+      };
+      /**
+       * Start the canvas animation
+       */
+      Loop.prototype.startLoop = function () {
+          this._loop = true;
+          this._then = window.performance.now();
+          this._startTime = this._then;
+          this._renderLoop(this);
+      };
+      /**
+       * Stop/pause the canvas animation
+       */
+      Loop.prototype.stopLoop = function () {
+          this._loop = false;
+      };
+      /**
+       * The animation loop running at the target frames per second
+       * @param self - TextCanvas class reference
+       */
+      Loop.prototype._renderLoop = function (self) {
+          if (self._loop) {
+              // calculate the deltaTime
+              var now = window.performance.now();
+              var elapsed = now - self._then;
+              // window has likely been inactive; reset frame and time counters
+              if (elapsed > 300) {
+                  self._startTime = now;
+                  self._frameCount = 0;
+                  self._then = now;
+                  elapsed = 0;
+              }
+              if (elapsed > self._fpsInterval) {
+                  self._then = now - (elapsed % self._fpsInterval);
+                  self._frameCount += 1;
+                  var sinceStart = now - self._startTime;
+                  var fps = Math.round(1000 / (sinceStart / self._frameCount));
+                  // create the rendererPayload object to be sent to each render function
+                  var payload = new RendererPayload();
+                  payload.canvas = self.canvas;
+                  payload.context = self.context;
+                  payload.glCanvas = self.glCanvas;
+                  payload.glContext = self.glContext;
+                  payload.webgl = self.opts.webGl;
+                  payload.backgroundColor = self.opts.backgroundColor;
+                  payload.deltaTime = elapsed / 1000;
+                  payload.frameCount = self._frameCount;
+                  payload.startTime = self._startTime;
+                  payload.fps = fps;
+                  payload.loop = self;
+                  self.context.save();
+                  // call each render function and pass rendererPayload
+                  for (var _i = 0, _a = self._rendererBuffer; _i < _a.length; _i++) {
+                      var renderer = _a[_i];
+                      try {
+                          renderer(payload);
+                      }
+                      catch (e) {
+                          Error("Renderer function \"" + renderer.name + "\" threw an uncaught exception: \"" + e + "\"", true);
+                          self._loop = false;
+                      }
+                  }
+                  // loop through the list of RenderQueues and call the render functions
+                  // within each
+                  for (var _b = 0, _c = self._renderQueueBuffer; _b < _c.length; _b++) {
+                      var rq = _c[_b];
+                      rq.renderer(payload);
+                  }
+                  // render shaders last so that the 2D context is finalized before being
+                  // passed as a uniform to the shaders
+                  for (var _d = 0, _e = self._shaderBuffer; _d < _e.length; _d++) {
+                      var sd = _e[_d];
+                      sd.renderer(payload);
+                  }
+                  self.context.restore();
+              }
+              var callback = function () {
+                  self._renderLoop(self);
+              };
+              // request next frame
+              requestAnimationFrame(callback);
+          }
+      };
+      return Loop;
+  }());
+
+  /*! *****************************************************************************
+  Copyright (c) Microsoft Corporation. All rights reserved.
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+  this file except in compliance with the License. You may obtain a copy of the
+  License at http://www.apache.org/licenses/LICENSE-2.0
+
+  THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+  WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+  MERCHANTABLITY OR NON-INFRINGEMENT.
+
+  See the Apache Version 2.0 License for specific language governing permissions
+  and limitations under the License.
+  ***************************************************************************** */
+
+  function __awaiter(thisArg, _arguments, P, generator) {
+      return new (P || (P = Promise))(function (resolve, reject) {
+          function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+          function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+          function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+          step((generator = generator.apply(thisArg, _arguments || [])).next());
+      });
+  }
+
+  function __generator(thisArg, body) {
+      var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+      return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+      function verb(n) { return function (v) { return step([n, v]); }; }
+      function step(op) {
+          if (f) throw new TypeError("Generator is already executing.");
+          while (_) try {
+              if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+              if (y = 0, t) op = [op[0] & 2, t.value];
+              switch (op[0]) {
+                  case 0: case 1: t = op; break;
+                  case 4: _.label++; return { value: op[1], done: false };
+                  case 5: _.label++; y = op[1]; op = [0]; continue;
+                  case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                  default:
+                      if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                      if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                      if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                      if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                      if (t[2]) _.ops.pop();
+                      _.trys.pop(); continue;
+              }
+              op = body.call(thisArg, _);
+          } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+          if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+      }
+  }
+
+  /**
+   * @exports V4.FontWrapper
+   * @class
+   */
+  var FontGroup = /** @class */ (function () {
+      /**
+       * Create a new Font object
+       * @param name - the font's name
+       * @param variants - the font's variants (Italic, Regular, etc.)
+       * @returns - the new Font object
+       */
+      function FontGroup(name, variants) {
+          if (name === void 0) { name = ""; }
+          if (variants === void 0) { variants = ["Regular"]; }
+          this.name = name;
+          this._fonts = {};
+          this._variants = variants;
+      }
+      /**
+       * Load a font and its styles from Google Fonts
+       * @param name - the name of the font, case and space sensitive
+       * @param variants - a list of font variants (strings), case and space sensitive (Italic, Regular, Bold Italic, etc.)
+       */
+      FontGroup.prototype.loadGFonts = function (name, variants) {
+          if (name === void 0) { name = this.name; }
+          if (variants === void 0) { variants = this._variants; }
+          return __awaiter(this, void 0, void 0, function () {
+              var urls, _a, _b, _i, variant, font;
+              return __generator(this, function (_c) {
+                  switch (_c.label) {
+                      case 0:
+                          urls = this._makeGFontUrls(name, variants);
+                          this._fonts = {};
+                          _a = [];
+                          for (_b in variants)
+                              _a.push(_b);
+                          _i = 0;
+                          _c.label = 1;
+                      case 1:
+                          if (!(_i < _a.length)) return [3 /*break*/, 4];
+                          variant = _a[_i];
+                          if (!variants.hasOwnProperty(variant)) return [3 /*break*/, 3];
+                          return [4 /*yield*/, this._load(urls[variant])];
+                      case 2:
+                          font = _c.sent();
+                          this._variants.push(variants[variant]);
+                          this._fonts[variants[variant]] = font;
+                          _c.label = 3;
+                      case 3:
+                          _i++;
+                          return [3 /*break*/, 1];
+                      case 4: return [2 /*return*/];
+                  }
+              });
+          });
+      };
+      /**
+       * Load a font from a url or path
+       * @param loc - the url/path containing the font .ttf/.otf file
+       * @param variant - the variant of the font (Italic, Regular, Bold Italic, etc.)
+       */
+      FontGroup.prototype.loadFont = function (loc, variant) {
+          if (loc === void 0) { loc = ""; }
+          if (variant === void 0) { variant = "Regular"; }
+          return __awaiter(this, void 0, void 0, function () {
+              var font;
+              return __generator(this, function (_a) {
+                  switch (_a.label) {
+                      case 0:
+                          this._variants.push(variant);
+                          return [4 /*yield*/, this._load(loc)];
+                      case 1:
+                          font = _a.sent();
+                          this._fonts[variant] = font;
+                          return [2 /*return*/];
+                  }
+              });
+          });
+      };
+      /**
+       * Wrapper for opentype.js' load function to provide async/await functionality
+       * @param url - the path/url to load the font
+       */
+      FontGroup.prototype._load = function (url) {
+          return new Promise(function (resolve) {
+              opentype_js.load(url, function (err, font) {
+                  if (err) {
+                      Error("Font could not be loaded.", true);
+                      resolve(undefined);
+                  }
+                  else {
+                      resolve(font);
+                  }
+              });
+          });
+      };
+      /**
+       * Get a specific font variant
+       * @param variant - the variant to get, case and space sensitive (Italic, Bold Italic, etc.)
+       * @returns - the opentype.js font object
+       */
+      FontGroup.prototype.getFontVariant = function (variant) {
+          var font = this._fonts[variant];
+          if (font === undefined) {
+              Error('Could not get font "' +
+                  variant +
+                  '". Did you forget to load it from a file with loadFont()?');
+          }
+          else {
+              return font;
+          }
+      };
+      /**
+       * Create the urls to retrieve a font and its variants from Google Fonts
+       * @param name - the name of the font, case and space sensitive
+       * @param variants - a list of font variants (strings), case and space sensitive (Italic, Regular, Bold Italic, etc.)
+       * @returns - a list of urls containing .ttf files for each of the font's variants
+       */
+      FontGroup.prototype._makeGFontUrls = function (name, variants) {
+          // make a url like this:
+          // https://raw.githubusercontent.com/google/fonts/master/ofl/crimsontext/CrimsonText-Regular.ttf
+          var baseUrl = "https://raw.githubusercontent.com/google/fonts/master/ofl/";
+          var nameNoSpace = name.replace(/ /g, "");
+          var nameCleaned = nameNoSpace.toLowerCase();
+          var varsCleaned = variants.map(function (val) {
+              return val.replace(" ", "").replace("-", "");
+          });
+          return varsCleaned.map(function (val) { return baseUrl + nameCleaned + "/" + nameNoSpace + "-" + val + ".ttf"; });
+      };
+      return FontGroup;
+  }());
+  //# sourceMappingURL=FontGroup.js.map
 
   var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -2023,6 +2022,7 @@
       };
       return Animation;
   }());
+  //# sourceMappingURL=Animation.js.map
 
   exports.Animation = Animation;
   exports.FontGroup = FontGroup;

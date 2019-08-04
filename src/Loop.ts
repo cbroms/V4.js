@@ -2,7 +2,13 @@ import { RendererPayload } from "./RendererPayload";
 import { backgroundRenderer, clearPrevRenderer } from "./Renderers";
 import { RenderQueue } from "./RenderQueue";
 import { Shader } from "./Shader";
+import { TextBox } from "./TextBox";
 import { Error } from "./utils/Error";
+
+interface IOptions {
+  backgroundColor: string;
+  webGl: boolean;
+}
 
 type Renderer = (rendererPayload: RendererPayload) => void;
 
@@ -15,19 +21,19 @@ export class Loop {
   public glCanvas: HTMLCanvasElement;
   public context: CanvasRenderingContext2D | null;
   public glContext: WebGLRenderingContext | null;
-  public webgl: boolean;
+  public opts: IOptions;
   private _loop: boolean;
   private _frameCount: number;
   private _rendererBuffer: Renderer[];
   private _renderQueueBuffer: RenderQueue[];
   private _shaderBuffer: Shader[];
-  private _backgroundColor: string;
   private _fps: number;
   private _fpsInterval: number;
+  private _sizeAdjusted: boolean;
   private _startTime: number;
   private _then: number;
 
-  constructor(canvas: HTMLCanvasElement, webgl = false) {
+  constructor(canvas: HTMLCanvasElement, opts: IOptions) {
     // check canvas and context are OK before continuing
     if (!(canvas instanceof HTMLCanvasElement)) {
       Error("Loop requires an HTML Canvas Element", true);
@@ -43,12 +49,22 @@ export class Loop {
     this.canvas = canvas;
     this.context = td;
 
-    // create a new canvas for WebGL stuff
-    this.glCanvas = webgl ? document.createElement("canvas") : null;
-    this.glContext = webgl ? this.glCanvas.getContext("webgl") : null;
-    this.webgl = webgl;
+    // set options
+    this.opts = {
+      backgroundColor: "#000",
+      webGl: false,
+    };
+    if (opts !== undefined) {
+      for (const opt in opts) {
+        if (this.opts[opt] !== undefined) this.opts[opt] = opts[opt];
+      }
+    }
 
-    if (webgl) {
+    // create a new canvas for WebGL stuff
+    this.glCanvas = this.opts.webGl ? document.createElement("canvas") : null;
+    this.glContext = this.opts.webGl ? this.glCanvas.getContext("webgl") : null;
+
+    if (this.opts.webGl) {
       const wrapper = document.createElement("div");
       wrapper.id = "v4-wrapper";
       this.glCanvas.id = "v4-webgl-canvas";
@@ -64,9 +80,6 @@ export class Loop {
 
     this._loop = false;
     this._frameCount = 0;
-    this._backgroundColor = "#000";
-    this._fps = 30;
-    this._fpsInterval = 30 / 1000;
     this._startTime = Date.now();
     this._then = Date.now();
 
@@ -77,50 +90,35 @@ export class Loop {
     this._renderQueueBuffer = [];
     this._shaderBuffer = [];
 
+    this._sizeAdjusted = false;
+
+    // set the size of the canvases
     const setSize = () => {
       // set HDPI canvas scale for retina displays
-      const ratio = window.devicePixelRatio;
+      const ratio = this._sizeAdjusted ? 1 : window.devicePixelRatio;
 
-      if (ratio !== 1) {
-        const width = this.canvas.width;
-        const height = this.canvas.height;
+      const width = this.canvas.width;
+      const height = this.canvas.height;
 
-        this.canvas.width = width * ratio;
-        this.canvas.height = height * ratio;
-        this.canvas.style.width = width + "px";
-        this.canvas.style.height = height + "px";
-        this.context.scale(ratio, ratio);
+      this.canvas.width = width * ratio;
+      this.canvas.height = height * ratio;
+      this.canvas.style.width = width + "px";
+      this.canvas.style.height = height + "px";
+      this.context.scale(ratio, ratio);
 
-        if (this.webgl) {
-          this.glCanvas.width = width * ratio;
-          this.glCanvas.height = height * ratio;
-          this.glCanvas.style.width = width + "px";
-          this.glCanvas.style.height = height + "px";
-        }
-      } else if (this.webgl) {
-        const width = this.canvas.width;
-        const height = this.canvas.height;
-        this.glCanvas.width = width;
-        this.glCanvas.height = height;
+      if (this.opts.webGl) {
+        this.glCanvas.width = width * ratio;
+        this.glCanvas.height = height * ratio;
         this.glCanvas.style.width = width + "px";
         this.glCanvas.style.height = height + "px";
+        this.glContext.viewport(0, 0, width, height);
       }
+
+      this._sizeAdjusted = true;
     };
 
     setSize();
     window.addEventListener("resize", setSize);
-  }
-
-  /**
-   * Get/set the background color of the canvas
-   * @param color - the color to fill, in hex
-   * @returns - the background color, in hex
-   */
-  public backgroundColor(color: string): string {
-    if (color) {
-      this._backgroundColor = color;
-    }
-    return this._backgroundColor;
   }
 
   /**
@@ -137,12 +135,14 @@ export class Loop {
   }
 
   /**
-   * Add a renderer function or RenderQueue to the animation
-   * @param renderer - the render function or RenderQueue object to be executed
+   * Add a renderer function, RenderQueue, Shader, or TextBox to the animation
+   * @param renderer - the renderer to be executed
    */
-  public addToLoop(renderer: Renderer | RenderQueue | Shader): void {
+  public addToLoop(renderer: Renderer | RenderQueue | Shader | TextBox): void {
     if (renderer instanceof RenderQueue) {
       this._renderQueueBuffer.push(renderer as RenderQueue);
+    } else if (renderer instanceof TextBox) {
+      this._rendererBuffer.push(renderer.renderer as Renderer);
     } else if (renderer instanceof Shader) {
       this._shaderBuffer.push(renderer as Shader);
     } else {
@@ -198,8 +198,8 @@ export class Loop {
         payload.context = self.context;
         payload.glCanvas = self.glCanvas;
         payload.glContext = self.glContext;
-        payload.webgl = self.webgl;
-        payload.backgroundColor = self._backgroundColor;
+        payload.webgl = self.opts.webGl;
+        payload.backgroundColor = self.opts.backgroundColor;
         payload.deltaTime = elapsed / 1000;
         payload.frameCount = self._frameCount;
         payload.startTime = self._startTime;

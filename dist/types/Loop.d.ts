@@ -1,6 +1,11 @@
 import { RendererPayload } from "./RendererPayload";
 import { RenderQueue } from "./RenderQueue";
 import { Shader } from "./Shader";
+import { TextBox } from "./TextBox";
+interface IOptions {
+    backgroundColor: string;
+    webGl: boolean;
+}
 declare type Renderer = (rendererPayload: RendererPayload) => void;
 /**
  * @exports V4.Loop
@@ -11,24 +16,18 @@ export declare class Loop {
     glCanvas: HTMLCanvasElement;
     context: CanvasRenderingContext2D | null;
     glContext: WebGLRenderingContext | null;
-    webgl: boolean;
+    opts: IOptions;
     private _loop;
     private _frameCount;
     private _rendererBuffer;
     private _renderQueueBuffer;
     private _shaderBuffer;
-    private _backgroundColor;
     private _fps;
     private _fpsInterval;
+    private _sizeAdjusted;
     private _startTime;
     private _then;
-    constructor(canvas: HTMLCanvasElement, webgl?: boolean);
-    /**
-     * Get/set the background color of the canvas
-     * @param color - the color to fill, in hex
-     * @returns - the background color, in hex
-     */
-    backgroundColor(color: string): string;
+    constructor(canvas: HTMLCanvasElement, opts: IOptions);
     /**
      * Get/set the target frames per second of canvas animations
      * @param num - target FPS
@@ -36,10 +35,10 @@ export declare class Loop {
      */
     framesPerSecond(num: number): number;
     /**
-     * Add a renderer function or RenderQueue to the animation
-     * @param renderer - the render function or RenderQueue object to be executed
+     * Add a renderer function, RenderQueue, Shader, or TextBox to the animation
+     * @param renderer - the renderer to be executed
      */
-    addToLoop(renderer: Renderer | RenderQueue | Shader): void;
+    addToLoop(renderer: Renderer | RenderQueue | Shader | TextBox): void;
     /**
      * Start the canvas animation
      */
