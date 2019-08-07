@@ -23,6 +23,14 @@ import { Loop, RenderQueue } from "v4js";
 ```
 All exposed classes can be [found here](https://github.com/rainflame/V4.js/blob/master/src/index.ts). 
 
+## Opentype 
+
+For rendering text, V4 uses [opentype.js](https://github.com/opentypejs/opentype.js). If you are using V4 with npm, it will get installed as a dependency. If loading from a CDN, be sure to include the latest version of opentype:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/opentype.js@latest/dist/opentype.min.js"></script>
+```
+
 ## CDN
 
 In your html:
@@ -32,11 +40,3 @@ In your html:
 ```
 
 V4 will be exposed as a global variable called `V4`. 
-
-## Opentype 
-
-For rendering text, V4 uses [opentype.js](https://github.com/opentypejs/opentype.js). If you are using V4 with npm, it will get installed as a dependency. If loading from a CDN, be sure to include the latest version of opentype:
-
-```html
-<script src="https://cdn.jsdelivr.net/npm/opentype.js@latest/dist/opentype.min.js"></script>
-```

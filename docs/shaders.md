@@ -68,4 +68,35 @@ In the GLSL code above, you'll notice two uniforms: `u_resolution` and `u_deltaT
 sd.setUniform("u_twoPi", Math.PI * 2);
 ```
 ### Combining 2D and WebGL
+
 Usually, an HTML canvas can only have one drawing context like `2d` or `webgl`. This means that you cannot use the convienient 2D drawing methods *and* WebGL shaders and 3D objects. V4 provides a way to bridge this gap by offering the ability to draw to the canvas with 2D methods and access to this drawing in a shader as a texture, so you can combine 2D drawings with shader effects. 
+
+This must be manually enabled, as it can be rather demanding:
+```js
+sd.useCanvasState(true);
+```
+
+Now, V4 will pass what's drawn on the canvas to your shader as a `sampler2D` uniform called `u_texture`. 
+
+As an example, you can render a duplicate of what's currently on the canvas with a shader like this:
+```glsl
+precision mediump float;
+
+uniform sampler2D u_texture;
+uniform vec2 u_resolution;
+uniform float u_deltaTime;
+
+void main() {
+    // get current pixel position
+    vec2 uv = gl_FragCoord.xy / u_resolution;
+   
+    // get the pixel's color value from the texture
+    vec3 tex = texture2D(u_texture, uv).rgb;
+
+    // set the shader's color to the texture's color
+    gl_FragColor = vec4(tex, 1.0);
+}
+```
+
+This method provides the best of both worlds: easy 2D drawing through the canvas' context, and shader manipulation of the shapes as a texture. It can be used to create some very interesting effects; check out some of the [examples](ex1.md).
+

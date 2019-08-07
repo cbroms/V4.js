@@ -101,3 +101,43 @@ console.log(fps); // > 60
 |  `Number` | The loop's target FPS. | 
 
 `V4.Loop.framesPerSecond()` is defined in [src/Loop.ts](https://github.com/rainflame/V4.js/blob/master/src/Loop.ts)
+<hr>
+
+## startLoop()
+
+Start running the loop.
+
+```js
+loop.startLoop();
+```
+#### Syntax 
+
+> `Loop.startLoop()`
+
+#### Returns
+
+| Type  |
+|-------|
+|  `void` |  
+
+`V4.Loop.startLoop()` is defined in [src/Loop.ts](https://github.com/rainflame/V4.js/blob/master/src/Loop.ts)
+<hr>
+
+## stopLoop()
+
+Stop running the loop.
+
+```js
+loop.stopLoop();
+```
+#### Syntax 
+
+> `Loop.stopLoop()`
+
+#### Returns
+
+| Type  |
+|-------|
+|  `void` |  
+
+`V4.Loop.stopLoop()` is defined in [src/Loop.ts](https://github.com/rainflame/V4.js/blob/master/src/Loop.ts)

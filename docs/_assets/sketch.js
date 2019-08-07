@@ -1,4 +1,3 @@
-/// [demo]
 const canvas = document.getElementById("testCanvas");
 // canvas size
 let w, h;
@@ -32,7 +31,7 @@ const start = async () => {
     font: fg.getFontVariant("Black"),
     position: { x: 0, y: h / 3 },
     size: { h: h / 3, w: w },
-    fontSize: 84,
+    fontSize: 72,
     color: "rgb(255, 255, 255, 0.1)",
     backgroundColor: "transparent",
     horizontalAlign: "CENTER",
@@ -72,8 +71,9 @@ const start = async () => {
       {
         position: { x: 0, y: h / 3 + 40 },
         color: "rgba(255, 255, 255, 1)",
+        fontSize: 82,
       },
-      4,
+      3,
       "easeOutCubic",
     );
     rq.push(down.renderer, () => {
@@ -82,8 +82,9 @@ const start = async () => {
         {
           position: { x: 0, y: h / 3 },
           color: "rgba(255, 255, 255, 0.1)",
+          fontSize: 72,
         },
-        5,
+        3,
         "easeInCubic",
       );
       rq.push(up.renderer, () => {
@@ -126,4 +127,3 @@ const start = async () => {
 };
 
 start();
-/// [demo]
