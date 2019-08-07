@@ -74,7 +74,7 @@ const start = async () => {
         fontSize: 82,
       },
       3,
-      "easeOutCubic",
+      "easeOutBounce",
     );
     rq.push(down.renderer, () => {
       const up = new V4.Animation(

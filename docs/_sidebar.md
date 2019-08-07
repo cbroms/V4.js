@@ -12,4 +12,5 @@
   - [TextBox](reference/text-box.md)
   - [Shader](reference/shader.md)
 - **Examples**
+ - [Text Animation](ex2.md)
  - [Text and Shaders](ex1.md)
