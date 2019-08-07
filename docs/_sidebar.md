@@ -5,6 +5,7 @@
   - [Renderers](renderers.md)
   - [The Render Queue](render-queue.md)
   - [Text](text.md)
+  - [Shaders](shaders.md)
 - **API Reference**
   - [Renderer](reference/renderer.md)
   - [Loop](reference/loop.md)
