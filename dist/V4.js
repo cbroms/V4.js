@@ -55,7 +55,6 @@
   var clearPrevRenderer = function (state) {
       state.context.clearRect(0, 0, state.canvas.width, state.canvas.height);
   };
-  //# sourceMappingURL=Renderers.js.map
 
   /**
    * @exports V4.RenderQueue
@@ -123,7 +122,6 @@
       };
       return RenderQueue;
   }());
-  //# sourceMappingURL=RenderQueue.js.map
 
   /**
    * Create a new error and print it to the console
@@ -141,7 +139,6 @@
       }
       return false;
   };
-  //# sourceMappingURL=Error.js.map
 
   var defaultVertexShader = "\n  #ifdef GL_ES\n  precision mediump float;\n  #endif\n  attribute vec2 position;\n  void main() {\n    gl_Position = vec4(position, 0.0, 1.0);\n  }\n";
   var defaultFragmentShader = "\n  #ifdef GL_ES\n  precision mediump float;\n  #endif\n  void main() {\n    gl_FragColor = vec4(0.0);\n  }\n";
@@ -412,7 +409,6 @@
       };
       return Shader;
   }());
-  //# sourceMappingURL=Shader.js.map
 
   var unwrapOptions = function (opts, target, animState) {
       var anim = animState !== undefined;
@@ -561,7 +557,6 @@
           }
       }
   };
-  //# sourceMappingURL=UnwrapOptions.js.map
 
   /**
    * @exports V4.TextBox
@@ -843,7 +838,6 @@
       };
       return TextBox;
   }());
-  //# sourceMappingURL=TextBox.js.map
 
   /**
    * @exports V4.Loop
@@ -1218,7 +1212,6 @@
       };
       return FontGroup;
   }());
-  //# sourceMappingURL=FontGroup.js.map
 
   var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -2022,7 +2015,6 @@
       };
       return Animation;
   }());
-  //# sourceMappingURL=Animation.js.map
 
   exports.Animation = Animation;
   exports.FontGroup = FontGroup;

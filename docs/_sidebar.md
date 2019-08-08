@@ -9,6 +9,7 @@
 - **API Reference**
   - [Renderer](reference/renderer.md)
   - [Loop](reference/loop.md)
+  - [FontGroup](reference/font-group.md)
   - [TextBox](reference/text-box.md)
   - [Shader](reference/shader.md)
 - **Examples**

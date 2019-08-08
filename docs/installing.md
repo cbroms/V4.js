@@ -1,6 +1,6 @@
 # Installing 
 
-## NPM 
+### NPM 
 
 ```shell
 npm i v4js
@@ -21,9 +21,8 @@ You can also directly import certain classes, for example:
 ```js
 import { Loop, RenderQueue } from "v4js";
 ```
-All exposed classes can be [found here](https://github.com/rainflame/V4.js/blob/master/src/index.ts). 
 
-## Opentype 
+### Opentype 
 
 For rendering text, V4 uses [opentype.js](https://github.com/opentypejs/opentype.js). If you are using V4 with npm, it will get installed as a dependency. If loading from a CDN, be sure to include the latest version of opentype:
 
@@ -31,7 +30,7 @@ For rendering text, V4 uses [opentype.js](https://github.com/opentypejs/opentype
 <script src="https://cdn.jsdelivr.net/npm/opentype.js@latest/dist/opentype.min.js"></script>
 ```
 
-## CDN
+### CDN
 
 In your html:
 

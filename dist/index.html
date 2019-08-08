@@ -11,46 +11,27 @@
     <script>
       async function start() {
         var canvas = document.getElementById("testCanvas");
-        canvas.height = window.innerHeight;
-        canvas.width = window.innerWidth;
+        canvas.height = 500;
+        canvas.width = 800;
 
-        const setSize = () => {
-        canvas.height = window.innerHeight;
-        canvas.width = window.innerWidth;
+        // const setSize = () => {
+        // canvas.height = window.innerHeight;
+        // canvas.width = window.innerWidth;
           
-        }
-        window.addEventListener("resize", setSize);
+        // }
+        // window.addEventListener("resize", setSize);
 
-
-        var loop = new V4.Loop(canvas, {webGl: true});
+        var loop = new V4.Loop(canvas, {webGl: true, backgroundColor: "teal"});
 
         var shader = new V4.Shader(loop.glCanvas);
-        shader.useCanvasState(true);
-
         const shaderSource = await shader.loadShader("assets/sample.glsl");
-
+        shader.useCanvasState(true);
         shader.setShader(shaderSource);
 
         var fontObj = new V4.FontGroup();
-        //  var fontObj2 = new V4.FontGroup();
-        // await fontObj.loadFont(
-        //     "assets/CrimsonText-Regular.ttf",
-        //     "Regular"
-        // );
-
         await fontObj.loadGFonts("Source Sans Pro", ["Regular", "Italic"]);
 
-        // await fontObj2.loadGFonts("Source Sans Pro", ["Regular"]);
-
         var font = fontObj.getFontVariant("Italic");
-        // var font = fontObj2.getFontVariant("Regular");
-
-        // var textBox = new V4.TextBox(font, 10, 300, 200, 150);
-        // textBox.text("Hello, World!", 72);
-        // textBox.outlinePath(true);
-        // textBox.verticalAlign("CENTER");
-        // textBox.horizontalAlign("CENTER");
-        // animator.addToAnimation(textBox.renderer);
 
         var textBox2 = new V4.TextBox({
           font: font,
@@ -63,7 +44,6 @@
         });
 
         textBox2.text("Hello, world!");
-        textBox2.outlinePath(true);
 
         var rq = new V4.RenderQueue();
 
@@ -76,7 +56,7 @@
           rq.push(anim5.renderer, () => {
             var anim6 = new V4.Animation(textBox2, {
               color: "yellow",
-              backgroundColor: "black",
+              backgroundColor: "aqua",
             });
 
             rq.push(anim6.renderer, () => {
@@ -85,17 +65,17 @@
           });
         }
 
-        function fontSizeLoop() {
-          var anim = new V4.Animation(textBox2, { fontSize: 72 });
+        // function fontSizeLoop() {
+        //   var anim = new V4.Animation(textBox2, { fontSize: 72 });
 
-          rq.push(anim.renderer, () => {
-            var anim2 = new V4.Animation(textBox2, { fontSize: 24 });
+        //   rq.push(anim.renderer, () => {
+        //     var anim2 = new V4.Animation(textBox2, { fontSize: 24 });
 
-            rq.push(anim2.renderer, () => {
-              fontSizeLoop();
-            });
-          });
-        }
+        //     rq.push(anim2.renderer, () => {
+        //       fontSizeLoop();
+        //     });
+        //   });
+        // }
 
         function positionLoop() {
           var anim3 = new V4.Animation(
@@ -104,7 +84,7 @@
               position: { x: 300, y: 450 },
               size: { h: 250, w: 300 },
             },
-            6,
+            3,
             "easeInOutCubic",
           );
 
@@ -124,110 +104,12 @@
           });
         }
 
-        // rq.push(anim3.renderer, () => {
-        //     var anim4 = new V4.Animation(textBox2, {position: {x: 0, y: 250}});
-        //     rq.push(anim4.renderer, () => {
-
-        //     })
-        // })
-
         loop.addToLoop(rq);
         loop.addToLoop(shader);
-
-        // fontSizeLoop();
         positionLoop();
         colorLoop();
 
-        // var paths = font.getPaths("Hello, world!", 50, 250, 172);
-        // var paths2 = font2.getPaths("Hello, world!",50, 250, 172);
-
-        // const interps = []
-
-        // for (let i = 0; i < paths.length; i++) {
-        //   const path1 = paths[i].toPathData(2);
-        //   const path2 = paths2[i].toPathData(2);
-
-        //    if (path1.length > 0 && path2.length > 0){
-        //     const interp = polymorph.interpolate([
-
-        //  path1,
-        //   path2], {
-        //     addPoints: 20,
-        //     precision: 3
-        //   }
-        // );
-        //   interps.push(interp);
-        //    }
-
-        // }
-
-        //         var duration = 2;
-        //         var percentDone = 0;
-        //         function textTestRenderer(state) {
-        //           const ctx = state.context;
-        //            ctx.fillStyle = "#000";
-        //           if (percentDone < 1) {
-
-        //             for (const interp of interps) {
-
-        // const drawPath = new Path2D(interp(percentDone));
-
-        //           ctx.fill(drawPath);
-        //             }
-
-        //         } else {
-        //           percentDone = 0;
-        //         }
-
-        //           percentDone += state.deltaTime / duration
-        //         }
-
-        //         loop.addToLoop(textTestRenderer);
-
-        // function customRenderer(state) {
-
-        //     // var ctx = state.context;
-        //     // elapsed += state.deltaTime;
-        //     // if (elapsed > 2) textBox2.text("Two seconds elapsed!", 24)
-        //   // textBox2.bounds(bounds.x1 += 10 * state.deltaTime, bounds.y1, bounds.h, bounds.w)
-
-        //     anim.move(state, () => {
-        //        anim2.move(state, () => {
-
-        //        })
-        //     })
-        //    // textBox2.renderer(state);
-
-        // }
-
-        //animator.addToAnimation(textBox2.renderer);
         loop.framesPerSecond(30);
-        // var x = 0;
-        // var right = true;
-        // var speed = 20;
-
-        // function backgroundRenderer(state) {
-        //     right
-        //         ? (x += speed * state.deltaTime)
-        //         : (x -= speed * state.deltaTime);
-
-        //     if (x + 100 > state.canvas.width) {
-        //         right = false;
-        //     } else if (x - 100 <= 0) {
-        //         right = true;
-        //     }
-
-        //     state.context.fillStyle = "#000";
-        //     state.context.fillRect(x, 20, 100, 200);
-        //     //state.context.fillColor();
-
-        //     //   let path = font.getPath("Hello, World!", x, 150, 72);
-        //     // path.fill = "white";
-        //     //  path.draw(animator.context);
-        // }
-
-        // animator.addToAnimation(backgroundRenderer);
-
         loop.startLoop();
       }
 
