@@ -1,5 +1,5 @@
 /*
- * V4.js 0.1.3 <https://V4.rainflame.com>
+ * V4.js 0.1.4 <https://V4.rainflame.com>
  *
  * Copyright 2019  Christian Broms <cb@rainfla.me>
  *
@@ -863,8 +863,9 @@
           };
           if (opts !== undefined) {
               for (var opt in opts) {
-                  if (this.opts[opt] !== undefined)
+                  if (this.opts[opt] !== undefined) {
                       this.opts[opt] = opts[opt];
+                  }
               }
           }
           // create a new canvas for WebGL stuff
