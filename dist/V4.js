@@ -1089,54 +1089,28 @@
       /**
        * Create a new Font object
        * @param name - the font's name
-       * @param variants - the font's variants (Italic, Regular, etc.)
-       * @returns - the new Font object
+       * @returns - the new FontGroup object
        */
-      function FontGroup(name, variants) {
-          if (name === void 0) { name = ""; }
-          if (variants === void 0) { variants = ["Regular"]; }
+      function FontGroup(name) {
           this.name = name;
           this._fonts = {};
-          this._variants = variants;
       }
-      /**
-       * Load a font and its styles from Google Fonts
-       * @param name - the name of the font, case and space sensitive
-       * @param variants - a list of font variants (strings), case and space sensitive (Italic, Regular, Bold Italic, etc.)
-       */
-      FontGroup.prototype.loadGFonts = function (name, variants) {
-          if (name === void 0) { name = this.name; }
-          if (variants === void 0) { variants = this._variants; }
-          return __awaiter(this, void 0, void 0, function () {
-              var urls, _a, _b, _i, variant, font;
-              return __generator(this, function (_c) {
-                  switch (_c.label) {
-                      case 0:
-                          urls = this._makeGFontUrls(name, variants);
-                          this._fonts = {};
-                          _a = [];
-                          for (_b in variants)
-                              _a.push(_b);
-                          _i = 0;
-                          _c.label = 1;
-                      case 1:
-                          if (!(_i < _a.length)) return [3 /*break*/, 4];
-                          variant = _a[_i];
-                          if (!variants.hasOwnProperty(variant)) return [3 /*break*/, 3];
-                          return [4 /*yield*/, this._load(urls[variant])];
-                      case 2:
-                          font = _c.sent();
-                          this._variants.push(variants[variant]);
-                          this._fonts[variants[variant]] = font;
-                          _c.label = 3;
-                      case 3:
-                          _i++;
-                          return [3 /*break*/, 1];
-                      case 4: return [2 /*return*/];
-                  }
-              });
-          });
-      };
+      // /**
+      //  * Load a font and its styles from Google Fonts
+      //  * @param name - the name of the font, case and space sensitive
+      //  * @param variants - a list of font variants (strings), case and space sensitive (Italic, Regular, Bold Italic, etc.)
+      //  */
+      // public async loadGFonts(name = this.name, variants = this._variants) {
+      //   const urls = this._makeGFontUrls(name, variants);
+      //   this._fonts = {};
+      //   for (const variant in variants) {
+      //     if (variants.hasOwnProperty(variant)) {
+      //       const font = await this._load(urls[variant]);
+      //       this._variants.push(variants[variant]);
+      //       this._fonts[variants[variant]] = font;
+      //     }
+      //   }
+      // }
       /**
        * Load a font from a url or path
        * @param loc - the url/path containing the font .ttf/.otf file
@@ -1144,18 +1118,17 @@
        */
       FontGroup.prototype.loadFont = function (loc, variant) {
           if (loc === void 0) { loc = ""; }
-          if (variant === void 0) { variant = "Regular"; }
           return __awaiter(this, void 0, void 0, function () {
               var font;
               return __generator(this, function (_a) {
                   switch (_a.label) {
-                      case 0:
-                          this._variants.push(variant);
-                          return [4 /*yield*/, this._load(loc)];
+                      case 0: return [4 /*yield*/, this._load(loc)];
                       case 1:
                           font = _a.sent();
-                          this._fonts[variant] = font;
-                          return [2 /*return*/];
+                          if (variant !== undefined) {
+                              this._fonts[variant] = font;
+                          }
+                          return [2 /*return*/, font];
                   }
               });
           });
@@ -1192,23 +1165,6 @@
           else {
               return font;
           }
-      };
-      /**
-       * Create the urls to retrieve a font and its variants from Google Fonts
-       * @param name - the name of the font, case and space sensitive
-       * @param variants - a list of font variants (strings), case and space sensitive (Italic, Regular, Bold Italic, etc.)
-       * @returns - a list of urls containing .ttf files for each of the font's variants
-       */
-      FontGroup.prototype._makeGFontUrls = function (name, variants) {
-          // make a url like this:
-          // https://raw.githubusercontent.com/google/fonts/master/ofl/crimsontext/CrimsonText-Regular.ttf
-          var baseUrl = "https://raw.githubusercontent.com/google/fonts/master/ofl/";
-          var nameNoSpace = name.replace(/ /g, "");
-          var nameCleaned = nameNoSpace.toLowerCase();
-          var varsCleaned = variants.map(function (val) {
-              return val.replace(" ", "").replace("-", "");
-          });
-          return varsCleaned.map(function (val) { return baseUrl + nameCleaned + "/" + nameNoSpace + "-" + val + ".ttf"; });
       };
       return FontGroup;
   }());

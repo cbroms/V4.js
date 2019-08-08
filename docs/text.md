@@ -11,8 +11,8 @@ The `FontGroup` class holds a font and its variants, such as _Italic_, **Bold**,
 A font group is created like this:
 
 ```js
-const fontObj = new V4.FontGroup("Crimson Text");
-await fontObj.loadFont(
+const fontObj = new V4.FontGroup();
+const reg = await fontObj.loadFont(
   "assets/CrimsonText-Regular.ttf", // path to the font file
   "Regular", // font variant
 );
@@ -23,7 +23,7 @@ await fontObj.loadFont(
 More variants can be added to the same object:
 
 ```js
-await fontObj.loadFont("assets/CrimsonText-Italic.ttf", "Italic");
+const italic = await fontObj.loadFont("assets/CrimsonText-Italic.ttf", "Italic");
 ```
 
 To access a particular font, it can be grabbed from the font group with `getFontVariant`:

@@ -29,9 +29,9 @@
         shader.setShader(shaderSource);
 
         var fontObj = new V4.FontGroup();
-        await fontObj.loadGFonts("Source Sans Pro", ["Regular", "Italic"]);
+        var font = await fontObj.loadFont("assets/CrimsonText-Italic.ttf");
 
-        var font = fontObj.getFontVariant("Italic");
+       // var font = fontObj.getFontVariant("Italic");
 
         var textBox2 = new V4.TextBox({
           font: font,

@@ -56,7 +56,7 @@ export class Loop {
     };
     if (opts !== undefined) {
       for (const opt in opts) {
-        if (this.opts[opt] !== undefined) this.opts[opt] = opts[opt];
+        if (this.opts[opt] !== undefined) { this.opts[opt] = opts[opt]; }
       }
     }
 
