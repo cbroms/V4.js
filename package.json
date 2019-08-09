@@ -1,8 +1,9 @@
 {
   "name": "v4js",
-  "version": "0.1.4",
-  "description": "A lightweight animation wrapper for the HTML canvas element.",
-  "main": "V4.js",
+  "version": "0.1.5",
+  "description": "A lightweight animation wrapper for the HTML canvas.",
+  "main": "dist/V4.js",
+  "types": "dist/types/index.d.ts",
   "keywords": [
     "V4",
     "V4.js",

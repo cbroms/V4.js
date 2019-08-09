@@ -7,10 +7,10 @@
     "strictNullChecks": false,
     "resolveJsonModule": true,
     "typeRoots": ["./types", "./node_modules/@types"],
-    "target": "es3",
+    "target": "es5",
     "lib": ["es2017", "dom"],
     "sourceMap": true,
-    "outDir": "dist/lib",
+    "outDir": "dist/",
     "declaration": true,
     "declarationDir": "dist/types",
     "esModuleInterop": true
