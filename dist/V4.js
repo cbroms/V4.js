@@ -1,5 +1,5 @@
 /*
- * V4.js 0.1.4 <https://V4.rainflame.com>
+ * V4.js 0.1.5 <https://V4.rainflame.com>
  *
  * Copyright 2019  Christian Broms <cb@rainfla.me>
  *
@@ -1172,7 +1172,7 @@
 
   var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
-  var colorName = {
+  var C__Users_Christian_Broms_Desktop_V4_js_node_modules_colorName = {
   	"aliceblue": [240, 248, 255],
   	"antiquewhite": [250, 235, 215],
   	"aqua": [0, 255, 255],
@@ -1325,18 +1325,18 @@
 
   var toString = Object.prototype.toString;
 
-  var isPlainObj = function (x) {
+  var C__Users_Christian_Broms_Desktop_V4_js_node_modules_isPlainObj = function (x) {
   	var prototype;
   	return toString.call(x) === '[object Object]' && (prototype = Object.getPrototypeOf(x), prototype === null || prototype === Object.getPrototypeOf({}));
   };
 
-  var defined = function () {
+  var C__Users_Christian_Broms_Desktop_V4_js_node_modules_defined = function () {
       for (var i = 0; i < arguments.length; i++) {
           if (arguments[i] !== undefined) return arguments[i];
       }
   };
 
-  var colorParse = parse;
+  var C__Users_Christian_Broms_Desktop_V4_js_node_modules_colorParse = parse;
 
   /**
    * Base hues
@@ -1362,8 +1362,8 @@
 
   	if (typeof cstr === 'string') {
   		//keyword
-  		if (colorName[cstr]) {
-  			parts = colorName[cstr].slice();
+  		if (C__Users_Christian_Broms_Desktop_V4_js_node_modules_colorName[cstr]) {
+  			parts = C__Users_Christian_Broms_Desktop_V4_js_node_modules_colorName[cstr].slice();
   			space = 'rgb';
   		}
 
@@ -1463,27 +1463,27 @@
   	}
 
   	//object case - detects css cases of rgb and hsl
-  	else if (isPlainObj(cstr)) {
-  		var r = defined(cstr.r, cstr.red, cstr.R, null);
+  	else if (C__Users_Christian_Broms_Desktop_V4_js_node_modules_isPlainObj(cstr)) {
+  		var r = C__Users_Christian_Broms_Desktop_V4_js_node_modules_defined(cstr.r, cstr.red, cstr.R, null);
 
   		if (r !== null) {
   			space = 'rgb';
   			parts = [
   				r,
-  				defined(cstr.g, cstr.green, cstr.G),
-  				defined(cstr.b, cstr.blue, cstr.B)
+  				C__Users_Christian_Broms_Desktop_V4_js_node_modules_defined(cstr.g, cstr.green, cstr.G),
+  				C__Users_Christian_Broms_Desktop_V4_js_node_modules_defined(cstr.b, cstr.blue, cstr.B)
   			];
   		}
   		else {
   			space = 'hsl';
   			parts = [
-  				defined(cstr.h, cstr.hue, cstr.H),
-  				defined(cstr.s, cstr.saturation, cstr.S),
-  				defined(cstr.l, cstr.lightness, cstr.L, cstr.b, cstr.brightness)
+  				C__Users_Christian_Broms_Desktop_V4_js_node_modules_defined(cstr.h, cstr.hue, cstr.H),
+  				C__Users_Christian_Broms_Desktop_V4_js_node_modules_defined(cstr.s, cstr.saturation, cstr.S),
+  				C__Users_Christian_Broms_Desktop_V4_js_node_modules_defined(cstr.l, cstr.lightness, cstr.L, cstr.b, cstr.brightness)
   			];
   		}
 
-  		alpha = defined(cstr.a, cstr.alpha, cstr.opacity, 1);
+  		alpha = C__Users_Christian_Broms_Desktop_V4_js_node_modules_defined(cstr.a, cstr.alpha, cstr.opacity, 1);
 
   		if (cstr.opacity != null) alpha /= 100;
   	}
@@ -1561,9 +1561,9 @@
   function lerp(v0, v1, t) {
       return v0*(1-t)+v1*t
   }
-  var lerp_1 = lerp;
+  var C__Users_Christian_Broms_Desktop_V4_js_node_modules_lerp = lerp;
 
-  var clamp_1 = clamp;
+  var C__Users_Christian_Broms_Desktop_V4_js_node_modules_clamp = clamp;
 
   function clamp(value, min, max) {
     return min < max
@@ -1585,7 +1585,7 @@
 
   function interpolate (palette) {
   	palette = palette.map(function(c) {
-  		c = colorParse(c);
+  		c = C__Users_Christian_Broms_Desktop_V4_js_node_modules_colorParse(c);
   		if (c.space != 'rgb') {
   			if (c.space != 'hsl') throw 'c.space' + 'space is not supported.';
   			c.values = hsl.rgb(c.values);
@@ -1595,8 +1595,8 @@
   	});
 
   	return function(t, mix) {
-  		mix = mix || lerp_1;
-  		t = clamp_1(t, 0, 1);
+  		mix = mix || C__Users_Christian_Broms_Desktop_V4_js_node_modules_lerp;
+  		t = C__Users_Christian_Broms_Desktop_V4_js_node_modules_clamp(t, 0, 1);
 
   		var idx = ( palette.length - 1 ) * t,
   			lIdx = Math.floor( idx ),
