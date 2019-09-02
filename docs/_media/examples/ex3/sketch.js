@@ -11,20 +11,28 @@ const setSize = () => {
 window.addEventListener("resize", setSize);
 setSize();
 
-// words, times, easings, and options the text box will loop through
-const words = ["Hello,", "this is", "a test of", "V4.js!"];
-const times = [3, 2, 2, 4];
-const easings = [
-  "easeInOutSine",
-  "easeInOutSine",
-  "easeInOutSine",
-  "easeInOutSine",
-];
-const opts = [
-  { position: { x: 0, y: h / 2 + 150 } },
-  { position: { x: 100, y: h / 2 + 150 } },
-  { position: { x: 200, y: h / 2 + 150 } },
-  { position: { x: 300, y: h / 2 + 150 } },
+// determine the time the snippet animates based on its length
+const makeTime = word => {
+  return word.length * 0.05;
+};
+
+// determine the size based on the snippet length
+const makeSize = word => {
+  return word.length * 3;
+};
+
+// the snippets the animation will loop through
+const words = [
+  "An incredible number",
+  "of possibilities",
+  "are created through",
+  "the modular system that",
+  "Müller-Brockmann developed,",
+  "and the influence",
+  "of his work",
+  "can be seen in",
+  "much graphic",
+  "and web design today",
 ];
 
 const loop = new V4.Loop(canvas);
@@ -34,17 +42,17 @@ loop.addToLoop(rq);
 
 const start = async () => {
   // load the font
-  await fg.loadFont("assets/Orbitron-Black.ttf", "Black");
+  const font = await fg.loadFont("assets/CrimsonText-Regular.ttf");
 
   // background text
   const tb = new V4.TextBox({
-    font: fg.getFontVariant("Black"),
+    font: font,
     position: { x: 0, y: h / 2 + 150 },
-    size: { h: 300, w: 500 },
-    fontSize: 72,
+    size: { h: 300, w: 1000 },
+    fontSize: 48,
     color: "white",
-    backgroundColor: "grey",
-    horizontalAlign: "CENTER",
+    backgroundColor: "transparent",
+    horizontalAlign: "LEFT",
     verticalAlign: "CENTER",
   });
 
@@ -53,7 +61,15 @@ const start = async () => {
   const animate = () => {
     // set the new text and create the next animation
     tb.text(words[pos]);
-    const anim = new V4.Animation(tb, opts[pos], times[pos], easings[pos]);
+    const anim = new V4.Animation(
+      tb,
+      {
+        position: { x: pos * 100, y: h / 2 + 150 },
+        fontSize: makeSize(words[pos]),
+      },
+      makeTime(words[pos]),
+      "easeInSine",
+    );
 
     // add the animation to the queue and repeat on done
     rq.push(anim.renderer, () => {
